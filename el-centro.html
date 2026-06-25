@@ -493,6 +493,9 @@ body {
 </div>
 <div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
 
+<!-- CONNECTION STATUS -->
+<div id="fb-status" style="display:none;text-align:center;padding:6px;font-size:12px;font-weight:600"></div>
+
 <!-- TABS -->
 <nav class="tabs" id="tabs" style="display:none">
   <div class="tab active" onclick="goTab('inicio')"><i>🏠</i>Inicio</div>
@@ -508,12 +511,6 @@ body {
   <div class="enrol-sub">¿Quién sos?</div>
 
   <div class="demo-chips" id="demo-chips"></div>
-
-  <div class="or-sep">— O ESCRIBÍ TU NOMBRE —</div>
-  <div style="text-align:left;margin-bottom:16px">
-    <input class="inp" id="enrol-inp" type="text" placeholder="Tu nombre..." maxlength="20" autocomplete="off" style="margin-bottom:12px" onkeydown="if(event.key==='Enter')enrolar()">
-    <button class="btn btn-primary" onclick="enrolar()">Entrar ✓</button>
-  </div>
 
   <div class="divider"></div>
 
@@ -917,7 +914,7 @@ try {
 // ══════════════════════════════════════════
 // CONSTANTES
 // ══════════════════════════════════════════
-const DEMO_PLAYERS = ['Antonio','Antar','Beker','Pako','Tomi','Javi IAS','Harry','Keke','Litka','Tute','Naros','MP','Ray','Gasti','Juan'];
+const DEMO_PLAYERS = ['Antonio','Antar','Beker','Pako','Tomi','Javi Vir','Harry','Keke','Litka','Tute','Naros','MP','Ray','Gasti','Juan'];
 const NOVIOS = ['Juan','Pako','Ray','Tonio','Harry'];
 const POSICIONES = [
   'Panza de gordo','Rodilla de vieja','Espalda de tés morena',
@@ -1025,12 +1022,19 @@ function iniciarApp() {
   if (esTablet) document.body.classList.add('tablet-mode');
   actualizarPill();
 
-  // Esperar conexión Firebase antes de arrancar
+  // Monitor Firebase connection
   db.ref('.info/connected').on('value', snap => {
+    const banner = document.getElementById('fb-status');
     if (snap.val() === true) {
+      banner.style.display = 'none';
       // Registrar presencia
       db.ref('jugadores/' + miNombre).set({ nombre: miNombre, esTablet, online: true });
       db.ref('jugadores/' + miNombre + '/online').onDisconnect().set(false);
+    } else {
+      banner.style.display = 'block';
+      banner.style.background = '#FFF3CD';
+      banner.style.color = '#856404';
+      banner.textContent = '⚠️ Sin conexión — reconectando...';
     }
   });
 
