@@ -1008,17 +1008,14 @@ function iniciarApp() {
   if (esTablet) document.body.classList.add('tablet-mode');
   actualizarPill();
 
-  // Test Firebase connection
+  // Esperar conexión Firebase antes de arrancar
   db.ref('.info/connected').on('value', snap => {
-    console.log('Firebase conectado:', snap.val());
-    if (!snap.val()) console.warn('Firebase DESCONECTADO');
+    if (snap.val() === true) {
+      // Registrar presencia
+      db.ref('jugadores/' + miNombre).set({ nombre: miNombre, esTablet, online: true });
+      db.ref('jugadores/' + miNombre + '/online').onDisconnect().set(false);
+    }
   });
-
-  // Registrar presencia en Firebase
-  db.ref('jugadores/' + miNombre).set({ nombre: miNombre, esTablet, online: true })
-    .then(() => console.log('Jugador registrado en Firebase OK'))
-    .catch(e => console.error('ERROR registrando jugador:', e));
-  db.ref('jugadores/' + miNombre + '/online').onDisconnect().set(false);
 
   // Listeners en tiempo real
   db.ref('jugadores').on('value', snap => {
