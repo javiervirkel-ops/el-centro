@@ -2295,7 +2295,14 @@ function resetDado() {
 // PWA — SERVICE WORKER
 // ══════════════════════════════════════════
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  window.addEventListener('load', async () => {
+    // Unregister all old service workers first to avoid stale cache
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const reg of regs) await reg.unregister();
+    // Clear all caches
+    const keys = await caches.keys();
+    for (const key of keys) await caches.delete(key);
+    // Register fresh
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }

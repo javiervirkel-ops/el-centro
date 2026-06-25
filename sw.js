@@ -1,4 +1,4 @@
-const CACHE = 'el-centro-v1';
+const CACHE = 'el-centro-v3';
 const ASSETS = [
   './el-centro.html',
   './manifest.json',
