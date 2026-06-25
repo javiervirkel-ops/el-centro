@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>El Centro</title>
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A4B9C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2308,17 +2307,12 @@ function resetDado() {
 // ══════════════════════════════════════════
 // PWA — SERVICE WORKER
 // ══════════════════════════════════════════
+// Desregistrar cualquier service worker viejo que pueda estar cacheando
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    // Unregister all old service workers first to avoid stale cache
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (const reg of regs) await reg.unregister();
-    // Clear all caches
-    const keys = await caches.keys();
-    for (const key of keys) await caches.delete(key);
-    // Register fresh
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
   });
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
 }
 </script>
 </body>
