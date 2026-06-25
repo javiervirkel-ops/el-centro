@@ -487,9 +487,9 @@ body {
     <div class="umenu-nm" id="um-nm">—</div>
     <div class="umenu-rol" id="um-rol">Jugador</div>
   </div>
-  <div class="umenu-item" id="um-tab-btn" onclick="toggleTablet()">📱 Entrar como tablet</div>
-  <div class="umenu-sep"></div>
   <div class="umenu-item danger" onclick="cerrarSesion()">🚪 Cambiar de perfil</div>
+  <div class="umenu-sep"></div>
+  <div class="umenu-item" onclick="abrirAdmin()">⚙️ Admin</div>
 </div>
 <div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
 
@@ -505,14 +505,23 @@ body {
 <div id="screen-enrol" class="screen active">
   <div class="enrol-icon">🏛️</div>
   <div class="enrol-tit">BIENVENIDO</div>
-  <div class="enrol-sub">Elegí tu nombre para unirte al viaje del Centro</div>
+  <div class="enrol-sub">¿Quién sos?</div>
+
   <div class="demo-chips" id="demo-chips"></div>
+
   <div class="or-sep">— O ESCRIBÍ TU NOMBRE —</div>
-  <div style="text-align:left">
+  <div style="text-align:left;margin-bottom:16px">
     <input class="inp" id="enrol-inp" type="text" placeholder="Tu nombre..." maxlength="20" autocomplete="off" style="margin-bottom:12px" onkeydown="if(event.key==='Enter')enrolar()">
-    <button class="btn btn-primary" onclick="enrolar()">Entrar al viaje ✓</button>
+    <button class="btn btn-primary" onclick="enrolar()">Entrar ✓</button>
   </div>
-  <div style="text-align:center;margin-top:16px">
+
+  <div class="divider"></div>
+
+  <button class="btn btn-outline" onclick="entrarComoTablet()" style="margin-bottom:16px">
+    📱 Soy la tablet del grupo
+  </button>
+
+  <div style="text-align:center">
     <span class="admin-link" onclick="abrirAdmin()">⚙ Acceso administrador</span>
   </div>
 </div>
@@ -908,7 +917,7 @@ try {
 // ══════════════════════════════════════════
 // CONSTANTES
 // ══════════════════════════════════════════
-const DEMO_PLAYERS = ['Antonio','Javi','Juan','Ray','Litka','Gasti'];
+const DEMO_PLAYERS = ['Antonio','Antar','Beker','Pako','Tomi','Javi IAS','Harry','Keke','Litka','Tute','Naros','MP','Ray','Gasti','Juan'];
 const NOVIOS = ['Juan','Pako','Ray','Tonio','Harry'];
 const POSICIONES = [
   'Panza de gordo','Rodilla de vieja','Espalda de tés morena',
@@ -972,6 +981,14 @@ window.onload = () => {
 function renderDemoChips() {
   document.getElementById('demo-chips').innerHTML =
     DEMO_PLAYERS.map(n => `<button class="demo-chip" onclick="entrarRapido('${n}')">${n}</button>`).join('');
+}
+
+function entrarComoTablet() {
+  miNombre = 'Tablet';
+  esTablet = true;
+  localStorage.setItem('ec_nombre', 'Tablet');
+  localStorage.setItem('ec_tablet', 'true');
+  iniciarApp();
 }
 
 function entrarRapido(n) {
@@ -1073,8 +1090,7 @@ function actualizarPill() {
   document.getElementById('u-av').textContent  = miNombre.charAt(0).toUpperCase();
   document.getElementById('u-nm').textContent  = miNombre;
   document.getElementById('um-nm').textContent = miNombre;
-  document.getElementById('um-rol').textContent = esTablet ? '📱 Modo tablet' : '👤 Jugador';
-  document.getElementById('um-tab-btn').textContent = esTablet ? '👤 Salir de modo tablet' : '📱 Entrar como tablet';
+  document.getElementById('um-rol').textContent = esTablet ? '📱 Tablet del grupo' : '👤 Jugador';
 }
 function toggleMenu() {
   document.getElementById('umenu').classList.toggle('open');
@@ -1084,15 +1100,7 @@ function cerrarMenu() {
   document.getElementById('umenu').classList.remove('open');
   document.getElementById('overlay').classList.remove('on');
 }
-function toggleTablet() {
-  cerrarMenu();
-  esTablet = !esTablet;
-  localStorage.setItem('ec_tablet', esTablet ? 'true' : 'false');
-  if (esTablet) document.body.classList.add('tablet-mode');
-  else document.body.classList.remove('tablet-mode');
-  actualizarPill();
-  renderPartida();
-}
+// toggleTablet removed — tablet mode is set at login
 function cerrarSesion() {
   cerrarMenu();
   miNombre = ''; esTablet = false;
@@ -1105,6 +1113,7 @@ function cerrarSesion() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-enrol').classList.add('active');
   document.getElementById('enrol-inp').value = '';
+  renderDemoChips();
 }
 
 // ══════════════════════════════════════════
