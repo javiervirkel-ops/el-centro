@@ -1016,70 +1016,74 @@ function cargarJugadores() {
   jugadores = s;
 }
 
-function iniciarApp() {
-  document.getElementById('screen-enrol').classList.remove('active');
-  document.getElementById('tabs').style.display = 'flex';
-  if (esTablet) document.body.classList.add('tablet-mode');
-  actualizarPill();
-
-  // Monitor Firebase connection
-  db.ref('.info/connected').on('value', snap => {
-    const banner = document.getElementById('fb-status');
-    if (snap.val() === true) {
-      banner.style.display = 'none';
-      // Registrar presencia
-      db.ref('jugadores/' + miNombre).set({ nombre: miNombre, esTablet, online: true });
-      db.ref('jugadores/' + miNombre + '/online').onDisconnect().set(false);
-    } else {
-      banner.style.display = 'block';
-      banner.style.background = '#FFF3CD';
-      banner.style.color = '#856404';
-      banner.textContent = '⚠️ Sin conexión — reconectando...';
-    }
-  });
-
-  // Listeners en tiempo real
+function registrarListeners() {
   db.ref('jugadores').on('value', snap => {
     jugadores = snap.val() || {};
     renderJugadores();
     renderSelCap();
   });
-
   db.ref('partida').on('value', snap => {
     partida = snap.val();
     const enCodigo = document.getElementById('screen-codigo').classList.contains('active');
     if (enCodigo) renderPartida();
   });
-
   db.ref('chat').on('value', snap => {
     const raw = snap.val() || {};
     chatMsgs = Object.values(raw).sort((a,b) => a.ts - b.ts);
     renderChat();
   });
-
   db.ref('album').on('value', snap => {
     albumData = snap.val() || {};
     lsSet('ec_album', albumData);
     const enAlbum = document.getElementById('screen-album').classList.contains('active');
     if (enAlbum) renderAlbum();
   });
-
   db.ref('puntos').on('value', snap => {
     lsSet('ec_puntos', snap.val() || {});
     const enTabla = document.getElementById('screen-tabla').classList.contains('active');
     if (enTabla) renderTablaGlobal();
   });
-
   db.ref('tateti').on('value', snap => {
     tt = snap.val() || { activa: false };
     const enTT = document.getElementById('screen-tateti').classList.contains('active');
     if (enTT) renderTateti();
   });
-
   db.ref('equipos').on('value', snap => {
     equipos = snap.val() || {};
     renderEquiposSection();
     renderSelCap();
+  });
+}
+
+function iniciarApp() {
+  document.getElementById('screen-enrol').classList.remove('active');
+  document.getElementById('tabs').style.display = 'flex';
+  if (esTablet) document.body.classList.add('tablet-mode');
+  actualizarPill();
+
+  // Registrar todos los listeners de una vez (Firebase los re-conecta solo si se cae)
+  let listenersRegistrados = false;
+
+  db.ref('.info/connected').on('value', snap => {
+    const banner = document.getElementById('fb-status');
+    if (snap.val() === true) {
+      if (banner) banner.style.display = 'none';
+      // Presencia
+      db.ref('jugadores/' + miNombre).set({ nombre: miNombre, esTablet, online: true });
+      db.ref('jugadores/' + miNombre + '/online').onDisconnect().set(false);
+      // Registrar listeners solo una vez
+      if (!listenersRegistrados) {
+        listenersRegistrados = true;
+        registrarListeners();
+      }
+    } else {
+      if (banner) {
+        banner.style.display = 'block';
+        banner.style.background = '#FFF3CD';
+        banner.style.color = '#856404';
+        banner.textContent = '⚠️ Sin conexión — reconectando...';
+      }
+    }
   });
 
   goTab('inicio');
