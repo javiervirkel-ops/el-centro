@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="El Centro">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -1241,6 +1242,7 @@ window.onload=()=>{
   pedirPermisoNotifs();
   actualizarItemNotifs();
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')limpiarBadge();});
+  limpiarBadge(); // por si quedó un badge pegado de una sesión anterior
   renderChips();
   const n=localStorage.getItem('ec_nombre');
   const t=localStorage.getItem('ec_tablet')==='true';
