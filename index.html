@@ -156,7 +156,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .msg-b{padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.5}
 .msg-b.yo{background:var(--az);color:#fff;border-bottom-right-radius:3px}
 .msg-b.otro{background:#fff;border:1px solid var(--bd);color:var(--txt);border-bottom-left-radius:3px}
+.msg-b.con-img{padding:4px}
+.msg-img-cap{padding:6px 6px 2px}
 .msg-hora{font-size:9px;opacity:.5;margin-top:4px;padding:0 4px}
+.btn-attach{width:42px;height:42px;border-radius:50%;background:var(--sf);border:1.5px solid var(--bd);cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.com-preview{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid var(--bd)}
+.com-preview img{width:52px;height:52px;object-fit:cover;border-radius:8px}
+.com-preview-x{margin-left:auto;background:none;border:none;color:var(--ro);font-size:12.5px;font-weight:700;cursor:pointer}
 .msg-img{max-width:200px;border-radius:10px;display:block;cursor:pointer}
 .chat-bar{display:flex;gap:8px;padding:10px 0 4px;border-top:1px solid var(--bd);align-items:center;flex-shrink:0}
 .chat-bar .inp{flex:1;border-radius:20px}
@@ -802,12 +808,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <button class="back-fab" onclick="goTab('inicio')" aria-label="Volver">←</button>
   <div class="pd-wrap">
     <div class="pd-scroll" id="pd-scroll"></div>
+    <div class="com-preview" id="com-preview" style="display:none"></div>
     <div class="chat-bar">
+      <button class="btn-attach" onclick="document.getElementById('com-file').click()">📷</button>
       <input class="inp" id="com-inp" type="text" placeholder="Comentá algo..." maxlength="280" onkeydown="if(event.key==='Enter')enviarComentario()">
       <button class="btn-send" onclick="enviarComentario()">➤</button>
     </div>
   </div>
 </div>
+<input type="file" id="com-file" accept="image/*" style="display:none" onchange="previewComFoto(event)">
 
 <!-- COMPOSER -->
 <div class="comp-modal" id="comp-modal">
@@ -1245,7 +1254,7 @@ let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
-let posts={},postAbierto=null,postFotoURL=null,postEfimero=false,postConsigna=false;
+let posts={},postAbierto=null,postFotoURL=null,postEfimero=false,postConsigna=false,comFotoURL=null;
 let ttSorteo=null;
 
 // ════════════════════════════════════════
@@ -1514,6 +1523,8 @@ function goSub(n){
   if(t) t.classList.add('on');
   if(n==='chat'){renderChat();marcarChatLeido();}
   if(n==='post'){
+    quitarComFoto();
+    const inp=document.getElementById('com-inp');if(inp)inp.value='';
     renderPostDetalle();
     const s=document.getElementById('pd-scroll');
     if(s) s.scrollTop=0; // arrancar mostrando la foto/texto, no el fondo del hilo
@@ -1849,11 +1860,14 @@ function comentariosHTML(p){
     <div class="pd-coms">${coms.map(m=>{
       const yo=m.nombre===miNombre;
       const col=colorFor(m.nombre||'?');
+      const cuerpo=m.img
+        ? `<img src="${m.img}" class="msg-img" onclick="abrirImgChat('${m.img}')">${m.texto?`<div class="msg-img-cap">${escaparHTML(m.texto)}</div>`:''}`
+        : escaparHTML(m.texto||'');
       return `<div class="msg-row ${yo?'yo':''}">
         ${!yo?avatarHTML(m.nombre,30,'margin-bottom:2px'):''}
         <div class="msg-bw">
           ${!yo?`<div class="msg-nm" style="color:${col}">${ng(m.nombre)}</div>`:''}
-          <div class="msg-b ${yo?'yo':'otro'}">${escaparHTML(m.texto||'')}</div>
+          <div class="msg-b ${yo?'yo':'otro'}${m.img?' con-img':''}">${cuerpo}</div>
           <div class="msg-hora">${m.hora||''}</div>
         </div>
         ${yo?avatarHTML(miNombre,30,'margin-bottom:2px'):''}
@@ -1885,14 +1899,34 @@ function renderPostDetalle(){
     </div>`+comentariosHTML(p);
 }
 
+function previewComFoto(e){
+  const file=e.target.files[0];if(!file)return;
+  e.target.value='';
+  abrirEditor(file,url=>{
+    comFotoURL=url;
+    const prev=document.getElementById('com-preview');
+    if(prev){prev.style.display='flex';prev.innerHTML=`<img src="${url}"><button class="com-preview-x" onclick="quitarComFoto()">Quitar ✕</button>`;}
+  });
+}
+function quitarComFoto(){
+  comFotoURL=null;
+  const prev=document.getElementById('com-preview');
+  if(prev){prev.style.display='none';prev.innerHTML='';}
+}
+
 function enviarComentario(){
   const inp=document.getElementById('com-inp');
   const txt=inp.value.trim();
-  if(!txt||!postAbierto||!miNombre)return;
-  db.ref('posts/'+postAbierto+'/coms').push({nombre:miNombre,texto:txt,hora:hora(),ts:Date.now()});
+  if(!txt&&!comFotoURL)return;
+  if(!postAbierto||!miNombre)return;
+  const com={nombre:miNombre,hora:hora(),ts:Date.now()};
+  if(txt) com.texto=txt;
+  if(comFotoURL) com.img=comFotoURL;
+  db.ref('posts/'+postAbierto+'/coms').push(com);
   const p=posts[postAbierto];
   if(p&&p.autor&&p.autor!==miNombre) notificar(miNombre+' comentó el post de '+p.autor,'💬');
   inp.value='';
+  quitarComFoto();
 }
 
 
