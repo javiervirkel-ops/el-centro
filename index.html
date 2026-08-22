@@ -40,20 +40,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .umenu-hdr{padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--sf)}
 .umenu-nm{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--az)}
 .umenu-rol{font-size:11px;color:var(--gr);margin-top:2px}
-.umenu-item{padding:12px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--txt);border-top:1px solid var(--bd)}
+.umenu-item{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--txt);border-top:1px solid var(--bd)}
+.umenu-item svg{flex-shrink:0}
 .umenu-item:hover{background:var(--sf)}
 .umenu-item.red{color:var(--ro)}
 .ov{display:none;position:fixed;inset:0;z-index:199}
 .ov.on{display:block}
 
 /* TABS */
-.tabs{display:flex;background:#fff;border-bottom:2px solid var(--bd);position:sticky;top:64px;z-index:99}
+.tabs{display:flex;background:#fff;border-top:2px solid var(--bd);position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;z-index:99;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 12px rgba(13,43,94,.08)}
 .tab{flex:1;padding:9px 4px;text-align:center;font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gr);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab.on{color:var(--az);border-bottom-color:var(--az)}
 .tab i{display:flex;align-items:center;justify-content:center;margin-bottom:3px;font-style:normal}
 
 /* SCREENS */
-.scr{display:none;padding:16px 16px 32px}
+.scr{display:none;padding:16px 16px calc(90px + env(safe-area-inset-bottom,0px))}
 .scr.on{display:block}
 
 /* UTILS */
@@ -129,6 +130,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .back-btn{background:none;border:none;color:var(--az);font-size:13px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;margin-bottom:14px}
 .back-fab{width:38px;height:38px;border-radius:50%;background:var(--sf);border:1.5px solid var(--bd);color:var(--az);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px}
 .back-fab:active{background:var(--bd)}
+.ico-in{display:inline-flex;align-items:center;gap:6px;vertical-align:-2px}
+.ico-in svg{flex-shrink:0}
 
 /* TABLA */
 .tabla-row{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:8px;border:1.5px solid var(--bd);display:flex;align-items:center;gap:10px}
@@ -145,7 +148,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tabla-info strong{color:var(--az)}
 
 /* CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 160px)}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 160px - env(safe-area-inset-bottom,0px))}
 .chat-msgs{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:10px}
 .msg-row{display:flex;gap:8px;align-items:flex-end}
 .msg-row.yo{flex-direction:row-reverse}
@@ -387,7 +390,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .cama-emo{margin-left:auto;font-size:17px}
 
 /* TRUCO */
-.ancho-espada{display:inline-block;transform:rotate(-45deg)}
 .truco-board{display:flex;background:#fff;border-radius:16px;border:1.5px solid var(--bd);overflow:hidden;min-height:340px}
 .truco-col{flex:1;padding:14px 10px;display:flex;flex-direction:column;align-items:center}
 .truco-divisor{width:2px;background:var(--bd)}
@@ -432,7 +434,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .post-borrar{margin-left:auto;font-size:11px;color:var(--gr);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif}
 .post.noticia{border-color:var(--az);background:linear-gradient(135deg,#F4F8FF,#EBF2FF)}
 .not-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
-.not-icono{width:38px;height:38px;border-radius:11px;background:var(--az);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.not-icono{width:38px;height:38px;border-radius:11px;background:var(--az);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .not-etiqueta{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;letter-spacing:1.5px;color:var(--az);text-transform:uppercase}
 .not-txt{padding:0 14px 12px;font-size:14.5px;line-height:1.5;color:var(--txt);font-weight:600;white-space:pre-wrap;word-break:break-word}
 .not-txt b{color:var(--az)}
@@ -468,7 +470,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .post-efi{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--am);background:#FFFBF0;border:1px solid var(--am);border-radius:20px;padding:2px 8px;margin-left:8px}
 
 /* POST DETALLE */
-.pd-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px)}
+.pd-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px - env(safe-area-inset-bottom,0px))}
 .pd-scroll{flex:1;overflow-y:auto}
 .pd-coms{padding-top:6px;display:flex;flex-direction:column;gap:10px}
 .pd-sin{text-align:center;padding:20px;color:var(--gr);font-size:13px}
@@ -554,9 +556,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <!-- MENU -->
 <div class="umenu" id="umenu">
   <div class="umenu-hdr"><div class="umenu-nm" id="um-nm">—</div><div class="umenu-rol" id="um-rol">Jugador</div></div>
-  <div class="umenu-item" id="um-notif-item" onclick="toggleNotifs()">🔕 Silenciar notificaciones</div>
-  <div class="umenu-item" id="um-tablet-item" onclick="cerrarMenu();pedirModoTablet()">📱 Modo tablet</div>
-  <div class="umenu-item" onclick="cerrarMenu();abrirAdmin()">⚙️ Administrador</div>
+  <div class="umenu-item" id="um-notif-item" onclick="toggleNotifs()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/></svg>Silenciar notificaciones</div>
+  <div class="umenu-item" id="um-tablet-item" onclick="cerrarMenu();pedirModoTablet()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Modo tablet</div>
+  <div class="umenu-item" onclick="cerrarMenu();abrirAdmin()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Administrador</div>
 </div>
 <div class="ov" id="ov" onclick="cerrarMenu()"></div>
 <div id="toasts"></div>
@@ -577,8 +579,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="enrol-sub">¿Quién sos?</div>
   <div class="lista-enrol" id="chips"></div>
   <div class="div"></div>
-  <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px">📱 Soy la tablet del grupo</button>
-  <div style="text-align:center"><span class="admin-lnk" onclick="abrirAdmin()">⚙ Acceso administrador</span></div>
+  <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Soy la tablet del grupo</span></button>
+  <div style="text-align:center"><span class="admin-lnk ico-in" onclick="abrirAdmin()"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Acceso administrador</span></div>
 </div>
 
 <!-- INICIO -->
@@ -693,22 +695,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div id="scr-juegos" class="scr">
   <span class="lbl" style="margin-top:0">Los Juegos</span>
   <div class="juego-card" onclick="goJuego('cs')">
-    <div class="juego-emo">🕵️</div>
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
     <div class="juego-info"><h3>Código Secreto</h3><p>Versión Pibes</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
   <div class="juego-card" onclick="goJuego('album')">
-    <div class="juego-emo">📸</div>
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></div>
     <div class="juego-info"><h3>Novios Panini</h3><p></p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
   <div class="juego-card" onclick="goJuego('tt')">
-    <div class="juego-emo">🎯</div>
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
     <div class="juego-info"><h3>TA TE TI</h3><p></p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
   <div class="juego-card" onclick="goJuego('truco')">
-    <div class="juego-emo"><span class="ancho-espada">🗡️</span></div>
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg></div>
     <div class="juego-info"><h3>Truco</h3><p>Contador de fósforos</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
@@ -862,7 +864,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <div class="ed-colores" id="ed-colores"></div>
       <div class="ed-slider-row"><label>Tamaño</label><input type="range" id="ed-escala" min="20" max="400" value="100" oninput="edSetEscala(this.value)"></div>
       <div class="ed-slider-row"><label>Girar</label><input type="range" id="ed-rot" min="-180" max="180" value="0" oninput="edSetRot(this.value)"></div>
-      <div class="ed-row"><button class="ed-btn danger" onclick="edBorrarCapa()">🗑 Borrar</button></div>
+      <div class="ed-row"><button class="ed-btn danger" onclick="edBorrarCapa()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Borrar</button></div>
     </div>
     <div class="ed-hint" id="ed-hint">Arrastrá para mover · tocá para seleccionar</div>
   </div>
@@ -1003,7 +1005,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <button class="btn btn-az" id="btn-cs" onclick="iniciarCS()" disabled>Iniciar partida</button>
   </div>
   <div id="cs-game" class="cs-game">
-    <div id="cs-tab-banner" class="tab-banner" style="display:none">📱 Tablet — tocá las cartas desde acá</div>
+    <div id="cs-tab-banner" class="tab-banner" style="display:none"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tablet — tocá las cartas desde acá</span></div>
     <div id="cs-rol"></div>
     <div class="marcs">
       <div class="marc marc-a"><span class="marc-n" id="sc-a">9</span><div class="marc-lbl">☭ Izquierda</div></div>
@@ -1078,7 +1080,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <button class="btn btn-az" id="btn-tt" onclick="iniciarTT()" disabled style="display:none">Iniciar partida</button>
     </div>
     <div id="tt-espera" style="display:none;text-align:center;padding:30px 0;color:var(--gr);font-size:13px">
-      <div style="font-size:36px;margin-bottom:8px">⏳</div>Esperando que la tablet inicie la partida…
+      <div style="margin-bottom:8px;display:flex;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></div>Esperando que la tablet inicie la partida…
     </div>
   </div>
   <div id="tt-game" style="display:none">
@@ -1125,7 +1127,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="modal" style="max-width:400px;text-align:left">
     <div class="modal-top"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--az)">⚙️ ADMIN</div>
+      <div class="ico-in" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--az)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>ADMIN</div>
       <button class="btn-xs btn-xs-r" onclick="document.getElementById('modal-admin-panel').classList.remove('open')">Cerrar</button>
     </div>
     <div class="modal-scroll">
@@ -1225,6 +1227,49 @@ const MISIONES=[
   "Hacé que [T] te puntúe del 1 al 10 en algo totalmente absurdo (cómo pestañeás, tu postura al sentarte, cómo sostenés el vaso).",
   "Convencé a [T] de que se fije si tenés algo en el ojo y lográ que te sople el ojo para sacártelo."
 ];
+// ── Íconos Lucide (SVG inline, sin CDN) ──
+const ICONOS={
+  bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  'bell-off':'<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/>',
+  bell:'<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+  camera:'<path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  circle:'<circle cx="12" cy="12" r="10"/>',
+  'door-open':'<path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/>',
+  hand:'<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+  hourglass:'<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>',
+  megaphone:'<path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/>',
+  'message-circle':'<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+  newspaper:'<path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>',
+  'refresh-cw':'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  scale:'<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>',
+  search:'<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+  settings:'<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>',
+  shuffle:'<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>',
+  smartphone:'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+  spade:'<path d="M12 18v4"/><path d="M2 14.499a5.5 5.5 0 0 0 9.591 3.675.6.6 0 0 1 .818.001A5.5 5.5 0 0 0 22 14.5c0-2.29-1.5-4-3-5.5l-5.492-5.312a2 2 0 0 0-3-.02L5 8.999c-1.5 1.5-3 3.2-3 5.5"/>',
+  swords:'<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  timer:'<line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/>',
+  'trash-2':'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  'triangle-alert':'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  trophy:'<path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
+};
+function ico(nombre,size){
+  const s=size||16;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONOS[nombre]||''}</svg>`;
+}
+// Traduce el emoji guardado en notif/posts a ícono Lucide solo para mostrarlo en pantalla.
+// Lo que se guarda en Firebase y lo que reciben las notificaciones nativas sigue siendo el emoji de siempre.
+const EMOJI_ICONO={'📣':'megaphone','🎯':'target','📰':'newspaper','💬':'message-circle',
+  '🕵️':'search','📸':'camera','🏆':'trophy','🔄':'refresh-cw',
+  '⚠️':'triangle-alert','⚖️':'scale','🃏':'spade','🛏️':'bed'};
+function iconoDe(emoji,size){
+  const k=EMOJI_ICONO[emoji];
+  return k?ico(k,size||16):(emoji||'📣');
+}
+
 const ADMIN_PASS='holis123';
 const GRIEGO={'Antonio':'Tonos Fridminides','Beker':'Matiades Bekeros','Pako':'Pakostoles',
   'Harry':'Harriclito','Keke':'Kekos Matzkagoras','Litka':'Kevos Litvinopulos',
@@ -1336,7 +1381,7 @@ function iniciarApp(){
   document.getElementById('um-nm').textContent=miNombre;
   document.getElementById('um-rol').textContent=esTablet?'📱 Tablet':'👤 Jugador';
   const umt=document.getElementById('um-tablet-item');
-  if(umt) umt.textContent=esTablet?'🚪 Salir de modo tablet':'📱 Modo tablet';
+  if(umt) umt.innerHTML=esTablet?ico('door-open',15)+'Salir de modo tablet':ico('smartphone',15)+'Modo tablet';
   if(esTablet) document.body.classList.add('tablet-mode');
 
   // Registrar jugador
@@ -1463,7 +1508,7 @@ function toggleNotifs(){
 
 function actualizarItemNotifs(){
   const el=document.getElementById('um-notif-item');
-  if(el) el.textContent=notifsActivas()?'🔕 Silenciar notificaciones':'🔔 Activar notificaciones';
+  if(el) el.innerHTML=notifsActivas()?ico('bell-off',15)+'Silenciar notificaciones':ico('bell',15)+'Activar notificaciones';
 }
 
 function pedirPermisoNotifs(){
@@ -1497,7 +1542,7 @@ function mostrarToast(texto,emoji){
   const cont=document.getElementById('toasts');if(!cont)return;
   const t=document.createElement('div');
   t.className='toast';
-  t.innerHTML=`<span style="font-size:18px">${emoji||'📣'}</span><span>${texto}</span>`;
+  t.innerHTML=`<span style="font-size:18px;display:inline-flex">${iconoDe(emoji,18)}</span><span>${texto}</span>`;
   cont.appendChild(t);
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),350);},4500);
 }
@@ -1755,7 +1800,7 @@ function renderFeed(){
     if(p.tipo==='noticia'){
       return `<div class="post noticia">
         <div class="not-hdr">
-          <div class="not-icono">${p.icono||'📣'}</div>
+          <div class="not-icono">${iconoDe(p.icono,20)}</div>
           <div><div class="not-etiqueta">${p.etiqueta||'Novedad'}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
         </div>
         <div class="not-txt">${escaparHTML(p.texto||'')}</div>
@@ -1767,7 +1812,7 @@ function renderFeed(){
     return `<div class="post${p.consigna?' post-consigna':''}">
       <div class="post-hdr">
         ${avatarHTML(p.autor,38)}
-        <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?'<span class="post-efi">⏳ 24 h</span>':''}</div></div>
+        <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?`<span class="post-efi">${ico('hourglass',11)}24 h</span>`:''}</div></div>
         ${p.autor===miNombre?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
@@ -1882,7 +1927,7 @@ function renderPostDetalle(){
   if(p.tipo==='noticia'){
     cont.innerHTML=`<div class="post noticia" style="margin-bottom:10px">
         <div class="not-hdr">
-          <div class="not-icono">${p.icono||'📣'}</div>
+          <div class="not-icono">${iconoDe(p.icono,20)}</div>
           <div><div class="not-etiqueta">${p.etiqueta||'Novedad'}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
         </div>
         <div class="not-txt">${escaparHTML(p.texto||'')}</div>
@@ -2204,7 +2249,7 @@ function ejecutarSorteo(){
           <div class="nov-tit">Equipo ${i+1} · ${ng(e[0])}</div>
           ${e.map((n,j)=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}${j===0?' <span style="font-size:10px;color:var(--az);font-weight:700">NOVIO</span>':''}</span></div>`).join('')}
         </div>`).join('')+`</div>
-        <button class="btn btn-out" style="margin-top:12px" onclick="ejecutarSorteo()">🔀 Sortear de nuevo</button>`;
+        <button class="btn btn-out" style="margin-top:12px" onclick="ejecutarSorteo()"><span class="ico-in">${ico('shuffle',14)}Sortear de nuevo</span></button>`;
       res.scrollIntoView({behavior:'smooth',block:'nearest'});
     },1500);
     return;
@@ -2218,7 +2263,7 @@ function ejecutarSorteo(){
       res.innerHTML=`<div class="eq-wrap" style="margin-bottom:12px">
         <div class="eq-card eq-izq"><div class="eq-tit">${eq1}</div>${lista.slice(0,mid).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}</span></div>`).join('')}</div>
         <div class="eq-card eq-der"><div class="eq-tit">${eq2}</div>${lista.slice(mid).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}</span></div>`).join('')}</div>
-      </div><button class="btn btn-out" onclick="ejecutarSorteo()">🔀 Sortear de nuevo</button>`;
+      </div><button class="btn btn-out" onclick="ejecutarSorteo()"><span class="ico-in">${ico('shuffle',14)}Sortear de nuevo</span></button>`;
     },1500);
     return;
   }
@@ -2255,7 +2300,7 @@ function ejecutarSorteo(){
       setTimeout(()=>{
         sub.innerHTML=`<strong style="color:var(--az);font-size:16px">\u00a1${ng(ganador)}!</strong>`;
         res.style.display='block';
-        res.innerHTML=`<div class="res-card"><div style="font-size:13px;color:var(--gr);margin-bottom:10px">El sorteado es</div><div style="display:flex;justify-content:center">${avatarHTML(ganador,110,'border:4px solid var(--az);box-shadow:0 6px 24px rgba(26,75,156,.3)')}</div><div class="res-ganador">${ng(ganador)}</div></div><button class="btn btn-out" onclick="ejecutarSorteo()">🔀 Sortear de nuevo</button>`;
+        res.innerHTML=`<div class="res-card"><div style="font-size:13px;color:var(--gr);margin-bottom:10px">El sorteado es</div><div style="display:flex;justify-content:center">${avatarHTML(ganador,110,'border:4px solid var(--az);box-shadow:0 6px 24px rgba(26,75,156,.3)')}</div><div class="res-ganador">${ng(ganador)}</div></div><button class="btn btn-out" onclick="ejecutarSorteo()"><span class="ico-in">${ico('shuffle',14)}Sortear de nuevo</span></button>`;
       },900);
     }
   },95);
@@ -2706,7 +2751,7 @@ function sortearEquiposTT(){
     <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--ro);margin-bottom:6px">🎩 Derecha</div>
     <div>${ttSorteo.r.map(n=>`<span class="tt-sorteo-chip-r">${n}</span>`).join('')}</div>
   </div>
-  <button class="btn btn-out" style="margin-bottom:8px" onclick="sortearEquiposTT()">🔀 Volver a sortear</button>`;
+  <button class="btn btn-out" style="margin-bottom:8px" onclick="sortearEquiposTT()"><span class="ico-in">${ico('shuffle',14)}Volver a sortear</span></button>`;
   const btn=document.getElementById('btn-tt');if(btn){btn.style.display='block';btn.disabled=false;}
 }
 
@@ -2749,9 +2794,9 @@ function renderTTGame(){
   const miEq=miEqTT();
   const eqBar=document.getElementById('tt-eq-bar');
   if(eqBar) eqBar.innerHTML=`<div class="tt-eq-bar">
-    <div class="tt-eq tt-eq-a"><div class="tt-eq-nm">⭕ Izquierda</div><div class="tt-eq-members">${toArr(tt.equipoIzq).join(', ')}</div></div>
-    <div class="tt-eq tt-eq-r"><div class="tt-eq-nm">❌ Derecha</div><div class="tt-eq-members">${toArr(tt.equipoDer).join(', ')}</div></div>
-  </div>${tt.ganador?`<div style="text-align:center;margin-bottom:10px;font-family:'Cinzel',serif;color:var(--az);font-weight:700;font-size:16px">🏆 Gana ${tt.ganador==='a'?'⭕ Izquierda':'❌ Derecha'}</div>`:''}`;
+    <div class="tt-eq tt-eq-a"><div class="tt-eq-nm ico-in">${ico('circle',11)}Izquierda</div><div class="tt-eq-members">${toArr(tt.equipoIzq).join(', ')}</div></div>
+    <div class="tt-eq tt-eq-r"><div class="tt-eq-nm ico-in">${ico('x',11)}Derecha</div><div class="tt-eq-members">${toArr(tt.equipoDer).join(', ')}</div></div>
+  </div>${tt.ganador?`<div class="ico-in" style="justify-content:center;width:100%;margin-bottom:10px;font-family:'Cinzel',serif;color:var(--az);font-weight:700;font-size:16px">${ico('trophy',16)}Gana ${tt.ganador==='a'?ico('circle',15)+'Izquierda':ico('x',15)+'Derecha'}</div>`:''}`;
 
   const tablero=toArr(tt.tablero);
   const elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
@@ -2763,7 +2808,7 @@ function renderTTGame(){
       // Ocupada: la ven TODOS igual (tablet, izq y der)
       div.classList.add(cell.equipo==='a'?'ocupada-a':'ocupada-r');
       if(tt.ganador&&esCeldaGanadora(pos,tt.ganador)) div.classList.add('ganadora');
-      div.innerHTML=`<div class="tt-sym" style="font-size:38px;font-weight:900;color:#fff;font-family:'Cinzel',serif">${cell.equipo==='a'?'O':'X'}</div><div class="tt-lbl">${cell.equipo==='a'?'⭕ Izquierda':'❌ Derecha'}</div>`;
+      div.innerHTML=`<div class="tt-sym" style="font-size:38px;font-weight:900;color:#fff;font-family:'Cinzel',serif">${cell.equipo==='a'?'O':'X'}</div><div class="tt-lbl ico-in" style="justify-content:center;width:100%">${cell.equipo==='a'?ico('circle',9)+'Izquierda':ico('x',9)+'Derecha'}</div>`;
     } else if(elMia===pos){
       // Mi equipo la está intentando
       div.classList.add('mision-'+miEq);
@@ -2793,14 +2838,14 @@ function renderTTGame(){
         const rest=Math.max(0,TT_LIMITE_MS-(Date.now()-inicio));
         const hs=Math.floor(rest/3600000), mn=Math.floor((rest%3600000)/60000), sg=Math.floor((rest%60000)/1000);
         const urgente=rest<30*60*1000;
-        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live">⏳ ${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido'}</div>`;
+        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido'}</span></div>`;
       }
       let btnCambiar='';
       if(chk.puede){
-        const txt=chk.motivo==='tiempo'?'⏱️ Se acabó el tiempo — cambiar misión':'⚖️ Vas en desventaja — cambiar misión';
-        btnCambiar=`<button class="btn btn-out" style="font-size:12px;padding:10px;margin-top:8px" onclick="cambiarMision()">${txt}</button>`;
+        const txt=chk.motivo==='tiempo'?ico('timer',13)+'Se acabó el tiempo — cambiar misión':ico('scale',13)+'Vas en desventaja — cambiar misión';
+        btnCambiar=`<button class="btn btn-out" style="font-size:12px;padding:10px;margin-top:8px" onclick="cambiarMision()"><span class="ico-in">${txt}</span></button>`;
       }
-      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit">🎯 TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})">✋ Misión cumplida — pedir aprobación</button>${btnCambiar}</div>`;
+      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>${btnCambiar}</div>`;
     } else mDiv.innerHTML='';
   }
 
@@ -2914,17 +2959,17 @@ function renderPendientesTT(){
   if(!esTablet){
     // A los jugadores les mostramos cuántas hay pendientes (info)
     const mias=pendientesArr.filter(p=>p.solicitante===miNombre);
-    div.innerHTML=mias.length?`<div style="background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:12px;color:var(--gr);text-align:center">⏳ Tu misión está esperando aprobación de la tablet…</div>`:'';
+    div.innerHTML=mias.length?`<div class="ico-in" style="background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:12px;color:var(--gr);justify-content:center;width:100%">${ico('hourglass',13)}Tu misión está esperando aprobación de la tablet…</div>`:'';
     return;
   }
 
-  div.innerHTML=`<div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--am);letter-spacing:1px;margin-bottom:10px;text-align:center">⏳ MISIONES PENDIENTES DE APROBACIÓN</div>`+
+  div.innerHTML=`<div class="ico-in" style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--am);letter-spacing:1px;margin-bottom:10px;justify-content:center;width:100%">${ico('hourglass',13)}MISIONES PENDIENTES DE APROBACIÓN</div>`+
     pendientesArr.map((p,i)=>`<div class="tt-pend">
-      <div class="tt-pend-tit">${p.equipo==='a'?'⭕ Izquierda':'❌ Derecha'} · Casilla ${p.pos+1} · ${p.solicitante}</div>
+      <div class="tt-pend-tit ico-in">${p.equipo==='a'?ico('circle',11)+'Izquierda':ico('x',11)+'Derecha'} · Casilla ${p.pos+1} · ${p.solicitante}</div>
       <div class="tt-pend-txt">${p.mision}</div>
       <div class="tt-pend-btns">
-        <button class="btn btn-ro" style="flex:1;padding:10px;font-size:12px" onclick="rechazarMision(${i})">✕ Rechazar</button>
-        <button class="btn btn-az" style="flex:1;padding:10px;font-size:12px" onclick="aprobarMision(${i})">✓ Aprobar</button>
+        <button class="btn btn-ro" style="flex:1;padding:10px;font-size:12px" onclick="rechazarMision(${i})"><span class="ico-in">${ico('x',13)}Rechazar</span></button>
+        <button class="btn btn-az" style="flex:1;padding:10px;font-size:12px" onclick="aprobarMision(${i})"><span class="ico-in">${ico('check',13)}Aprobar</span></button>
       </div></div>`).join('');
 }
 
@@ -3080,7 +3125,7 @@ function sortearEquiposTruco(){
     <div class="eq-card eq-izq"><div class="eq-tit">NOSOTROS</div>${a.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
     <div class="eq-card eq-der"><div class="eq-tit">ELLOS</div>${r.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
   </div>
-  <button class="btn btn-out" style="margin-bottom:8px" onclick="sortearEquiposTruco()">🔀 Volver a sortear</button>
+  <button class="btn btn-out" style="margin-bottom:8px" onclick="sortearEquiposTruco()"><span class="ico-in">${ico('shuffle',14)}Volver a sortear</span></button>
   <button class="btn btn-az" onclick="iniciarTruco(${JSON.stringify(a).replace(/"/g,'&quot;')},${JSON.stringify(r).replace(/"/g,'&quot;')})">Empezar partida ✓</button>`;
 }
 
