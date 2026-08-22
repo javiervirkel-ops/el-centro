@@ -299,6 +299,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .album-cell-lbl{font-size:9px;font-weight:700;color:var(--gr);line-height:1.4;position:relative;z-index:1}
 .album-cell.comp .album-cell-lbl{color:rgba(255,255,255,.9);text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .album-check{position:absolute;top:5px;right:5px;background:var(--vd);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;z-index:2;color:#fff}
+.album-del{position:absolute;top:5px;left:5px;background:var(--ro);border:none;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;z-index:2;color:#fff;cursor:pointer;padding:0}
 .album-reglas{font-size:12px;color:var(--gr);background:var(--sf);border-radius:10px;padding:12px;margin-bottom:14px;border:1px solid var(--bd);line-height:1.7}
 .album-reglas strong{color:var(--az)}
 
@@ -444,6 +445,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .comp-efimero.on{border-color:var(--az);background:var(--sf);color:var(--az);font-weight:600}
 .comp-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
 .comp-efimero.on .comp-check{background:var(--az);border-color:var(--az);color:#fff}
+.comp-efimero.comp-consigna.on{border-color:var(--am);background:#FFFBEB;color:#92610A}
+.comp-efimero.comp-consigna.on .comp-check{background:var(--am);border-color:var(--am);color:#fff}
+.comp-hint{font-size:12px;color:var(--az);background:var(--sf);border-radius:10px;padding:9px 11px;margin-bottom:12px;line-height:1.4}
+
+/* CONSIGNAS */
+.post-consigna{border:2px solid var(--am);background:#FFFBF0}
+.cons-badge{display:inline-block;background:var(--am);color:#fff;font-size:9px;font-weight:800;border-radius:20px;padding:2px 8px;margin-left:6px;letter-spacing:.5px;vertical-align:middle}
+.cons-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--am),#FBBF24);border-radius:14px;padding:12px 14px;margin-bottom:12px;cursor:pointer;color:#fff}
+.cons-banner-ico{font-size:24px;flex-shrink:0}
+.cons-banner-txt{flex:1;font-size:12.5px;font-weight:600;line-height:1.35;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cons-banner-txt b{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;opacity:.9;margin-bottom:2px}
+.cons-banner-cta{font-size:11px;font-weight:800;background:rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;white-space:nowrap;flex-shrink:0}
 .post-efi{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--am);background:#FFFBF0;border:1px solid var(--am);border-radius:20px;padding:2px 8px;margin-left:8px}
 
 /* POST DETALLE */
@@ -566,6 +579,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <span class="lbl" style="margin:0">El Feed</span>
     <button class="feed-chat-btn" onclick="goSub('chat')">💬 Chat del grupo<span class="chat-badge" id="chat-badge" style="display:none">0</span></button>
   </div>
+
+  <div class="cons-banner" id="cons-banner" style="display:none"></div>
 
   <div class="composer" onclick="abrirComposer()">
     <div id="comp-av"></div>
@@ -796,10 +811,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="comp-modal" id="comp-modal">
   <div class="comp-sheet">
     <div class="comp-tit">Nuevo post</div>
+    <div class="comp-hint">💡 ¿Tenés una idea para que haga todo el grupo? Tirala como consigna en vez de un post común.</div>
     <textarea class="comp-txt" id="comp-inp" placeholder="Un pensamiento, una foto, lo que sea..." maxlength="600"></textarea>
     <div class="comp-zona" id="comp-zona" onclick="document.getElementById('post-file').click()">
       <div>📷 Agregar una foto (opcional)</div>
     </div>
+    <label class="comp-efimero comp-consigna" id="comp-cons-lbl" onclick="toggleConsigna(event)">
+      <span class="comp-check" id="comp-cons-check">✓</span>
+      <span>🎯 Es una consigna — que la siga todo el grupo</span>
+    </label>
     <label class="comp-efimero" id="comp-efi-lbl" onclick="toggleEfimero(event)">
       <span class="comp-check" id="comp-check">✓</span>
       <span>Que desaparezca en 24 horas</span>
@@ -1223,7 +1243,7 @@ let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
-let posts={},postAbierto=null,postFotoURL=null,postEfimero=false;
+let posts={},postAbierto=null,postFotoURL=null,postEfimero=false,postConsigna=false;
 let ttSorteo=null;
 
 // ════════════════════════════════════════
@@ -1692,10 +1712,20 @@ function cantComs(p){
   return Array.isArray(cm)?cm.filter(Boolean).length:Object.keys(cm).length;
 }
 
+function renderConsignaBanner(){
+  const b=document.getElementById('cons-banner');if(!b)return;
+  const activa=postsOrdenados().find(p=>p.consigna);
+  if(!activa){b.style.display='none';return;}
+  b.style.display='flex';
+  b.onclick=()=>abrirPost(activa.id);
+  b.innerHTML=`<div class="cons-banner-ico">🎯</div><div class="cons-banner-txt"><b>Consigna activa — de ${ng(activa.autor)}</b>${escaparHTML(activa.texto||'sumate al hilo')}</div><div class="cons-banner-cta">Sumate →</div>`;
+}
+
 function renderFeed(){
   const av=document.getElementById('comp-av');
   if(av) av.innerHTML=avatarHTML(miNombre,34);
   actualizarBadgeChat();
+  renderConsignaBanner();
   const cont=document.getElementById('feed-lista');if(!cont)return;
   const lista=postsOrdenados();
   if(!lista.length){
@@ -1717,10 +1747,10 @@ function renderFeed(){
         </div>
       </div>`;
     }
-    return `<div class="post">
+    return `<div class="post${p.consigna?' post-consigna':''}">
       <div class="post-hdr">
         ${avatarHTML(p.autor,38)}
-        <div><div class="post-nm">${ng(p.autor)}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?'<span class="post-efi">⏳ 24 h</span>':''}</div></div>
+        <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?'<span class="post-efi">⏳ 24 h</span>':''}</div></div>
         ${p.autor===miNombre?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
@@ -1740,8 +1770,11 @@ function escaparHTML(t){
 function abrirComposer(){
   postFotoURL=null;
   postEfimero=false;
+  postConsigna=false;
   const efi=document.getElementById('comp-efi-lbl');
   if(efi) efi.classList.remove('on');
+  const cons=document.getElementById('comp-cons-lbl');
+  if(cons) cons.classList.remove('on');
   document.getElementById('comp-inp').value='';
   document.getElementById('comp-zona').innerHTML='<div>📷 Agregar una foto (opcional)</div>';
   document.getElementById('post-file').value='';
@@ -1754,6 +1787,12 @@ function toggleEfimero(e){
   if(e) e.preventDefault();
   postEfimero=!postEfimero;
   document.getElementById('comp-efi-lbl').classList.toggle('on',postEfimero);
+}
+
+function toggleConsigna(e){
+  if(e) e.preventDefault();
+  postConsigna=!postConsigna;
+  document.getElementById('comp-cons-lbl').classList.toggle('on',postConsigna);
 }
 
 function previewPostFoto(e){
@@ -1777,9 +1816,12 @@ function publicarPost(){
   if(txt) post.texto=txt;
   if(postFotoURL) post.img=postFotoURL;
   if(postEfimero) post.vence=Date.now()+24*60*60*1000;
+  if(postConsigna) post.consigna=true;
   db.ref('posts').push(post);
-  notificar(miNombre+' subió algo al feed','📰');
+  if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯');
+  else notificar(miNombre+' subió algo al feed','📰');
   postFotoURL=null;
+  postConsigna=false;
   cerrarComposer();
 }
 
@@ -1828,10 +1870,10 @@ function renderPostDetalle(){
     cont.scrollTop=cont.scrollHeight;
     return;
   }
-  cont.innerHTML=`<div class="post" style="margin-bottom:10px">
+  cont.innerHTML=`<div class="post${p.consigna?' post-consigna':''}" style="margin-bottom:10px">
       <div class="post-hdr">
         ${avatarHTML(p.autor,38)}
-        <div><div class="post-nm">${ng(p.autor)}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
+        <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" onclick="abrirImgChat('${p.img}')">`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
@@ -2502,10 +2544,15 @@ function renderAlbumNovio(){
   const grid=document.getElementById('album-grid');if(!grid)return;
   POSICIONES.forEach((pos,i)=>{
     const cell=document.createElement('div');
-    cell.className='album-cell'+(fotos[i]?' comp':'');
-    if(fotos[i]){
-      cell.innerHTML=`<img src="${fotos[i]}"><div class="album-check">✓</div><div class="album-cell-lbl">${pos}</div>`;
-      cell.onclick=()=>abrirImgChat(fotos[i]); // ver en grande
+    const raw=fotos[i];
+    // Compat: fotos viejas son un string URL suelto; las nuevas son {url,autor}
+    const url=raw?(typeof raw==='string'?raw:raw.url):null;
+    const autor=raw&&typeof raw==='object'?raw.autor:null;
+    cell.className='album-cell'+(url?' comp':'');
+    if(url){
+      const puedeBorrar=autor===miNombre;
+      cell.innerHTML=`<img src="${url}"><div class="album-check">✓</div><div class="album-cell-lbl">${pos}</div>${puedeBorrar?`<button class="album-del" onclick="event.stopPropagation();eliminarFotoAlbum('${albumNovio}',${i})">✕</button>`:''}`;
+      cell.onclick=()=>abrirImgChat(url); // ver en grande
     } else {
       cell.innerHTML=`<div class="album-cell-lbl">${pos}</div>`;
       cell.onclick=()=>abrirUpload(albumNovio,i,pos);
@@ -2541,7 +2588,7 @@ function previewFoto(e){
 
 function confirmarFoto(){
   if(!upURL||upNovio===null||upPos===null)return;
-  db.ref('album/'+upNovio+'/'+upPos).set(upURL);
+  db.ref('album/'+upNovio+'/'+upPos).set({url:upURL,autor:miNombre});
   notificar(miNombre+' subió una figurita al álbum de '+upNovio,'📸');
   publicarNoticia('Novios Panini','📸',
     `${ng(miNombre)} pegó una figurita en el álbum de ${ng(upNovio)}: ${POSICIONES[upPos]||''}.`);
@@ -2563,6 +2610,16 @@ function confirmarFoto(){
         }
       });
     }
+  });
+}
+
+function eliminarFotoAlbum(novio,pos){
+  db.ref('album/'+novio+'/'+pos).once('value').then(snap=>{
+    const raw=snap.val();
+    const autor=raw&&typeof raw==='object'?raw.autor:null;
+    if(autor!==miNombre)return; // solo el que la subió puede borrarla
+    if(!confirm('¿Eliminar esta figurita?'))return;
+    db.ref('album/'+novio+'/'+pos).remove();
   });
 }
 
@@ -2826,14 +2883,17 @@ function renderPendientesTT(){
 function generarPregunta(mision){
   // Convertir la misión en una pregunta para el target
   if(mision.includes('eructo')) return '¿Te soplaron un eructo de cerca?';
-  if(mision.includes('cumpleaños')) return '¿Te cantaron el feliz cumpleaños?';
   if(mision.includes('abrazo')) return '¿Te dieron un abrazo diciéndote que estaban tristes?';
-  if(mision.includes('selfie')) return '¿Te sacaron una selfie sin que te dieras cuenta?';
   if(mision.includes('quiero')) return '¿Te hicieron decir "te quiero"?';
-  if(mision.includes('consejo')) return '¿Te pidieron un consejo de vida con seriedad?';
-  if(mision.includes('cante')||mision.includes('cantó')) return '¿Te cantaron algo?';
   if(mision.includes('comer')) return '¿Te dieron de comer algo con la mano?';
-  if(mision.includes('secreto')) return '¿Te hicieron contar un secreto?';
+  if(mision.includes('cinco')) return '¿Te chocaron los cinco varias veces con excusas raras?';
+  if(mision.includes('trago')) return '¿Te invitaron un trago o comida solo con miradas y gestos?';
+  if(mision.includes('palabra nueva')) return '¿Usaste una palabra inventada sin darte cuenta?';
+  if(mision.includes('mimo')) return '¿Te hicieron un mimo en el pelo o una caricia en la espalda?';
+  if(mision.includes('brindis')) return '¿Hiciste un brindis ridículo en voz alta?';
+  if(mision.includes('fobia')) return '¿Contaste tu mayor miedo o fobia?';
+  if(mision.includes('puntúe')) return '¿Te pusieron puntaje en algo absurdo?';
+  if(mision.includes('ojo')) return '¿Te soplaron el ojo para "sacarte algo"?';
   return '¿Cumplieron la misión contigo?';
 }
 
