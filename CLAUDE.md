@@ -12,6 +12,12 @@ Pueblo del Medio", que ridiculiza por igual a izquierda y derecha.
 
 **Hablame siempre en español rioplatense.**
 
+**Nunca uses ni toques la cuenta de Global-e para nada de este proyecto** (git, deploys,
+credenciales, config). Es la cuenta laboral del usuario y no tiene que mezclarse con este
+proyecto personal. Git de este repo ya está configurado localmente con su mail personal
+(`javiervirkel@gmail.com`); si hace falta configurar algo (git, Netlify, Firebase, etc.),
+usar siempre cuenta/mail personal.
+
 ---
 
 ## Cómo está armado
