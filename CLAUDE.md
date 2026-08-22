@@ -198,16 +198,8 @@ y poner los puntos en cero. El **modo tablet** también entra con esa clave.
 ## PENDIENTES
 
 ### Listo para programar
-- **Banco de misiones del TA TE TI**: cargar las 12 que están en `PENDIENTES.md` y hacer que
-  el juego sortee 9 al azar por partida (hoy tiene 9 fijas viejas).
-- **Novios Panini — eliminar foto propia**: quien subió una figurita tiene que poder
-  eliminarla. Si la subió otro jugador, solo la puede ver — no eliminarla.
-- **Consignas en el feed**: nuevo tipo de post, "consigna". Se arma parecido a un post
-  normal, pero al publicarla le llega una notificación a todos ("fulano tiró una consigna")
-  y abre su propio hilo de comentarios, igual que cualquier post. La app tiene que incitar a
-  participar en dos momentos: (a) cuando alguien va a armar un post nuevo, ofrecerle/incitarlo
-  a que sea una consigna en vez de un post común; (b) cuando ya hay una consigna activa,
-  incitar a que el resto la siga/responda.
+_(vacío por ahora — lo último programado: banco de misiones TA TE TI ya completo,
+eliminar foto propia en Novios Panini, y consignas en el feed)_
 
 ### Frenado, lo estoy pensando
 - **Cuestionario del login**: 3 preguntas de 2 opciones al elegir tu nombre, que te clasifican
