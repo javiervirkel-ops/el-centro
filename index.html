@@ -127,6 +127,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .badge-on{background:var(--az);color:#fff}
 .badge-off{background:#E2EAF7;color:var(--gr)}
 .back-btn{background:none;border:none;color:var(--az);font-size:13px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;margin-bottom:14px}
+.back-fab{width:38px;height:38px;border-radius:50%;background:var(--sf);border:1.5px solid var(--bd);color:var(--az);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px}
+.back-fab:active{background:var(--bd)}
 
 /* TABLA */
 .tabla-row{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:8px;border:1.5px solid var(--bd);display:flex;align-items:center;gap:10px}
@@ -797,7 +799,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- POST DETALLE -->
 <div id="scr-post" class="scr" style="padding-bottom:8px">
-  <button class="back-btn" onclick="goTab('inicio')">← Feed</button>
+  <button class="back-fab" onclick="goTab('inicio')" aria-label="Volver">←</button>
   <div class="pd-wrap">
     <div class="pd-scroll" id="pd-scroll"></div>
     <div class="chat-bar">
@@ -1511,7 +1513,11 @@ function goSub(n){
   const t=document.getElementById('scr-'+n);
   if(t) t.classList.add('on');
   if(n==='chat'){renderChat();marcarChatLeido();}
-  if(n==='post') renderPostDetalle();
+  if(n==='post'){
+    renderPostDetalle();
+    const s=document.getElementById('pd-scroll');
+    if(s) s.scrollTop=0; // arrancar mostrando la foto/texto, no el fondo del hilo
+  }
 }
 
 function goJuego(j){
@@ -1867,7 +1873,6 @@ function renderPostDetalle(){
         </div>
         <div class="not-txt">${escaparHTML(p.texto||'')}</div>
       </div>`+comentariosHTML(p);
-    cont.scrollTop=cont.scrollHeight;
     return;
   }
   cont.innerHTML=`<div class="post${p.consigna?' post-consigna':''}" style="margin-bottom:10px">
@@ -1878,7 +1883,6 @@ function renderPostDetalle(){
       ${p.img?`<img class="post-img" src="${p.img}" onclick="abrirImgChat('${p.img}')">`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
     </div>`+comentariosHTML(p);
-  cont.scrollTop=cont.scrollHeight;
 }
 
 function enviarComentario(){
@@ -1978,12 +1982,14 @@ function edCoords(e){
 }
 
 function edHit(p){
+  const cv=document.getElementById('ed-canvas');
+  const tol=cv?cv.width*0.05:20; // margen en px de canvas: el dedo es mucho más ancho que 20px reales
   for(let i=ed.capas.length-1;i>=0;i--){
     const cp=ed.capas[i];
     const a=-cp.rot*Math.PI/180;
     const dx=p.x-cp.x, dy=p.y-cp.y;
     const lx=dx*Math.cos(a)-dy*Math.sin(a), ly=dx*Math.sin(a)+dy*Math.cos(a);
-    const mw=(cp._w||60)/2+20, mh=(cp._h||60)/2+20;
+    const mw=(cp._w||60)/2+tol, mh=(cp._h||60)/2+tol;
     if(Math.abs(lx)<mw&&Math.abs(ly)<mh) return cp;
   }
   return null;
@@ -2065,9 +2071,17 @@ function edInit(){
 
   const down=e=>{
     if(e.touches&&e.touches.length===2){
-      if(!ed.sel)return;
       e.preventDefault();
-      ed.pinch={d:edDist(e.touches),a:edAng(e.touches),escala:ed.sel.escala,rot:ed.sel.rot};
+      if(!ed.sel){
+        // Al pellizcar, los dedos suelen caer a los costados del emoji y no encima:
+        // si el primer dedo ya lo deseleccionó, probar de nuevo con el punto medio.
+        const mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+        const my=(e.touches[0].clientY+e.touches[1].clientY)/2;
+        edSeleccionar(edHit(edCoords({touches:[{clientX:mx,clientY:my}]})));
+      }
+      if(!ed.sel)return;
+      ed.drag=null;
+      ed.pinch={d:Math.max(edDist(e.touches),1),a:edAng(e.touches),escala:ed.sel.escala,rot:ed.sel.rot};
       return;
     }
     const p=edCoords(e);
