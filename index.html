@@ -48,13 +48,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .ov.on{display:block}
 
 /* TABS */
-.tabs{display:flex;background:#fff;border-top:2px solid var(--bd);position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;z-index:99;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 12px rgba(13,43,94,.08)}
-.tab{flex:1;padding:9px 4px;text-align:center;font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gr);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tabs{display:flex;background:#fff;border-top:2px solid var(--bd);position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;z-index:99;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 12px rgba(13,43,94,.08)}
+.tab{flex:1;padding:14px 4px 10px;text-align:center;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gr);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab.on{color:var(--az);border-bottom-color:var(--az)}
-.tab i{display:flex;align-items:center;justify-content:center;margin-bottom:3px;font-style:normal}
+.tab i{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:3px;font-style:normal}
+.tab .chat-badge{position:absolute;top:-5px;right:-9px;min-width:15px;height:15px;font-size:9px;padding:0 4px}
 
 /* SCREENS */
-.scr{display:none;padding:16px 16px calc(90px + env(safe-area-inset-bottom,0px))}
+.scr{display:none;padding:16px 16px calc(112px + env(safe-area-inset-bottom,0px))}
 .scr.on{display:block}
 
 /* UTILS */
@@ -414,8 +415,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 /* FEED */
 .feed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.feed-chat-btn{background:var(--sf);border:1.5px solid var(--bd);color:var(--az);border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
-.feed-chat-btn{position:relative;display:inline-flex;align-items:center;gap:7px}
 .chat-badge{background:var(--ro);color:#fff;border-radius:20px;min-width:19px;height:19px;padding:0 6px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;animation:badgeIn .3s ease}
 @keyframes badgeIn{from{transform:scale(0)}to{transform:scale(1)}}
 .composer{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--bd);border-radius:26px;padding:8px 8px 8px 10px;margin-bottom:18px;cursor:pointer}
@@ -565,11 +564,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- TABS -->
 <nav class="tabs" id="tabs" style="display:none">
-  <div class="tab on" onclick="goTab('inicio')"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></i>Inicio</div>
-  <div class="tab" onclick="goTab('juegos')"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg></i>Juegos</div>
-  <div class="tab" onclick="goTab('tabla')"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></i>Tabla</div>
-  <div class="tab" onclick="goTab('calendario')"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></i>Calendario</div>
-  <div class="tab" onclick="goTab('sorteo')"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></i>Sortear</div>
+  <div class="tab on" onclick="goTab('inicio')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></i>Inicio</div>
+  <div class="tab" onclick="goTab('juegos')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg></i>Juegos</div>
+  <div class="tab" onclick="goTab('chat')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span class="chat-badge" id="chat-badge" style="display:none">0</span></i>Chat</div>
+  <div class="tab" onclick="goTab('calendario')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></i>Calendario</div>
+  <div class="tab" onclick="goTab('sorteo')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></i>Sortear</div>
 </nav>
 
 <!-- ENROL -->
@@ -587,7 +586,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div id="scr-inicio" class="scr">
   <div class="feed-top">
     <span class="lbl" style="margin:0">El Feed</span>
-    <button class="feed-chat-btn" onclick="goSub('chat')">💬 Chat del grupo<span class="chat-badge" id="chat-badge" style="display:none">0</span></button>
   </div>
 
   <div class="cons-banner" id="cons-banner" style="display:none"></div>
@@ -714,6 +712,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="juego-info"><h3>Truco</h3><p>Contador de fósforos</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
+  <div class="juego-card" onclick="goJuego('tabla')">
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></div>
+    <div class="juego-info"><h3>Tabla de posiciones</h3><p>Puntos de todos los juegos</p></div>
+  </div>
 </div>
 
 <!-- TRUCO -->
@@ -780,6 +782,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- TABLA -->
 <div id="scr-tabla" class="scr">
+  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
   <span class="lbl" style="margin-top:0">Tabla de Posiciones</span>
   <div class="tabla-info">
     <strong>Cómo se suman puntos:</strong><br>
@@ -1551,13 +1554,14 @@ function mostrarToast(texto,emoji){
 // TABS
 // ════════════════════════════════════════
 function goTab(n){
+  document.getElementById('tabs').style.display='flex';
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('scr-'+n).classList.add('on');
-  const idx=['inicio','juegos','tabla','calendario','sorteo'].indexOf(n);
+  const idx=['inicio','juegos','chat','calendario','sorteo'].indexOf(n);
   if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('on');
   if(n==='inicio') renderFeed();
-  if(n==='tabla') renderTabla();
+  if(n==='chat'){renderChat();marcarChatLeido();}
   if(n==='sorteo'){renderSorteoChips();if(camasPool!==null||document.getElementById('sm-camas').classList.contains('on'))renderCamas();}
 }
 
@@ -1566,8 +1570,8 @@ function goSub(n){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   const t=document.getElementById('scr-'+n);
   if(t) t.classList.add('on');
-  if(n==='chat'){renderChat();marcarChatLeido();}
   if(n==='post'){
+    document.getElementById('tabs').style.display='none'; // que no tape la barra de comentarios
     quitarComFoto();
     const inp=document.getElementById('com-inp');if(inp)inp.value='';
     renderPostDetalle();
@@ -1586,6 +1590,7 @@ function goJuego(j){
   if(j==='album'){renderAlbumTabs();renderAlbumNovio();}
   if(j==='tt') renderTT();
   if(j==='truco') renderTruco();
+  if(j==='tabla') renderTabla();
 }
 
 // ════════════════════════════════════════
