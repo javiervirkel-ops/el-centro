@@ -12,6 +12,7 @@ setGlobalOptions({ maxInstances: 5 });
 exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   const data = event.data.val();
   if (!data) return;
+  if (data.push === false) return; // marcado explicitamente para no mandar push (solo toast en pantalla)
 
   const texto = data.texto || "";
   const emoji = data.emoji || "📣";

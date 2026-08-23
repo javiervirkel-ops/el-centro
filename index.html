@@ -1494,8 +1494,8 @@ function iniciarApp(){
 // NOTIFICACIONES
 // ════════════════════════════════════════
 const appStartTs=Date.now();
-function notificar(texto,emoji){
-  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre});
+function notificar(texto,emoji,push){
+  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:push!==false});
 }
 // ── Notificaciones del sistema + badge en el ícono ──
 function notifsActivas(){return localStorage.getItem('ec_notifs')!=='off';}
@@ -3390,7 +3390,7 @@ function sortearCama(){
     camasAsignadas.push({cama:numCama,nombre:ganador});
     rifaCorriendo=false;
     renderCamas();
-    notificar(ng(ganador)+' se quedó con la cama '+numCama,'🛏️');
+    notificar(ng(ganador)+' se quedó con la cama '+numCama,'🛏️',false);
     // Cuando ya no queda nadie en el gorro, se publica el reparto completo
     if(!camasPool.length){
       const detalle=camasAsignadas.map(x=>'Cama '+x.cama+': '+ng(x.nombre)).join('\n');
