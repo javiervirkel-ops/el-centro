@@ -14,7 +14,7 @@ const GRUPO_PASSCODE = defineSecret("GRUPO_PASSCODE");
 // Verifica la contraseña del grupo (guardada como secreto, nunca en el codigo) y,
 // si es correcta, da un token de acceso a la base de datos. La app queda logueada
 // sola despues de la primera vez (Firebase guarda la sesion).
-exports.verificarAcceso = onCall({ secrets: [GRUPO_PASSCODE] }, async (request) => {
+exports.verificarAcceso = onCall({ secrets: [GRUPO_PASSCODE], invoker: "public" }, async (request) => {
   const clave = request.data && request.data.clave;
   if (clave !== GRUPO_PASSCODE.value()) {
     throw new HttpsError("permission-denied", "Contraseña incorrecta");
