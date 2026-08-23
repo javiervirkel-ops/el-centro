@@ -43,9 +43,18 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
     },
   };
 
+  console.log(`enviarPush: mandando a ${tokens.length} token(s): ${tokens.map(t=>t.nombre).join(', ')}`);
+
   const resp = await admin.messaging().sendEachForMulticast({
     tokens: tokens.map((t) => t.token),
     ...mensaje,
+  });
+
+  console.log(`enviarPush: exito=${resp.successCount} fallo=${resp.failureCount}`);
+  resp.responses.forEach((r, i) => {
+    if (!r.success) {
+      console.log(`enviarPush: fallo para ${tokens[i].nombre} - ${r.error && r.error.code} - ${r.error && r.error.message}`);
+    }
   });
 
   // Limpiar tokens invalidos/vencidos para no acumular basura ni gastar de mas
