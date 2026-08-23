@@ -61,7 +61,8 @@ Proyecto `mykonos-pibes---el-centro`, base
 Son divs `.scr`, y se muestra una sola con la clase `.on`. La navegación pasa por `goTab()`
 (las 5 pestañas), `goJuego()` (los juegos) y `goSub()` (chat y detalle de post).
 
-Pestañas: **Inicio (feed) · Juegos · Tabla · Calendario · Sortear**.
+Pestañas: **Inicio (feed) · Juegos · Chat · Calendario · Sortear**. Tabla de posiciones dejó de
+ser pestaña propia y ahora es una card más adentro de Juegos (con su propio botón de volver).
 
 ---
 
@@ -252,18 +253,33 @@ Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
    - Learnings: https://app.notion.com/p/Learnings-3c59da1bf7398175ab7df118fd2b033c
    - Bitácora: https://app.notion.com/p/Bit-cora-3c59da1bf739814f95d4e6c13e6030f6
 
-   **Ojo**: estas páginas son privadas — Claude Code no tiene forma de leerlas solo. Ya se
-   probó conectar una integración de Notion desde claude.ai (web) y **no sirve**: esa conexión
-   no llega a las sesiones de Claude Code, son entornos separados. Hasta que se encuentre otra
-   forma, la opción que funciona es que el usuario haga "Share to web" en las 3 páginas (quedan
-   accesibles por link, sin aparecer en buscadores) o pegue el contenido directo en el chat al
-   arrancar la sesión.
+   **Cómo leerlas**: el conector/MCP de Notion no funciona desde Claude Code (probado: una
+   integración conectada desde claude.ai web no llega a esta sesión, son entornos separados).
+   Lo que sí funciona es **curl directo a la API de Notion**, con un token de integración
+   interna guardado en `.notion_token` (en la raíz del proyecto, gitignoreado — **nunca**
+   pegar el token adentro de este archivo ni de ningún archivo que se commitee). Formato:
+
+   ```bash
+   TOKEN=$(cat .notion_token)
+   curl -s "https://api.notion.com/v1/blocks/{page_id}/children?page_size=100" \
+     -H "Authorization: Bearer $TOKEN" -H "Notion-Version: 2022-06-28"
+   ```
+
+   El `page_id` es el código al final de la URL de cada página (con o sin guiones, la API
+   acepta ambos). Si un `page_id` da 404 "object_not_found", significa que esa página todavía
+   no tiene la conexión "EL CENTRO" agregada (Notion: página → "···" → Conexiones → Añadir
+   conexión → EL CENTRO) — pedirle al usuario que la agregue.
+
+   Para escribir (agregar contenido a Bitácora/Learnings/Plataformas y servicios), es
+   `PATCH /v1/blocks/{page_id}/children` con un body JSON de `children` (mismo header de auth).
+   Todavía no se probó escribir, solo leer — probar con cuidado la primera vez.
 2. Revisar el Backlog (Kanban) antes de arrancar a tocar código:
-   https://app.notion.com/3c59da1bf73981458186e7c280048eee — si algo está "En progreso"
-   asignado a Ale, **no tocarlo**.
-3. Trabajar sobre la rama **`dev`**, nunca directo sobre `main` — pero esto recién aplica
-   **cuando la rama `dev` ya exista**. Si todavía no existe, está bien seguir en `main`
-   (así se subió el proyecto la primera vez, el 2026-08-23).
+   https://app.notion.com/3c59da1bf73981458186e7c280048eee (id `3c59da1bf73981458186e7c280048eee`,
+   se consulta con `POST /v1/databases/{id}/query`) — si algo está "En progreso" asignado a
+   Ale, **no tocarlo**.
+3. Trabajar sobre la rama **`dev`**, nunca directo sobre `main`. La rama `dev` ya existe
+   (la creó Ale el 2026-08-23) — el proyecto se subió la primera vez a `main` porque `dev`
+   todavía no existía en ese momento, pero de acá en más siempre es `dev`.
 4. `git pull` antes de empezar a trabajar.
 
 ### Al terminar cada sesión
@@ -273,7 +289,3 @@ Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
 7. Si se usó o cambió algo de un servicio externo (hosting, dominio, API, etc.) → anotarlo en
    **Plataformas y servicios**.
 8. `git push` y avisarle a Ale **"listo, tu turno"** antes de cerrar.
-
-**Ojo**: los pasos 5-7 son para escribir en Notion, y por ahora Claude Code tampoco puede
-escribir ahí solo (mismo problema de acceso que arriba). Hasta que se resuelva, avisarle al
-usuario al final de la sesión qué texto convendría agregar a cada página, para que lo pegue él.
