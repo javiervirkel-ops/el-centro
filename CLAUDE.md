@@ -238,3 +238,36 @@ eliminar foto propia en Novios Panini, y consignas en el feed)_
 - Cuando te digo una idea, **anotala; no la programes** hasta que te diga
   "programá lo pendiente".
 - Verificá el archivo antes de dármelo. Nada de entregar y debuggear en loop.
+
+---
+
+## Flujo con Notion y Ale
+
+El proyecto ahora se coordina con **Ale**, otro colaborador, vía tres páginas de Notion y un
+Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
+
+### Al empezar cada sesión
+1. Leer estas tres páginas de Notion antes de tocar nada:
+   - Plataformas y servicios: https://app.notion.com/p/Plataformas-y-servicios-3c59da1bf7398102943cd5c0385ab2c8
+   - Learnings: https://app.notion.com/p/Learnings-3c59da1bf7398175ab7df118fd2b033c
+   - Bitácora: https://app.notion.com/p/Bit-cora-3c59da1bf739814f95d4e6c13e6030f6
+
+   **Ojo**: estas páginas son privadas — Claude Code no tiene forma de leerlas solo (no hay
+   integración de Notion conectada). O bien las compartís vos pegando el contenido en el chat
+   al arrancar, o hay que conectar un MCP de Notion, o hacerlas públicas ("Share to web") para
+   que se puedan leer por URL. Mientras no se resuelva esto, avisarle al usuario que hay que
+   pegar el contenido a mano.
+2. Revisar el Backlog (Kanban) antes de arrancar a tocar código:
+   https://app.notion.com/3c59da1bf73981458186e7c280048eee — si algo está "En progreso"
+   asignado a Ale, **no tocarlo**.
+3. Trabajar sobre la rama **`dev`**, nunca directo sobre `main` — pero esto recién aplica
+   **cuando la rama `dev` ya exista**. Si todavía no existe, está bien seguir en `main`
+   (así se subió el proyecto la primera vez, el 2026-08-23).
+4. `git pull` antes de empezar a trabajar.
+
+### Al terminar cada sesión
+5. Si algo se rompió y se arregló, se tomó una decisión de diseño importante, o se aprendió
+   algo útil sobre una herramienta/servicio → agregar 2-3 líneas simples en **Learnings**.
+6. Si se usó o cambió algo de un servicio externo (hosting, dominio, API, etc.) → anotarlo en
+   **Plataformas y servicios**.
+7. `git push` y avisarle a Ale **"listo, tu turno"** antes de cerrar.
