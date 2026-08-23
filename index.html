@@ -1717,6 +1717,7 @@ function enviarMsg(){
   const inp=document.getElementById('chat-inp');
   const txt=inp.value.trim();if(!txt||!miNombre)return;
   db.ref('chat').push({nombre:miNombre,texto:txt,hora:hora(),ts:Date.now(),tipo:'texto'});
+  notificar(miNombre+': '+txt,'💬');
   inp.value='';
 }
 function abrirImgChat(src){
