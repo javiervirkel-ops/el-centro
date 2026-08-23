@@ -252,11 +252,12 @@ Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
    - Learnings: https://app.notion.com/p/Learnings-3c59da1bf7398175ab7df118fd2b033c
    - Bitácora: https://app.notion.com/p/Bit-cora-3c59da1bf739814f95d4e6c13e6030f6
 
-   **Ojo**: estas páginas son privadas — Claude Code no tiene forma de leerlas solo (no hay
-   integración de Notion conectada). O bien las compartís vos pegando el contenido en el chat
-   al arrancar, o hay que conectar un MCP de Notion, o hacerlas públicas ("Share to web") para
-   que se puedan leer por URL. Mientras no se resuelva esto, avisarle al usuario que hay que
-   pegar el contenido a mano.
+   **Ojo**: estas páginas son privadas — Claude Code no tiene forma de leerlas solo. Ya se
+   probó conectar una integración de Notion desde claude.ai (web) y **no sirve**: esa conexión
+   no llega a las sesiones de Claude Code, son entornos separados. Hasta que se encuentre otra
+   forma, la opción que funciona es que el usuario haga "Share to web" en las 3 páginas (quedan
+   accesibles por link, sin aparecer en buscadores) o pegue el contenido directo en el chat al
+   arrancar la sesión.
 2. Revisar el Backlog (Kanban) antes de arrancar a tocar código:
    https://app.notion.com/3c59da1bf73981458186e7c280048eee — si algo está "En progreso"
    asignado a Ale, **no tocarlo**.
@@ -266,8 +267,13 @@ Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
 4. `git pull` antes de empezar a trabajar.
 
 ### Al terminar cada sesión
-5. Si algo se rompió y se arregló, se tomó una decisión de diseño importante, o se aprendió
+5. Agregar una entrada en **Bitácora** con qué se hizo y qué quedó pendiente.
+6. Si algo se rompió y se arregló, se tomó una decisión de diseño importante, o se aprendió
    algo útil sobre una herramienta/servicio → agregar 2-3 líneas simples en **Learnings**.
-6. Si se usó o cambió algo de un servicio externo (hosting, dominio, API, etc.) → anotarlo en
+7. Si se usó o cambió algo de un servicio externo (hosting, dominio, API, etc.) → anotarlo en
    **Plataformas y servicios**.
-7. `git push` y avisarle a Ale **"listo, tu turno"** antes de cerrar.
+8. `git push` y avisarle a Ale **"listo, tu turno"** antes de cerrar.
+
+**Ojo**: los pasos 5-7 son para escribir en Notion, y por ahora Claude Code tampoco puede
+escribir ahí solo (mismo problema de acceso que arriba). Hasta que se resuelva, avisarle al
+usuario al final de la sesión qué texto convendría agregar a cada página, para que lo pegue él.
