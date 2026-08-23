@@ -1408,18 +1408,15 @@ function iniciarApp(){
     if(document.getElementById('scr-chat').classList.contains('on')) marcarChatLeido();
     else {
       actualizarBadgeChat();
-      const ult=chatMsgs[chatMsgs.length-1];
-      if(ult && (ult.ts||0)>appStartTs && ult.nombre!==miNombre)
-        avisoSistema(ult.nombre+': '+(ult.texto||'mandó una foto'),'💬');
     }
   });
 
-  // Notificaciones en tiempo real (solo las nuevas)
+  // Notificaciones en tiempo real (solo las nuevas) — el aviso del sistema/push real
+  // lo maneja el service worker (firebase-messaging-sw.js), acá solo el toast en pantalla
   db.ref('notif').limitToLast(1).on('child_added',snap=>{
     const n=snap.val();
     if(n&&n.ts>appStartTs&&n.de!==miNombre){
       mostrarToast(n.texto,n.emoji);
-      avisoSistema(n.texto,n.emoji);
     }
   });
 
@@ -1433,14 +1430,12 @@ function iniciarApp(){
       if(antes[id]||!p||(p.ts||0)<=appStartTs)return;
       if(p.tipo==='noticia')return;               // las noticias ya avisan por su lado
       if(p.autor===miNombre)return;
-      avisoSistema(ng(p.autor)+' subió algo al feed','📰');
     });
     // Comentario nuevo en un post mío
     const cuenta=o=>{const cm=o&&o.coms;return !cm?0:(Array.isArray(cm)?cm.filter(Boolean).length:Object.keys(cm).length);};
     Object.entries(posts).forEach(([id,p])=>{
       if(!p||p.autor!==miNombre)return;
       const nuevo=cuenta(p), viejo=cuenta(antes[id]);
-      if(antes[id]&&nuevo>viejo) avisoSistema('Comentaron tu post','💬');
     });
     if(document.getElementById('scr-inicio').classList.contains('on')) renderFeed();
     if(document.getElementById('scr-post').classList.contains('on')) renderPostDetalle();
@@ -1554,16 +1549,9 @@ function limpiarBadge(){
   try{ if(navigator.clearAppBadge) navigator.clearAppBadge(); }catch(e){}
 }
 
-// Aviso del sistema cuando la app no está en primer plano
-function avisoSistema(texto,emoji){
-  if(!notifsActivas())return;
-  sumarBadge();
-  try{
-    if(!('Notification' in window) || Notification.permission!=='granted') return;
-    if(document.visibilityState==='visible') return; // en pantalla alcanza con el toast
-    new Notification('El Centro', {body:(emoji||'📣')+' '+texto, icon:'icon-192.png', tag:'el-centro'});
-  }catch(e){}
-}
+// El aviso del sistema (notificacion real) ahora lo maneja el service worker via push (FCM).
+// Antes existia avisoSistema() para simularlo mientras la app seguia abierta en segundo plano,
+// pero duplicaba el aviso junto con el push real - se saco.
 
 function mostrarToast(texto,emoji){
   const cont=document.getElementById('toasts');if(!cont)return;
