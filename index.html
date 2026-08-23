@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap');
 :root{
@@ -1390,6 +1391,9 @@ function iniciarApp(){
   // Registrar jugador
   if(!esTablet) db.ref('jugadores/'+miNombre).set({nombre:miNombre,online:true});
 
+  // Si ya habia dado permiso de notificaciones antes, renovar el token de push
+  if(notifsActivas() && 'Notification' in window && Notification.permission==='granted') registrarPush();
+
   // ── LISTENERS EN TIEMPO REAL ──
   db.ref('jugadores').on('value',snap=>{
     jugadores=snap.val()||{};
@@ -1500,6 +1504,7 @@ function toggleNotifs(){
   cerrarMenu();
   if(notifsActivas()){
     localStorage.setItem('ec_notifs','off');
+    if(miNombre) db.ref('fcmTokens/'+miNombre).remove();
     alert('Notificaciones silenciadas');
   } else {
     localStorage.setItem('ec_notifs','on');
@@ -1514,9 +1519,29 @@ function actualizarItemNotifs(){
   if(el) el.innerHTML=notifsActivas()?ico('bell-off',15)+'Silenciar notificaciones':ico('bell',15)+'Activar notificaciones';
 }
 
+// ── Push notifications reales (Firebase Cloud Messaging) ──
+// OJO: hay que reemplazar FCM_VAPID_KEY por la clave real (Firebase console → Configuración del proyecto → Cloud Messaging → Certificados push web → Generar par de claves)
+const FCM_VAPID_KEY = 'FCM_VAPID_KEY_PENDIENTE';
+
+async function registrarPush(){
+  try{
+    if(!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    if(FCM_VAPID_KEY==='FCM_VAPID_KEY_PENDIENTE') return; // todavia no configurada
+    if(!miNombre) return;
+    const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({vapidKey:FCM_VAPID_KEY, serviceWorkerRegistration:reg});
+    if(token) db.ref('fcmTokens/'+miNombre).set(token);
+  }catch(e){console.warn('No se pudo registrar push:',e);}
+}
+
 function pedirPermisoNotifs(){
   try{
-    if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+    if('Notification' in window && Notification.permission==='default'){
+      Notification.requestPermission().then(perm=>{ if(perm==='granted') registrarPush(); });
+    } else if('Notification' in window && Notification.permission==='granted'){
+      registrarPush();
+    }
   }catch(e){}
 }
 
