@@ -22,4 +22,7 @@ messaging.onBackgroundMessage((payload) => {
     icon: 'icon-192.png',
     tag: 'el-centro'
   });
+  try{
+    if(self.setAppBadge) self.setAppBadge(1);
+  }catch(e){}
 });
