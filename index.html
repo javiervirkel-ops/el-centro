@@ -12,6 +12,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap');
 :root{
@@ -572,8 +574,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="tab" onclick="goTab('sorteo')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></i>Sortear</div>
 </nav>
 
+<!-- PASSCODE -->
+<div id="scr-passcode" class="scr on">
+  <div class="enrol-emo">🔒</div>
+  <div class="enrol-tit">EL CENTRO</div>
+  <div class="enrol-sub">Contraseña del grupo</div>
+  <div class="div"></div>
+  <input class="inp" id="pc-inp" type="password" placeholder="Contraseña..." style="margin-bottom:12px;text-align:center" onkeydown="if(event.key==='Enter')verificarPasscode()">
+  <button class="btn btn-az" onclick="verificarPasscode()">Entrar</button>
+  <div id="pc-err" style="color:var(--ro);font-size:12px;margin-top:8px;text-align:center;display:none">Contraseña incorrecta</div>
+</div>
+
 <!-- ENROL -->
-<div id="scr-enrol" class="scr on">
+<div id="scr-enrol" class="scr">
   <div class="enrol-emo">🏛️</div>
   <div class="enrol-tit">BIENVENIDO</div>
   <div class="enrol-sub">¿Quién sos?</div>
@@ -1194,6 +1207,7 @@ firebase.initializeApp({
   appId:"1:321874389654:web:d44c90dabbbab5adb570b7"
 });
 const db = firebase.database();
+const functions = firebase.functions();
 
 // ════════════════════════════════════════
 // CONSTANTES
@@ -1316,7 +1330,30 @@ const colorFor=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%C
 // ════════════════════════════════════════
 // ARRANQUE
 // ════════════════════════════════════════
-window.onload=()=>{
+// La app necesita estar logueada (con la contraseña del grupo) antes de tocar cualquier dato.
+// Firebase guarda la sesión sola, así que esto solo pide la contraseña la primera vez.
+firebase.auth().onAuthStateChanged(user=>{
+  if(user) arrancarApp();
+  else document.getElementById('scr-passcode').classList.add('on');
+});
+
+function verificarPasscode(){
+  const clave=document.getElementById('pc-inp').value;
+  if(!clave)return;
+  const err=document.getElementById('pc-err');
+  err.style.display='none';
+  functions.httpsCallable('verificarAcceso')({clave}).then(res=>{
+    return firebase.auth().signInWithCustomToken(res.data.token);
+  }).then(()=>{
+    document.getElementById('scr-passcode').classList.remove('on');
+  }).catch(()=>{
+    err.style.display='block';
+  });
+}
+
+function arrancarApp(){
+  document.getElementById('scr-passcode').classList.remove('on');
+  document.getElementById('scr-enrol').classList.add('on');
   edInit();
   setInterval(limpiarVencidos,5*60*1000);
   pedirPermisoNotifs();
@@ -1327,7 +1364,7 @@ window.onload=()=>{
   const n=localStorage.getItem('ec_nombre');
   const t=localStorage.getItem('ec_tablet')==='true';
   if(n){miNombre=n;esTablet=t;iniciarApp();}
-};
+}
 
 function renderChips(){
   document.getElementById('chips').innerHTML=

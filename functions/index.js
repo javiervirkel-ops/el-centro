@@ -1,11 +1,27 @@
 const { onValueCreated } = require("firebase-functions/v2/database");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
+const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
 
 // Limite de gasto: mantener todo en la region mas barata / default y sin memoria extra
 setGlobalOptions({ maxInstances: 5 });
+
+const GRUPO_PASSCODE = defineSecret("GRUPO_PASSCODE");
+
+// Verifica la contraseña del grupo (guardada como secreto, nunca en el codigo) y,
+// si es correcta, da un token de acceso a la base de datos. La app queda logueada
+// sola despues de la primera vez (Firebase guarda la sesion).
+exports.verificarAcceso = onCall({ secrets: [GRUPO_PASSCODE] }, async (request) => {
+  const clave = request.data && request.data.clave;
+  if (clave !== GRUPO_PASSCODE.value()) {
+    throw new HttpsError("permission-denied", "Contraseña incorrecta");
+  }
+  const token = await admin.auth().createCustomToken("grupo-el-centro");
+  return { token };
+});
 
 // Se dispara cada vez que se crea un aviso nuevo en /notif
 // (lo mismo que ya usa la app para el toast/badge en primer plano)
