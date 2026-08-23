@@ -1521,12 +1521,11 @@ function actualizarItemNotifs(){
 
 // ── Push notifications reales (Firebase Cloud Messaging) ──
 // OJO: hay que reemplazar FCM_VAPID_KEY por la clave real (Firebase console → Configuración del proyecto → Cloud Messaging → Certificados push web → Generar par de claves)
-const FCM_VAPID_KEY = 'FCM_VAPID_KEY_PENDIENTE';
+const FCM_VAPID_KEY = 'BGs4V38p28CWbTa44sV7UR2tjILV97qlRBkmI_W0oryOPeSyht2i9Xa0W3va6WAQmowEb7-h_JnCM5MOTK86kk8';
 
 async function registrarPush(){
   try{
     if(!('serviceWorker' in navigator) || !('Notification' in window)) return;
-    if(FCM_VAPID_KEY==='FCM_VAPID_KEY_PENDIENTE') return; // todavia no configurada
     if(!miNombre) return;
     const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
     const messaging = firebase.messaging();
