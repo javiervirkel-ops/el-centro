@@ -272,7 +272,8 @@ Kanban. Repo en GitHub (privado): `javiervirkel-ops/el-centro`.
 
    Para escribir (agregar contenido a Bitácora/Learnings/Plataformas y servicios), es
    `PATCH /v1/blocks/{page_id}/children` con un body JSON de `children` (mismo header de auth).
-   Todavía no se probó escribir, solo leer — probar con cuidado la primera vez.
+   Ya probado y funcionando (2026-08-23): usar bloques `bulleted_list_item` o `heading_2/3`
+   simples, con `rich_text: [{type:"text", text:{content:"..."}}]`.
 2. Revisar el Backlog (Kanban) antes de arrancar a tocar código:
    https://app.notion.com/3c59da1bf73981458186e7c280048eee (id `3c59da1bf73981458186e7c280048eee`,
    se consulta con `POST /v1/databases/{id}/query`) — si algo está "En progreso" asignado a
