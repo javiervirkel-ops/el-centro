@@ -31,15 +31,12 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   }
   if (tokens.length === 0) return;
 
+  // Se manda SOLO data (sin bloque "notification") para que el navegador no la muestre solo
+  // y quede una unica via de aviso: onBackgroundMessage en el service worker.
   const mensaje = {
-    notification: {
-      title: "El Centro",
-      body: `${emoji} ${texto}`,
-    },
-    webpush: {
-      notification: {
-        icon: "/icon-192.png",
-      },
+    data: {
+      titulo: "El Centro",
+      texto: `${emoji} ${texto}`,
     },
   };
 

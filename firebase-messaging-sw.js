@@ -14,9 +14,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Se dispara cuando llega una notificación y la app está cerrada o en segundo plano
+// El mensaje viene solo con "data" (sin "notification") para tener una unica via de aviso, sin duplicados.
 messaging.onBackgroundMessage((payload) => {
-  const titulo = (payload.notification && payload.notification.title) || 'El Centro';
-  const texto = (payload.notification && payload.notification.body) || '';
+  const d = payload.data || {};
+  const titulo = d.titulo || 'El Centro';
+  const texto = d.texto || '';
   self.registration.showNotification(titulo, {
     body: texto,
     icon: 'icon-192.png',
