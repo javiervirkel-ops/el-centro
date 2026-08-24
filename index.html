@@ -585,7 +585,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <!-- HEADER -->
 <header class="hdr">
   <div class="hdr-inner">
-    <div class="hdr-left">
+    <div class="hdr-left" style="cursor:pointer" onclick="if(miNombre)goTab('inicio')">
       <span class="hdr-icon">🏛️</span>
       <div>
         <div class="hdr-tit">EL CENTRO</div>
@@ -899,7 +899,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- CHAT -->
 <div id="scr-chat" class="scr" style="padding-bottom:8px">
-  <button class="back-btn" onclick="goTab('inicio')">← Feed</button>
   <div class="chat-wrap">
     <div class="chat-msgs" id="chat-msgs">
       <div class="empty-chat"><div class="big">💬</div>El chat del grupo aparece acá.</div>
@@ -1741,7 +1740,7 @@ function goTab(n){
   document.getElementById('scr-'+n).classList.add('on');
   const idx=['inicio','juegos','chat','calendario','sorteo'].indexOf(n);
   if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('on');
-  if(n==='inicio') renderFeed();
+  if(n==='inicio'){renderFeed();window.scrollTo(0,0);}
   if(n==='chat'){renderChat();marcarChatLeido();}
   if(n==='sorteo'){renderSorteoChips();if(camasPool!==null||document.getElementById('sm-camas').classList.contains('on'))renderCamas();}
 }
