@@ -28,3 +28,17 @@ messaging.onBackgroundMessage((payload) => {
     if(self.setAppBadge) self.setAppBadge(1);
   }catch(e){}
 });
+
+// Al tocar la notificacion: si la app ya esta abierta en una pestana, la enfoca.
+// Si no, abre una nueva (el root siempre arranca en el feed/Inicio).
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({type: 'window', includeUncontrolled: true}).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('/');
+    })
+  );
+});
