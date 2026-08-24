@@ -300,6 +300,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .album-novio-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
 .an-tab{padding:7px 15px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .an-tab.on{border-color:var(--az);background:var(--sf);color:var(--az)}
+.an-tab.mine{border-color:#2E9E5B}
+.an-tab.mine::after{content:'★';margin-left:4px;color:#2E9E5B}
+.an-tab.mine.on{background:#E3F6EC;color:#217A45;border-color:#2E9E5B}
+.panini-banner{background:#E3F6EC;border:1.5px solid #2E9E5B;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#217A45;font-weight:600;text-align:center}
 .album-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;background:var(--az);border-radius:14px;padding:14px}
 .album-av{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;font-family:'Cinzel',serif;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.4);flex-shrink:0}
 .album-nm{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#fff}
@@ -1116,6 +1120,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     En cada foto tiene que aparecer el <strong>tatuaje de la novia</strong> puesto en la <strong>parte del cuerpo</strong> que pide la casilla. El primero en completar las 9 gana.
     <div style="margin-top:9px;padding:9px 11px;background:var(--ro2);border:1.5px solid var(--ro);border-radius:9px;color:var(--ro);font-weight:800;font-size:12.5px;letter-spacing:.3px">🚫 NO VALE GRUPO PIBES — tiene que ser gente de afuera</div>
   </div>
+  <div id="album-sorteo"></div>
   <div class="album-novio-tabs" id="album-tabs"></div>
   <div id="album-content"></div>
 </div>
@@ -1611,6 +1616,12 @@ function iniciarApp(){
     renderSelCap();
   });
 
+  db.ref('panini_equipos').on('value',snap=>{
+    paniniEquipos=snap.val();
+    const en=document.getElementById('scr-album').classList.contains('on');
+    if(en){renderAlbumTabs();renderAlbumSorteo();}
+  });
+
   // Sorteo chips init
   JUGADORES.forEach(n=>sorteoSel.add(n));
   renderSorteoChips();
@@ -1738,7 +1749,7 @@ function goJuego(j){
   const target=document.getElementById('scr-'+j);
   if(target) target.classList.add('on');
   if(j==='cs'){renderEqSection();renderSelCap();if(partida&&partida.activa)renderCS();}
-  if(j==='album'){renderAlbumTabs();renderAlbumNovio();}
+  if(j==='album'){renderAlbumSorteo();renderAlbumTabs();renderAlbumNovio();}
   if(j==='tt') renderTT();
   if(j==='truco') renderTruco();
   if(j==='tabla') renderTabla();
@@ -2854,11 +2865,43 @@ function actualizarTimer(){
 // ════════════════════════════════════════
 // ALBUM
 // ════════════════════════════════════════
+let paniniEquipos=null; // {Pako:[...],Juan:[...],...} — null = todavia no se sorteo
 
+function paniniEquipoDe(nombre){
+  if(!paniniEquipos)return null;
+  for(const novio in paniniEquipos){ if((paniniEquipos[novio]||[]).includes(nombre)) return novio; }
+  return null;
+}
+
+function renderAlbumSorteo(){
+  const el=document.getElementById('album-sorteo');if(!el)return;
+  if(!paniniEquipos){
+    el.innerHTML=esTablet?`<button class="btn btn-az" style="margin-bottom:12px" onclick="paniniSortear()">🎲 Sortear equipos</button>`:'';
+    return;
+  }
+  const miEq=paniniEquipoDe(miNombre);
+  el.innerHTML=`<div class="panini-banner">${miEq?`⭐ Tu equipo es el de <strong>${ng(miEq)}</strong>`:'No estás en ningún equipo — hablá con la tablet'}</div>
+    ${esTablet?`<button class="btn btn-out" style="margin-bottom:12px;padding:9px;font-size:12px" onclick="paniniSortear()">🔄 Volver a sortear equipos</button>`:''}`;
+}
+
+// Sorteo real (no truqueado): cada novio ancla su equipo, el resto se reparte parejo al azar.
+function paniniSortear(){
+  if(!esTablet)return;
+  if(paniniEquipos&&!confirm('¿Volver a sortear? Se pierden los equipos actuales.'))return;
+  const resto=shuf(JUGADORES.filter(n=>!NOVIOS.includes(n)));
+  const eqs={};
+  NOVIOS.forEach(n=>eqs[n]=[n]);
+  resto.forEach(n=>{
+    const menor=NOVIOS.reduce((a,b)=>eqs[b].length<eqs[a].length?b:a);
+    eqs[menor].push(n);
+  });
+  db.ref('panini_equipos').set(eqs);
+}
 
 function renderAlbumTabs(){
   const el=document.getElementById('album-tabs');if(!el)return;
-  el.innerHTML=NOVIOS.map(n=>`<div class="an-tab ${n===albumNovio?'on':''}" onclick="selNovio('${n}')">${ng(n)}</div>`).join('');
+  const miEq=paniniEquipoDe(miNombre);
+  el.innerHTML=NOVIOS.map(n=>`<div class="an-tab ${n===albumNovio?'on':''} ${n===miEq?'mine':''}" onclick="selNovio('${n}')">${ng(n)}</div>`).join('');
 }
 
 function selNovio(n){albumNovio=n;renderAlbumTabs();renderAlbumNovio();}
@@ -2898,6 +2941,10 @@ function renderAlbumNovio(){
 }
 
 function abrirUpload(novio,pos,posNm){
+  if(paniniEquipos&&paniniEquipoDe(miNombre)!==novio){
+    alert(`🚫 Este álbum es del equipo de ${ng(novio)}. Vos sos del equipo de ${ng(paniniEquipoDe(miNombre))||'nadie — hablá con la tablet'}.`);
+    return;
+  }
   upNovio=novio;upPos=pos;upURL=null;
   const tit=document.getElementById('up-tit');const sub=document.getElementById('up-sub');
   if(tit) tit.textContent=`${novio} · ${posNm}`;
@@ -2938,7 +2985,7 @@ function confirmarFoto(){
           const nueva=[...orden,upNovio];
           db.ref('album_orden').set(nueva);
           const pts=[5,4,3,2,1][nueva.length-1]||1;
-          sumarPtosLista([upNovio],pts);
+          sumarPtosLista((paniniEquipos&&paniniEquipos[upNovio])||[upNovio],pts);
           notificar('¡El álbum de '+upNovio+' está completo! +'+pts+' pts','🏆');
           publicarNoticia('Novios Panini','🏆',
             `¡El álbum de ${ng(upNovio)} está completo! Las 9 figuritas pegadas. +${pts} pts.`);
