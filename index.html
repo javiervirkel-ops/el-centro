@@ -1883,7 +1883,7 @@ function renderChat(){
 // lo volvemos a fijar en el nuevo fondo, que ahora es mas alto por la foto.
 function chatImgCargada(img){
   const c=document.getElementById('chat-msgs');if(!c)return;
-  if(c.scrollTop===chatScrollFondo){
+  if(Math.abs(c.scrollTop-chatScrollFondo)<2){
     c.scrollTop=c.scrollHeight;
     chatScrollFondo=c.scrollTop;
   }
