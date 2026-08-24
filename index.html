@@ -1274,20 +1274,20 @@ const AF_EQUIPO2 = ['Pako','Antonio','Javi Vir','Beker','Tute','Litka','Naros'];
 const AF_PREGUNTAS = [
   {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #1'},
   {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #1'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #1'},
+  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #1'},
   {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #2'},
+  {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #1'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #2'},
   {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #2'},
   {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #3'},
-  {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #3'},
-  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #4'},
-  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #1'},
-  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #1'},
   {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #2'},
-  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #2'},
-  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #3'},
   {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #3'},
-  {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #1'},
-  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #4'},
   {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #2'},
+  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #4'},
+  {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #3'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #4'},
+  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #3'},
   {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #5'},
   {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #3'},
 ];
@@ -3318,6 +3318,8 @@ setInterval(()=>{
 // AMIGO FIEL — trivia sobre los novios
 // ════════════════════════════════════════
 let afRespuestas=[];
+let afSorteado=false;
+let afSorteando=false;
 function afEquipoDe(nombre){
   if(AF_EQUIPO1.includes(nombre)) return 1;
   if(AF_EQUIPO2.includes(nombre)) return 2;
@@ -3328,10 +3330,49 @@ function afPuntosEquipo(eq){
   afRespuestas.forEach((p,i)=>{ if(AF_PREGUNTAS[i] && AF_PREGUNTAS[i].equipo===eq) pts+=p; });
   return pts;
 }
+function afEquiposHTML(){
+  return `<div class="eq-wrap" style="margin-bottom:14px">
+    <div class="eq-card eq-izq"><div class="eq-tit">EQUIPO 1</div>${AF_EQUIPO1.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+    <div class="eq-card eq-der"><div class="eq-tit">EQUIPO 2</div>${AF_EQUIPO2.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+  </div>`;
+}
+// El "sorteo" es puro teatro: siempre termina en AF_EQUIPO1/AF_EQUIPO2 fijos.
+// Solo mezclamos los nombres en pantalla un rato para que parezca al azar.
+function afSortear(){
+  if(!esTablet||afSorteando)return;
+  afSorteando=true;
+  const cuerpo=document.getElementById('af-cuerpo');
+  let vueltas=0;
+  const iv=setInterval(()=>{
+    const mezcla=shuf([...JUGADORES]);
+    cuerpo.innerHTML=`<div class="eq-wrap" style="margin-bottom:14px">
+      <div class="eq-card eq-izq"><div class="eq-tit">EQUIPO 1</div>${mezcla.slice(0,7).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+      <div class="eq-card eq-der"><div class="eq-tit">EQUIPO 2</div>${mezcla.slice(7).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+    </div>`;
+    vueltas++;
+    if(vueltas>=8){
+      clearInterval(iv);
+      afSorteando=false;
+      cuerpo.innerHTML=afEquiposHTML()+`
+        <button class="btn btn-out" style="margin-bottom:8px" onclick="afSortear()"><span class="ico-in">${ico('shuffle',14)}Volver a sortear</span></button>
+        <button class="btn btn-az" onclick="afEmpezar()">Empezar juego ✓</button>`;
+    }
+  },180);
+}
+function afEmpezar(){
+  if(!esTablet)return;
+  db.ref('amigoFiel').set({sorteado:true,respuestas:[]});
+}
 function renderAF(){
   document.getElementById('af-pts1').textContent=afPuntosEquipo(1);
   document.getElementById('af-pts2').textContent=afPuntosEquipo(2);
   const cuerpo=document.getElementById('af-cuerpo');if(!cuerpo)return;
+  if(!afSorteado){
+    cuerpo.innerHTML=esTablet
+      ?`<button class="btn btn-az" onclick="afSortear()">🎲 Sortear equipos</button>`
+      :`<div class="af-espera">Esperando que la tablet sortee los equipos…</div>`;
+    return;
+  }
   const i=afRespuestas.length;
   const miEq=afEquipoDe(miNombre);
   if(i>=AF_PREGUNTAS.length){
