@@ -152,7 +152,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tabla-info strong{color:var(--az)}
 
 /* CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 160px - env(safe-area-inset-bottom,0px))}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 96px - 84px - env(safe-area-inset-bottom,0px))}
 .chat-msgs{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:10px}
 .msg-row{display:flex;gap:8px;align-items:flex-end}
 .msg-row.yo{flex-direction:row-reverse}
@@ -171,7 +171,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .com-preview img{width:52px;height:52px;object-fit:cover;border-radius:8px}
 .com-preview-x{margin-left:auto;background:none;border:none;color:var(--ro);font-size:12.5px;font-weight:700;cursor:pointer}
 .msg-img{max-width:200px;border-radius:10px;display:block;cursor:pointer}
-.chat-bar{display:flex;gap:8px;padding:10px 0 4px;border-top:1px solid var(--bd);align-items:center;flex-shrink:0}
+.chat-bar{display:flex;gap:8px;padding:10px 0 calc(4px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);align-items:center;flex-shrink:0}
 .chat-bar .inp{flex:1;border-radius:20px}
 .btn-send{width:42px;height:42px;border-radius:50%;background:var(--az);border:none;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
 .btn-foto{width:40px;height:40px;border-radius:50%;background:var(--sf);border:1.5px solid var(--bd);cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
