@@ -1757,6 +1757,21 @@ function mostrarToast(texto,emoji){
 // ════════════════════════════════════════
 // TABS
 // ════════════════════════════════════════
+// Ocultar la barra de navegacion mientras el teclado esta abierto (escribiendo en
+// cualquier input/textarea), asi no queda flotando arriba del teclado sin sentido.
+document.addEventListener('focusin',e=>{
+  if(e.target.matches('input[type="text"],textarea')){
+    document.getElementById('tabs').style.display='none';
+  }
+});
+document.addEventListener('focusout',e=>{
+  if(e.target.matches('input[type="text"],textarea')){
+    // No la muestres de nuevo si estamos en post detalle (ahi va oculta a proposito) o sin sesion.
+    const enPost=document.getElementById('scr-post')&&document.getElementById('scr-post').classList.contains('on');
+    if(miNombre&&!enPost) document.getElementById('tabs').style.display='flex';
+  }
+});
+
 function goTab(n){
   document.getElementById('tabs').style.display='flex';
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
