@@ -3160,8 +3160,12 @@ function renderTTGame(){
       }
       let btnCambiar='';
       if(chk.puede){
-        const txt=chk.motivo==='tiempo'?ico('timer',13)+'Se acabó el tiempo — cambiar misión':ico('scale',13)+'Vas en desventaja — cambiar misión';
-        btnCambiar=`<button class="btn btn-out" style="font-size:12px;padding:10px;margin-top:8px" onclick="cambiarMision()"><span class="ico-in">${txt}</span></button>`;
+        const vencesActuales=(miEq==='a'?cell.vencesIzq:cell.vencesDer)||0;
+        const esSegundoVencimiento=chk.motivo==='tiempo'&&vencesActuales>=1;
+        const txt=esSegundoVencimiento?ico('triangle-alert',13)+'Se acabó el tiempo de nuevo — perdés el casillero'
+          :chk.motivo==='tiempo'?ico('timer',13)+'Se acabó el tiempo — cambiar misión'
+          :ico('scale',13)+'Vas en desventaja — cambiar misión';
+        btnCambiar=`<button class="btn ${esSegundoVencimiento?'btn-ro':'btn-out'}" style="font-size:12px;padding:10px;margin-top:8px" onclick="cambiarMision()"><span class="ico-in">${txt}</span></button>`;
       }
       mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>${btnCambiar}</div>`;
     } else mDiv.innerHTML='';
