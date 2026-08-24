@@ -3113,7 +3113,7 @@ function renderTTGame(){
     <div class="tt-eq tt-eq-a"><div class="tt-eq-nm ico-in">${ico('circle',11)}Izquierda</div><div class="tt-eq-members">${toArr(tt.equipoIzq).join(', ')}</div></div>
     <div class="tt-eq tt-eq-r"><div class="tt-eq-nm ico-in">${ico('x',11)}Derecha</div><div class="tt-eq-members">${toArr(tt.equipoDer).join(', ')}</div></div>
   </div>${tt.ganador?`<div class="ico-in" style="justify-content:center;width:100%;margin-bottom:10px;font-family:'Cinzel',serif;color:var(--az);font-weight:700;font-size:16px">${ico('trophy',16)}Gana ${tt.ganador==='a'?ico('circle',15)+'Izquierda':ico('x',15)+'Derecha'}</div>`:''}
-  ${esTablet&&!tt.ganador?`<button class="btn ${tt.pausadoDesde?'btn-az':'btn-out'}" style="margin-bottom:10px;padding:9px;font-size:12px" onclick="${tt.pausadoDesde?'ttReanudar()':'ttPausar()'}">${tt.pausadoDesde?'▶ Reanudar tiempo':'⏸ Pausar tiempo (ej: de noche)'}</button>`:''}`;
+  ${esTablet&&!tt.ganador?`<button class="btn ${tt.pausadoDesde?'btn-az':'btn-out'}" style="margin-bottom:10px;padding:9px;font-size:12px" onclick="${tt.pausadoDesde?'ttReanudar()':'ttPausar()'}">${tt.pausadoDesde?'▶ Reanudar tiempo':'⏸ Pausar tiempo'}</button>`:''}`;
 
   const tablero=toArr(tt.tablero);
   const elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
