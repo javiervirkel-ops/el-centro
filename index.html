@@ -1596,10 +1596,13 @@ function iniciarApp(){
 
   db.ref('amigoFiel').on('value',snap=>{
     const v=snap.val()||{};
-    afRespuestas=v.respuestas||[];
+    const rObj=v.respuestas||{};
+    // Object.keys ordena bien los ids de push() porque son cronologicamente ordenables como texto.
+    afRespuestas=Array.isArray(rObj)?rObj:Object.keys(rObj).sort().map(k=>rObj[k]);
     afSorteado=!!v.sorteado||afRespuestas.length>0; // partidas viejas (antes del sorteo) ya cuentan como sorteadas
     const en=document.getElementById('scr-af').classList.contains('on');
     if(en)renderAF();
+    if(esTablet&&!v.premiado&&afRespuestas.length>=AF_PREGUNTAS.length) afAdjudicarGanador(afRespuestas);
   });
 
   db.ref('equipos').on('value',snap=>{
@@ -3363,7 +3366,7 @@ function afSortear(){
 }
 function afEmpezar(){
   if(!esTablet)return;
-  db.ref('amigoFiel').set({sorteado:true,respuestas:[]});
+  db.ref('amigoFiel').set({sorteado:true});
 }
 function renderAF(){
   document.getElementById('af-pts1').textContent=afPuntosEquipo(1);
@@ -3409,19 +3412,22 @@ function renderAF(){
 }
 function afPuntuar(pts){
   if(!esTablet)return;
-  const nuevas=[...afRespuestas,pts];
-  db.ref('amigoFiel').set({sorteado:true,respuestas:nuevas});
-  if(nuevas.length>=AF_PREGUNTAS.length){
-    let p1=0,p2=0;
-    nuevas.forEach((p,i)=>{ if(AF_PREGUNTAS[i].equipo===1)p1+=p; else p2+=p; });
-    if(p1!==p2){
-      const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
-      const nEq=p1>p2?1:2;
-      sumarPtosLista(ganador,5);
-      notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
-      publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
-    }
-  }
+  // push() en vez de leer-y-pisar el array entero: asi dos clicks seguidos nunca se
+  // pisan entre si, sin importar si el anterior todavia no volvio de la base.
+  db.ref('amigoFiel/respuestas').push(pts);
+}
+// Se llama sola desde el listener de amigoFiel cuando ya estan las 18 respuestas.
+// El flag "premiado" evita sumar los puntos dos veces si el listener se vuelve a disparar.
+function afAdjudicarGanador(respuestas){
+  let p1=0,p2=0;
+  respuestas.forEach((p,i)=>{ if(AF_PREGUNTAS[i].equipo===1)p1+=p; else p2+=p; });
+  db.ref('amigoFiel/premiado').set(true);
+  if(p1===p2)return;
+  const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
+  const nEq=p1>p2?1:2;
+  sumarPtosLista(ganador,5);
+  notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
+  publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
 }
 function afReset(){
   if(!esTablet)return;
