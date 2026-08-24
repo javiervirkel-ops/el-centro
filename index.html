@@ -342,6 +342,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tt-cell.ocupada-a .tt-lbl,.tt-cell.ocupada-r .tt-lbl{color:rgba(255,255,255,.8)}
 .tt-eq-bar{display:flex;gap:8px;margin-bottom:12px}
 .tt-pausa-banner{background:#FCE8B0;border:1.5px solid #C9971F;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12.5px;color:#8A6100;font-weight:700;text-align:center}
+.tt-control-panel{background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.tt-control-tit{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--az);letter-spacing:.5px;margin-bottom:8px;text-align:center}
+.tt-control-row{display:flex;gap:8px}
+.tt-control-eq{flex:1;background:var(--bl);border:1.5px solid var(--bd);border-radius:10px;padding:9px;text-align:center}
+.tt-control-nm{font-size:12px;font-weight:700;color:var(--txt);justify-content:center;margin-bottom:5px}
+.tt-control-cas{font-size:12px;color:var(--gr);margin-bottom:3px}
+.tt-control-timer{font-size:13px;font-weight:700;color:var(--az);justify-content:center;margin-bottom:2px}
+.tt-control-venc{font-size:10.5px;color:var(--gr)}
+.tt-control-sin{font-size:12px;color:var(--gr);padding:6px 0}
 .tt-eq{flex:1;padding:10px;border-radius:10px;text-align:center}
 .tt-eq-a{background:var(--sf);border:1.5px solid var(--bd)}
 .tt-eq-r{background:var(--ro2);border:1.5px solid #F5C6C2}
@@ -760,7 +769,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
   <div class="juego-card" onclick="goJuego('tt')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-    <div class="juego-info"><h3>TA TE TI</h3><p></p></div>
+    <div class="juego-info"><h3>Misiones 2.0 - TA TE TI</h3><p></p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
   <div class="juego-card" onclick="goJuego('truco')">
@@ -861,7 +870,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <strong>Cómo se suman puntos:</strong><br>
     🕵️ Código Secreto: equipo ganador +1 pt por partida<br>
     📸 Novios Panini: 1°=5pts · 2°=4pts · 3°=3pts · 4°=2pts · 5°=1pt<br>
-    🎯 TA TE TI: equipo ganador +5 pts<br>
+    🎯 Misiones 2.0 - TA TE TI: equipo ganador +5 pts<br>
     🃏 Truco: +1 pt a cada ganador del partido
   </div>
   <div id="tabla-rows"></div>
@@ -1133,7 +1142,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div id="scr-tt" class="scr">
   <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
   <div id="tt-setup">
-    <span class="lbl" style="margin-top:0">TA TE TI · Misiones del Centro</span>
+    <span class="lbl" style="margin-top:0">Misiones 2.0 - TA TE TI</span>
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleReglas('tt')">
         <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--az)">📜 Reglas</span>
@@ -1162,6 +1171,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
   <div id="tt-game" style="display:none">
     <div id="tt-eq-bar"></div>
+    <div id="tt-control"></div>
     <div class="tt-board" id="tt-board"></div>
     <div id="tt-mision-activa"></div>
     <div id="tt-pendientes"></div>
@@ -1222,7 +1232,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <div class="admin-tit">📸 Novios Panini</div>
       <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Borrar todas las fotos</button>
       <div class="div"></div>
-      <div class="admin-tit">🎯 TA TE TI</div>
+      <div class="admin-tit">🎯 Misiones 2.0 - TA TE TI</div>
       <button class="btn btn-ro btn-sm-full" onclick="adminResetTT()">Resetear partida</button>
       <div class="div"></div>
       <div class="admin-tit">🃏 Truco</div>
@@ -1820,7 +1830,7 @@ function adminEliminar(n){db.ref('jugadores/'+n).remove();}
 function adminLimpiarJugs(){if(!confirm('¿Eliminar todos?'))return;db.ref('jugadores').remove();}
 function adminResetCS(){if(!confirm('¿Resetear CS?'))return;db.ref('partida').set({activa:false});db.ref('equipos').remove();}
 function adminResetAlbum(){if(!confirm('¿Borrar fotos?'))return;db.ref('album').remove();db.ref('album_orden').remove();}
-function adminResetTT(){if(!confirm('¿Resetear TA TE TI?'))return;db.ref('tateti').set({activa:false});}
+function adminResetTT(){if(!confirm('¿Resetear Misiones 2.0 - TA TE TI?'))return;db.ref('tateti').set({activa:false});}
 function adminResetTruco(){if(!confirm('¿Resetear Truco?'))return;db.ref('truco').set({activa:false});}
 function adminResetFeed(){
   if(!confirm('¿Vaciar el feed? Se borran todos los posts y sus comentarios.'))return;
@@ -2118,7 +2128,7 @@ function irANoticia(etiqueta){
   const destinos={
     'Código Secreto':()=>goJuego('cs'),
     'Novios Panini':()=>goJuego('album'),
-    'TA TE TI':()=>goJuego('tt'),
+    'Misiones 2.0 - TA TE TI':()=>goJuego('tt'),
     'Truco':()=>goJuego('truco'),
     'Amigo Fiel':()=>goJuego('af'),
     'Rifa de Sábanas':()=>goTab('sorteo')
@@ -3158,6 +3168,7 @@ function renderTTGame(){
   }
 
   renderPendientesTT();
+  renderTTControl();
 
   // Botón reset solo en tablet
   const st=document.getElementById('tt-status');
@@ -3194,6 +3205,32 @@ function ttTranscurrido(cell,lado){
   const pausaDuranteEsteIntervalo=(tt.pausaAcumulada||0)-snap;
   const ahora=tt.pausadoDesde||Date.now();
   return Math.max(0,ahora-inicio-pausaDuranteEsteIntervalo);
+}
+
+// Panel resumen para la tablet: que casillero esta jugando cada equipo y sus cronometros.
+function renderTTControl(){
+  const el=document.getElementById('tt-control');if(!el)return;
+  if(!esTablet||!tt||!tt.activa){el.innerHTML='';return;}
+  const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
+  const tablero=toArr(tt.tablero);
+  const info=lado=>{
+    const pos=lado==='a'?tt.eleccionIzq:tt.eleccionDer;
+    if(pos==null||!tablero[pos])return {activa:false};
+    const cell=tablero[pos];
+    const rest=Math.max(0,TT_LIMITE_MS-ttTranscurrido(cell,lado));
+    const hs=Math.floor(rest/3600000),mn=Math.floor((rest%3600000)/60000),sg=Math.floor((rest%60000)/1000);
+    const vences=(lado==='a'?cell.vencesIzq:cell.vencesDer)||0;
+    return {activa:true,pos,txt:`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`,vences};
+  };
+  const iA=info('a'),iR=info('r');
+  const bloque=(nm,ic,i)=>`<div class="tt-control-eq">
+    <div class="tt-control-nm ico-in">${ico(ic,11)}${nm}</div>
+    ${i.activa?`<div class="tt-control-cas">Casilla ${i.pos+1}</div><div class="tt-control-timer ico-in">${ico('hourglass',12)}${i.txt}</div><div class="tt-control-venc">${i.vences}/2 vencimientos</div>`:'<div class="tt-control-sin">Sin misión activa</div>'}
+  </div>`;
+  el.innerHTML=`<div class="tt-control-panel">
+    <div class="tt-control-tit">📋 Tablero de control</div>
+    <div class="tt-control-row">${bloque('Izquierda','circle',iA)}${bloque('Derecha','x',iR)}</div>
+  </div>`;
 }
 
 function ttPausar(){
@@ -3260,13 +3297,13 @@ function cambiarMision(){
       const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
       const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
       notificar(nmMio+' dejó pasar el tiempo 2 veces en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
-      publicarNoticia('TA TE TI','⏳',
+      publicarNoticia('Misiones 2.0 - TA TE TI','⏳',
         `${nmMio} se quedó sin tiempo dos veces en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
       if(gano){
         ganador=rival;
         sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5);
-        notificar('¡TA TE TI! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
-        publicarNoticia('TA TE TI','🏆',`¡TA TE TI! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
+        notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
+        publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
       }
       db.ref('tateti').set({...tt,tablero,pendientes,usadas,
         eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
@@ -3389,14 +3426,14 @@ function aprobarMision(idx){
   let ganador=tt.ganador??null;
   const eqNombre=p.equipo==='a'?'⭕ Izquierda':'❌ Derecha';
   notificar(p.solicitante+' completó su misión — '+eqNombre+' ocupa la casilla '+(p.pos+1),'🎯');
-  publicarNoticia('TA TE TI','🎯',
+  publicarNoticia('Misiones 2.0 - TA TE TI','🎯',
     `${ng(p.solicitante)} cumplió su misión con ${ng(p.target)||'alguien'} y ${eqNombre} se queda con la casilla ${p.pos+1}.\n\n"${p.mision||''}"`);
   if(rivalPerdio) notificar('El otro equipo llegó primero a la casilla '+(p.pos+1)+' — elegí otra','⚠️');
   if(gano){
     ganador=p.equipo;
     sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5);
-    notificar('¡TA TE TI! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
-    publicarNoticia('TA TE TI','🏆',`¡TA TE TI! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
+    notificar('¡Misiones 2.0! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
+    publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
   } else {
     // Avisar si el que va perdiendo ya puede cambiar de misión
     const dif=Math.abs(ocupadasIzq-ocupadasDer);
@@ -3426,7 +3463,7 @@ function chequearTT(tablero,eq){
 
 function resetTTTablet(){
   if(!esTablet)return;
-  if(!confirm('¿Resetear el TA TE TI? Se borra la partida para todos.'))return;
+  if(!confirm('¿Resetear Misiones 2.0 - TA TE TI? Se borra la partida para todos.'))return;
   db.ref('tateti').set({activa:false});
 }
 
@@ -3436,10 +3473,12 @@ function esCeldaGanadora(pos,ganador){
   return[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(l=>l.includes(pos)&&l.every(i=>tablero[i]&&tablero[i].estado==='ocupada'&&tablero[i].equipo===ganador));
 }
 
-// Refrescar el timer del TA TE TI cada segundo
+// Refrescar los timers de Misiones 2.0 - TA TE TI cada segundo
+// (el propio, si tengo una mision activa; o el tablero de control si soy la tablet)
 setInterval(()=>{
-  const el=document.getElementById('tt-timer-live');
-  if(el&&tt&&tt.activa&&!tt.ganador&&document.getElementById('scr-tt').classList.contains('on')){
+  const hayTimerPropio=document.getElementById('tt-timer-live');
+  const enPantalla=document.getElementById('scr-tt')&&document.getElementById('scr-tt').classList.contains('on');
+  if((hayTimerPropio||esTablet)&&tt&&tt.activa&&!tt.ganador&&enPantalla){
     renderTTGame();
   }
 },1000);
