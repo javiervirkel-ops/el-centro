@@ -1851,6 +1851,7 @@ function cerrarCampanita(){
   document.getElementById('campanita-modal').classList.remove('open');
 }
 
+let chatScrollFondo=0;
 function renderChat(){
   const c=document.getElementById('chat-msgs');if(!c)return;
   if(!chatMsgs.length){c.innerHTML='<div class="empty-chat"><div class="big">💬</div>El chat del grupo aparece acá.</div>';return;}
@@ -1871,16 +1872,21 @@ function renderChat(){
     </div>`;
   }).join('');
   c.scrollTop=c.scrollHeight;
+  chatScrollFondo=c.scrollTop;
   if(document.getElementById('scr-chat').classList.contains('on')) marcarChatLeido();
   else actualizarBadgeChat();
 }
 
 // Las fotos del chat cargan despues del render y hacen crecer la altura, dejando
-// el scroll "corto" (no en el ultimo mensaje real). Si justo antes de cargar la foto
-// estabamos cerca del fondo, lo volvemos a fijar ahi.
+// el scroll "corto" (no en el ultimo mensaje real). Si el usuario no movio el scroll
+// desde que se fijo en el fondo (renderChat guarda esa posicion en chatScrollFondo),
+// lo volvemos a fijar en el nuevo fondo, que ahora es mas alto por la foto.
 function chatImgCargada(img){
   const c=document.getElementById('chat-msgs');if(!c)return;
-  if(c.scrollHeight-c.scrollTop-c.clientHeight<150) c.scrollTop=c.scrollHeight;
+  if(c.scrollTop===chatScrollFondo){
+    c.scrollTop=c.scrollHeight;
+    chatScrollFondo=c.scrollTop;
+  }
 }
 
 // ════════════════════════════════════════
