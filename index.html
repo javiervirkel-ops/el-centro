@@ -1595,7 +1595,9 @@ function iniciarApp(){
   });
 
   db.ref('amigoFiel').on('value',snap=>{
-    afRespuestas=(snap.val()&&snap.val().respuestas)||[];
+    const v=snap.val()||{};
+    afRespuestas=v.respuestas||[];
+    afSorteado=!!v.sorteado||afRespuestas.length>0; // partidas viejas (antes del sorteo) ya cuentan como sorteadas
     const en=document.getElementById('scr-af').classList.contains('on');
     if(en)renderAF();
   });
