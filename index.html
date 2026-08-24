@@ -545,6 +545,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       </div>
     </div>
     <div id="hdr-sello" style="font-size:26px">🏺</div>
+    <div id="hdr-campanita" style="display:none;position:relative;margin-right:10px;cursor:pointer;color:#fff" onclick="abrirCampanita()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+      <span class="chat-badge" id="campanita-badge" style="display:none;position:absolute;top:-6px;right:-8px">0</span>
+    </div>
     <div id="hdr-user" style="display:none" onclick="toggleMenu()">
       <div class="upill">
         <div class="uav" id="u-av">?</div>
@@ -564,6 +568,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 </div>
 <div class="ov" id="ov" onclick="cerrarMenu()"></div>
 <div id="toasts"></div>
+
+<!-- CAMPANITA -->
+<div class="upload-modal" id="campanita-modal">
+  <div class="upload-sheet" style="max-height:70vh;display:flex;flex-direction:column">
+    <div class="upload-tit">🔔 Notificaciones</div>
+    <div class="upload-sub">Lo que te involucra a vos</div>
+    <div id="campanita-lista" style="overflow-y:auto;flex:1;margin-top:10px"></div>
+    <button class="btn btn-out" onclick="cerrarCampanita()" style="margin-top:14px">Cerrar</button>
+  </div>
+</div>
 
 <!-- TABS -->
 <nav class="tabs" id="tabs" style="display:none">
@@ -1458,6 +1472,14 @@ function iniciarApp(){
     }
   });
 
+  // Campanita — historial de notificaciones que me involucran a mi
+  document.getElementById('hdr-campanita').style.display='block';
+  db.ref('notif').limitToLast(50).on('value',snap=>{
+    misNotifs=notifsParaMi(snap.val());
+    actualizarBadgeCampanita();
+    if(document.getElementById('campanita-modal').classList.contains('open')) renderCampanita();
+  });
+
   // FEED — posts del grupo, orden cronológico
   db.ref('posts').on('value',snap=>{
     const antes=posts||{};
@@ -1527,8 +1549,8 @@ function iniciarApp(){
 // NOTIFICACIONES
 // ════════════════════════════════════════
 const appStartTs=Date.now();
-function notificar(texto,emoji,push){
-  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:push!==false});
+function notificar(texto,emoji,push,para,postId){
+  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:push!==false,para:para||null,postId:postId||null});
 }
 // ── Notificaciones del sistema + badge en el ícono ──
 function notifsActivas(){return localStorage.getItem('ec_notifs')!=='off';}
@@ -1663,6 +1685,7 @@ function cerrarSesion(){
   document.getElementById('tabs').style.display='none';
   document.getElementById('hdr-sello').style.display='block';
   document.getElementById('hdr-user').style.display='none';
+  document.getElementById('hdr-campanita').style.display='none';
   ['inicio','juegos','tabla','chat','sorteo','cs','album','tt'].forEach(s=>{
     const el=document.getElementById('scr-'+s);
     if(el) el.classList.remove('on');
@@ -1767,6 +1790,60 @@ function marcarChatLeido(){
   const ult=chatMsgs.length?Math.max(...chatMsgs.map(m=>m.ts||0)):Date.now();
   localStorage.setItem('ec_chat_leido',String(ult));
   actualizarBadgeChat();
+}
+
+// ════════════════════════════════════════
+// CAMPANITA — notificaciones que te involucran
+// ════════════════════════════════════════
+let misNotifs=[];
+
+function notifsParaMi(raw){
+  return Object.values(raw||{})
+    .filter(n=>n && n.de!==miNombre && (n.para==='todos' || n.para===miNombre))
+    .sort((a,b)=>(b.ts||0)-(a.ts||0));
+}
+
+function noLeidasCampanita(){
+  const ult=parseInt(localStorage.getItem('ec_campanita_leido')||'0',10);
+  return misNotifs.filter(n=>(n.ts||0)>ult).length;
+}
+
+function actualizarBadgeCampanita(){
+  const b=document.getElementById('campanita-badge');if(!b)return;
+  const n=noLeidasCampanita();
+  if(n>0){b.style.display='inline-flex';b.textContent=n>9?'9+':String(n);}
+  else b.style.display='none';
+}
+
+function marcarCampanitaLeida(){
+  const ult=misNotifs.length?Math.max(...misNotifs.map(n=>n.ts||0)):Date.now();
+  localStorage.setItem('ec_campanita_leido',String(ult));
+  actualizarBadgeCampanita();
+}
+
+function renderCampanita(){
+  const c=document.getElementById('campanita-lista');if(!c)return;
+  if(!misNotifs.length){c.innerHTML='<div class="empty-chat"><div class="big">🔔</div>Todavía no tenés notificaciones.</div>';return;}
+  c.innerHTML=misNotifs.map(n=>`
+    <div class="fila-enrol" style="cursor:pointer;margin-bottom:8px" onclick="irANotif('${n.postId||''}')">
+      ${avatarHTML(n.de,36)}
+      <div class="fila-enrol-txt"><div class="fila-enrol-gr">${escaparHTML(n.texto||'')}</div><div class="fila-enrol-ap">${haceCuanto(n.ts||0)}</div></div>
+    </div>`).join('');
+}
+
+function irANotif(postId){
+  cerrarCampanita();
+  if(postId){abrirPost(postId);return;}
+  goTab('inicio');
+}
+
+function abrirCampanita(){
+  document.getElementById('campanita-modal').classList.add('open');
+  renderCampanita();
+  marcarCampanitaLeida();
+}
+function cerrarCampanita(){
+  document.getElementById('campanita-modal').classList.remove('open');
 }
 
 function renderChat(){
@@ -1949,7 +2026,7 @@ function publicarPost(){
   if(postEfimero) post.vence=Date.now()+24*60*60*1000;
   if(postConsigna) post.consigna=true;
   db.ref('posts').push(post);
-  if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯');
+  if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯',true,'todos');
   else notificar(miNombre+' subió algo al feed','📰');
   postFotoURL=null;
   postConsigna=false;
@@ -2038,7 +2115,7 @@ function enviarComentario(){
   if(comFotoURL) com.img=comFotoURL;
   db.ref('posts/'+postAbierto+'/coms').push(com);
   const p=posts[postAbierto];
-  if(p&&p.autor&&p.autor!==miNombre) notificar(miNombre+' comentó el post de '+p.autor,'💬');
+  if(p&&p.autor&&p.autor!==miNombre) notificar(miNombre+' comentó el post de '+p.autor,'💬',true,p.autor,postAbierto);
   inp.value='';
   quitarComFoto();
 }
