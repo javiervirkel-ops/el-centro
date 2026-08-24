@@ -341,6 +341,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tt-lbl{font-size:8px;font-weight:700;color:var(--gr);margin-top:4px;line-height:1.3}
 .tt-cell.ocupada-a .tt-lbl,.tt-cell.ocupada-r .tt-lbl{color:rgba(255,255,255,.8)}
 .tt-eq-bar{display:flex;gap:8px;margin-bottom:12px}
+.tt-pausa-banner{background:#FCE8B0;border:1.5px solid #C9971F;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12.5px;color:#8A6100;font-weight:700;text-align:center}
 .tt-eq{flex:1;padding:10px;border-radius:10px;text-align:center}
 .tt-eq-a{background:var(--sf);border:1.5px solid var(--bd)}
 .tt-eq-r{background:var(--ro2);border:1.5px solid #F5C6C2}
@@ -3070,11 +3071,15 @@ function iniciarTT(){
     estado:'libre',
     equipo:null,
     inicioIzq:null,   // cuándo Izquierda empezó esta casilla
-    inicioDer:null
+    inicioDer:null,
+    vencesIzq:0,      // cuantas veces se le vencieron las 4hs a Izquierda en esta casilla
+    vencesDer:0,
+    pausaAlIniciarIzq:0, // foto de pausaAcumulada al momento de arrancar el reloj (para no contar pausas de antes)
+    pausaAlIniciarDer:0
   }));
   db.ref('tateti').set({activa:true,equipoIzq:ttSorteo.a,equipoDer:ttSorteo.r,
     tablero,usadas,pendientes:[],ganador:null,eleccionIzq:null,eleccionDer:null,
-    ocupadasIzq:0,ocupadasDer:0});
+    ocupadasIzq:0,ocupadasDer:0,pausadoDesde:null,pausaAcumulada:0});
   ttSorteo=null;
 }
 
@@ -3094,10 +3099,11 @@ function renderTTGame(){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const miEq=miEqTT();
   const eqBar=document.getElementById('tt-eq-bar');
-  if(eqBar) eqBar.innerHTML=`<div class="tt-eq-bar">
+  if(eqBar) eqBar.innerHTML=`${tt.pausadoDesde?`<div class="tt-pausa-banner">⏸ Juego en pausa — los relojes están congelados</div>`:''}<div class="tt-eq-bar">
     <div class="tt-eq tt-eq-a"><div class="tt-eq-nm ico-in">${ico('circle',11)}Izquierda</div><div class="tt-eq-members">${toArr(tt.equipoIzq).join(', ')}</div></div>
     <div class="tt-eq tt-eq-r"><div class="tt-eq-nm ico-in">${ico('x',11)}Derecha</div><div class="tt-eq-members">${toArr(tt.equipoDer).join(', ')}</div></div>
-  </div>${tt.ganador?`<div class="ico-in" style="justify-content:center;width:100%;margin-bottom:10px;font-family:'Cinzel',serif;color:var(--az);font-weight:700;font-size:16px">${ico('trophy',16)}Gana ${tt.ganador==='a'?ico('circle',15)+'Izquierda':ico('x',15)+'Derecha'}</div>`:''}`;
+  </div>${tt.ganador?`<div class="ico-in" style="justify-content:center;width:100%;margin-bottom:10px;font-family:'Cinzel',serif;color:var(--az);font-weight:700;font-size:16px">${ico('trophy',16)}Gana ${tt.ganador==='a'?ico('circle',15)+'Izquierda':ico('x',15)+'Derecha'}</div>`:''}
+  ${esTablet&&!tt.ganador?`<button class="btn ${tt.pausadoDesde?'btn-az':'btn-out'}" style="margin-bottom:10px;padding:9px;font-size:12px" onclick="${tt.pausadoDesde?'ttReanudar()':'ttPausar()'}">${tt.pausadoDesde?'▶ Reanudar juego':'⏸ Pausar juego (ej: de noche)'}</button>`:''}`;
 
   const tablero=toArr(tt.tablero);
   const elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
@@ -3136,10 +3142,11 @@ function renderTTGame(){
       let timerHtml='';
       const inicio=miEq==='a'?cell.inicioIzq:cell.inicioDer;
       if(inicio){
-        const rest=Math.max(0,TT_LIMITE_MS-(Date.now()-inicio));
+        const rest=Math.max(0,TT_LIMITE_MS-ttTranscurrido(cell,miEq));
         const hs=Math.floor(rest/3600000), mn=Math.floor((rest%3600000)/60000), sg=Math.floor((rest%60000)/1000);
         const urgente=rest<30*60*1000;
-        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido'}</span></div>`;
+        const pausadoTxt=tt.pausadoDesde?' · ⏸ en pausa':'';
+        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido'}${pausadoTxt}</span></div>`;
       }
       let btnCambiar='';
       if(chk.puede){
@@ -3166,8 +3173,9 @@ function elegirCeldaTT(pos){
   const tablero=toArr(tt.tablero).map(x=>({...x}));
   if(!tablero[pos]||tablero[pos].estado!=='libre')return;
   // Arrancar el reloj de 4hs para este equipo en esta casilla
-  if(miEq==='a') tablero[pos].inicioIzq=Date.now();
-  else tablero[pos].inicioDer=Date.now();
+  // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
+  if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
+  else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=tt.pausaAcumulada||0;}
   db.ref('tateti').set({...tt,tablero,
     eleccionIzq:(miEq==='a'?pos:(tt.eleccionIzq??null)),
     eleccionDer:(miEq==='r'?pos:(tt.eleccionDer??null)),
@@ -3176,6 +3184,26 @@ function elegirCeldaTT(pos){
     usadas:toArr(tt.usadas),
     ocupadasIzq:tt.ocupadasIzq??0,
     ocupadasDer:tt.ocupadasDer??0});
+}
+
+// Cuanto tiempo real paso desde que empezo el reloj de esta casilla, descontando pausas.
+function ttTranscurrido(cell,lado){
+  const inicio=lado==='a'?cell.inicioIzq:cell.inicioDer;
+  if(!inicio)return 0;
+  const snap=(lado==='a'?cell.pausaAlIniciarIzq:cell.pausaAlIniciarDer)||0;
+  const pausaDuranteEsteIntervalo=(tt.pausaAcumulada||0)-snap;
+  const ahora=tt.pausadoDesde||Date.now();
+  return Math.max(0,ahora-inicio-pausaDuranteEsteIntervalo);
+}
+
+function ttPausar(){
+  if(!esTablet||!tt||tt.pausadoDesde)return;
+  db.ref('tateti/pausadoDesde').set(Date.now());
+}
+function ttReanudar(){
+  if(!esTablet||!tt||!tt.pausadoDesde)return;
+  const nuevaAcum=(tt.pausaAcumulada||0)+(Date.now()-tt.pausadoDesde);
+  db.ref('tateti').update({pausadoDesde:null,pausaAcumulada:nuevaAcum});
 }
 
 const TT_LIMITE_MS=4*60*60*1000; // 4 horas
@@ -3188,7 +3216,7 @@ function puedeCambiarMision(){
   const pos=miEq==='a'?(tt.eleccionIzq??null):(tt.eleccionDer??null);
   if(pos===null||!tablero[pos])return {puede:false,motivo:''};
   const inicio=miEq==='a'?tablero[pos].inicioIzq:tablero[pos].inicioDer;
-  const transcurrido=inicio?Date.now()-inicio:0;
+  const transcurrido=inicio?ttTranscurrido(tablero[pos],miEq):0;
   // Motivo 1: pasaron las 4hs
   if(inicio&&transcurrido>=TT_LIMITE_MS) return {puede:true,motivo:'tiempo',pos};
   // Motivo 2: el rival va 2 casillas arriba y yo tengo 0 avance en esa diferencia
@@ -3208,6 +3236,44 @@ function cambiarMision(){
   const pos=chk.pos;
   if(!tablero[pos]||tablero[pos].estado!=='libre')return;
 
+  // Si se acabo el tiempo, es la segunda vez que se le vence a este equipo en esta
+  // casilla: pasa directo y automatico al rival, sin necesidad de que la completen.
+  if(chk.motivo==='tiempo'){
+    const vencesKey=miEq==='a'?'vencesIzq':'vencesDer';
+    tablero[pos][vencesKey]=(tablero[pos][vencesKey]||0)+1;
+    if(tablero[pos][vencesKey]>=2){
+      const rival=miEq==='a'?'r':'a';
+      tablero[pos].estado='ocupada';
+      tablero[pos].equipo=rival;
+
+      let eIzq=tt.eleccionIzq??null, eDer=tt.eleccionDer??null;
+      if(miEq==='a') eIzq=null; else eDer=null;
+      if(rival==='a'&&eIzq===pos) eIzq=null;
+      if(rival==='r'&&eDer===pos) eDer=null;
+
+      const pendientes=toArr(tt.pendientes).filter(p=>p.pos!==pos);
+      const ocupadasIzq=(tt.ocupadasIzq??0)+(rival==='a'?1:0);
+      const ocupadasDer=(tt.ocupadasDer??0)+(rival==='r'?1:0);
+
+      const gano=chequearTT(tablero,rival);
+      let ganador=tt.ganador??null;
+      const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
+      const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
+      notificar(nmMio+' dejó pasar el tiempo 2 veces en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
+      publicarNoticia('TA TE TI','⏳',
+        `${nmMio} se quedó sin tiempo dos veces en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
+      if(gano){
+        ganador=rival;
+        sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5);
+        notificar('¡TA TE TI! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
+        publicarNoticia('TA TE TI','🏆',`¡TA TE TI! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
+      }
+      db.ref('tateti').set({...tt,tablero,pendientes,usadas,
+        eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
+      return;
+    }
+  }
+
   // Buscar una misión del banco que no esté en juego
   const disponibles=MISIONES.map((_,i)=>i).filter(i=>!usadas.includes(i));
   if(!disponibles.length){alert('No quedan misiones nuevas en el banco.');return;}
@@ -3216,8 +3282,8 @@ function cambiarMision(){
   // Reemplazar la misión de esa casilla y reiniciar el reloj
   const vieja=tablero[pos].misionIdx;
   tablero[pos].misionIdx=nueva;
-  if(miEq==='a') tablero[pos].inicioIzq=Date.now();
-  else tablero[pos].inicioDer=Date.now();
+  if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
+  else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=tt.pausaAcumulada||0;}
   const nuevasUsadas=usadas.map(u=>u===vieja?nueva:u);
 
   // Descartar reportes pendientes propios de esa casilla
