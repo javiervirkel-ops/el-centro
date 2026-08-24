@@ -3409,7 +3409,19 @@ function renderAF(){
 }
 function afPuntuar(pts){
   if(!esTablet)return;
-  db.ref('amigoFiel').set({respuestas:[...afRespuestas,pts]});
+  const nuevas=[...afRespuestas,pts];
+  db.ref('amigoFiel').set({sorteado:true,respuestas:nuevas});
+  if(nuevas.length>=AF_PREGUNTAS.length){
+    let p1=0,p2=0;
+    nuevas.forEach((p,i)=>{ if(AF_PREGUNTAS[i].equipo===1)p1+=p; else p2+=p; });
+    if(p1!==p2){
+      const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
+      const nEq=p1>p2?1:2;
+      sumarPtosLista(ganador,5);
+      notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
+      publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
+    }
+  }
 }
 function afReset(){
   if(!esTablet)return;
