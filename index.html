@@ -582,6 +582,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       </div>
     </div>
     <div id="hdr-sello" style="font-size:26px">🏺</div>
+    <div id="hdr-sugerencias" style="display:none;position:relative;margin-right:10px;cursor:pointer;font-size:20px" onclick="abrirSugerencia()">💡</div>
     <div id="hdr-campanita" style="display:none;position:relative;margin-right:10px;cursor:pointer;color:#fff" onclick="abrirCampanita()">
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
       <span class="chat-badge" id="campanita-badge" style="display:none;position:absolute;top:-6px;right:-8px">0</span>
@@ -607,6 +608,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div id="toasts"></div>
 
 <!-- CAMPANITA -->
+<div class="upload-modal" id="sugerencia-modal">
+  <div class="upload-sheet">
+    <div class="upload-tit">💡 Buzón de sugerencias</div>
+    <div class="upload-sub">Ideas, quejas, lo que sea — le llega a Javi</div>
+    <textarea class="comp-txt" id="sugerencia-inp" placeholder="Contá tu idea..." maxlength="500" style="margin-top:10px"></textarea>
+    <button class="btn btn-az" style="margin-top:12px" onclick="enviarSugerencia()">Enviar</button>
+    <button class="btn btn-out" onclick="cerrarSugerencia()" style="margin-top:8px">Cerrar</button>
+  </div>
+</div>
+
 <div class="upload-modal" id="campanita-modal">
   <div class="upload-sheet" style="max-height:70vh;display:flex;flex-direction:column">
     <div class="upload-tit">🔔 Notificaciones</div>
@@ -1218,6 +1229,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <button class="btn-xs btn-xs-r" onclick="document.getElementById('modal-admin-panel').classList.remove('open')">Cerrar</button>
     </div>
     <div class="modal-scroll">
+      <div class="admin-tit">💡 Sugerencias</div>
+      <div id="adm-sugerencias"></div>
+      <div class="div"></div>
       <div class="admin-tit">👥 Jugadores</div>
       <div id="adm-jugs"></div>
       <div class="add-row">
@@ -1409,7 +1423,7 @@ const CHAT_COLORS=['#1A4B9C','#C0392B','#1A8A4A','#7B2D8B','#C67A00','#0A7B8C','
 // ESTADO
 // ════════════════════════════════════════
 let miNombre='',esTablet=false;
-let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos={};
+let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos={},sugerencias={};
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
@@ -1535,6 +1549,11 @@ function iniciarApp(){
     renderAdminJugs();
   });
 
+  db.ref('sugerencias').on('value',snap=>{
+    sugerencias=snap.val()||{};
+    renderAdminSugerencias();
+  });
+
   db.ref('chat').on('value',snap=>{
     const raw=snap.val()||{};
     chatMsgs=Object.values(raw).sort((a,b)=>a.ts-b.ts);
@@ -1553,6 +1572,8 @@ function iniciarApp(){
       mostrarToast(n.texto,n.emoji);
     }
   });
+
+  document.getElementById('hdr-sugerencias').style.display='block';
 
   // Campanita — historial de notificaciones que me involucran a mi
   document.getElementById('hdr-campanita').style.display='block';
@@ -1791,6 +1812,7 @@ function cerrarSesion(){
   document.getElementById('hdr-sello').style.display='block';
   document.getElementById('hdr-user').style.display='none';
   document.getElementById('hdr-campanita').style.display='none';
+  document.getElementById('hdr-sugerencias').style.display='none';
   ['inicio','juegos','tabla','chat','sorteo','cs','album','tt'].forEach(s=>{
     const el=document.getElementById('scr-'+s);
     if(el) el.classList.remove('on');
@@ -1811,10 +1833,24 @@ function checkAdmin(){
   if(document.getElementById('adm-pass').value===ADMIN_PASS){
     document.getElementById('modal-admin-pass').classList.remove('open');
     renderAdminJugs();
+    renderAdminSugerencias();
     document.getElementById('modal-admin-panel').classList.add('open');
     sessionStorage.setItem('ec_admin','true');
   } else document.getElementById('adm-err').style.display='block';
 }
+function renderAdminSugerencias(){
+  const cont=document.getElementById('adm-sugerencias');if(!cont)return;
+  const toArr=v=>v?Object.entries(v).map(([id,s])=>({id,...s})):[];
+  const lista=toArr(sugerencias).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  cont.innerHTML=lista.length?lista.map(s=>`<div class="admin-jug" style="align-items:flex-start;flex-direction:column;gap:4px">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+        <span style="font-weight:700;font-size:12px">${escaparHTML(ng(s.autor))} · ${haceCuanto(s.ts||0)}</span>
+        <button class="btn-xs btn-xs-r" onclick="adminBorrarSugerencia('${s.id}')">Eliminar</button>
+      </div>
+      <div style="font-size:12.5px;color:var(--txt)">${escaparHTML(s.texto||'')}</div>
+    </div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin sugerencias todavía</div>';
+}
+function adminBorrarSugerencia(id){db.ref('sugerencias/'+id).remove();renderAdminSugerencias();}
 function renderAdminJugs(){
   const cont=document.getElementById('adm-jugs');if(!cont)return;
   const ns=Object.keys(jugadores);
@@ -1940,6 +1976,21 @@ function irANotif(postId){
   cerrarCampanita();
   if(postId){abrirPost(postId);return;}
   goTab('inicio');
+}
+
+function abrirSugerencia(){
+  document.getElementById('sugerencia-inp').value='';
+  document.getElementById('sugerencia-modal').classList.add('open');
+}
+function cerrarSugerencia(){
+  document.getElementById('sugerencia-modal').classList.remove('open');
+}
+function enviarSugerencia(){
+  const txt=document.getElementById('sugerencia-inp').value.trim();
+  if(!txt)return;
+  db.ref('sugerencias').push({autor:miNombre,texto:txt,ts:Date.now()});
+  cerrarSugerencia();
+  mostrarToast('¡Gracias! Le llegó a Javi.','💡');
 }
 
 function abrirCampanita(){
