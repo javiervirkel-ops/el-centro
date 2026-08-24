@@ -2146,7 +2146,7 @@ function renderFeed(){
         ${p.autor===miNombre?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
-      ${p.video?`<video class="post-img" src="${p.video}" controls preload="metadata"></video>`:''}
+      ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
       <div class="post-bar" onclick="abrirPost('${p.id}')">
         <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
@@ -2304,7 +2304,7 @@ function renderPostDetalle(){
         <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" onclick="abrirImgChat('${p.img}')">`:''}
-      ${p.video?`<video class="post-img" src="${p.video}" controls preload="metadata"></video>`:''}
+      ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
     </div>`+comentariosHTML(p);
 }
@@ -2608,6 +2608,11 @@ function mostrarSubiendo(texto){
 function ocultarSubiendo(){
   const el=document.getElementById('cloud-loading');if(!el)return;
   el.classList.remove('open');
+}
+// Cloudinary genera solo un frame como miniatura de cualquier video con solo cambiar
+// la extension a .jpg (mismo public_id, mismo archivo) — sirve de poster sin subir nada aparte.
+function posterDeVideo(url){
+  return (url||'').replace(/\.[a-z0-9]+(\?.*)?$/i,'.jpg$1');
 }
 
 // ════════════════════════════════════════
