@@ -1827,7 +1827,7 @@ function renderCampanita(){
   c.innerHTML=misNotifs.map(n=>`
     <div class="fila-enrol" style="cursor:pointer;margin-bottom:8px" onclick="irANotif('${n.postId||''}')">
       ${avatarHTML(n.de,36)}
-      <div class="fila-enrol-txt"><div class="fila-enrol-gr">${escaparHTML(n.texto||'')}</div><div class="fila-enrol-ap">${haceCuanto(n.ts||0)}</div></div>
+      <div class="fila-enrol-txt"><div style="font-size:13px;font-weight:600;color:var(--txt);line-height:1.35">${escaparHTML(n.texto||'')}</div><div class="fila-enrol-ap">${haceCuanto(n.ts||0)}</div></div>
     </div>`).join('');
 }
 
