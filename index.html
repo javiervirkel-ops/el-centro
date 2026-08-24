@@ -304,6 +304,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .an-tab.mine::after{content:'★';margin-left:4px;color:#2E9E5B}
 .an-tab.mine.on{background:#E3F6EC;color:#217A45;border-color:#2E9E5B}
 .panini-banner{background:#E3F6EC;border:1.5px solid #2E9E5B;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#217A45;font-weight:600;text-align:center}
+.panini-equipos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.panini-eq-card{background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:9px}
+.panini-eq-tit{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--az);margin-bottom:5px}
 .album-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;background:var(--az);border-radius:14px;padding:14px}
 .album-av{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;font-family:'Cinzel',serif;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.4);flex-shrink:0}
 .album-nm{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#fff}
@@ -2879,9 +2882,17 @@ function renderAlbumSorteo(){
     el.innerHTML=esTablet?`<button class="btn btn-az" style="margin-bottom:12px" onclick="paniniSortear()">🎲 Sortear equipos</button>`:'';
     return;
   }
+  if(esTablet){
+    el.innerHTML=`<div class="panini-equipos-grid">${NOVIOS.map(n=>`
+      <div class="panini-eq-card">
+        <div class="panini-eq-tit">${ng(n)}</div>
+        ${(paniniEquipos[n]||[]).map(m=>`<div class="eq-member">${avatarHTML(m,22)}<span>${ng(m)}</span></div>`).join('')}
+      </div>`).join('')}</div>
+      <button class="btn btn-out" style="margin:12px 0;padding:9px;font-size:12px" onclick="paniniSortear()">🔄 Volver a sortear equipos</button>`;
+    return;
+  }
   const miEq=paniniEquipoDe(miNombre);
-  el.innerHTML=`<div class="panini-banner">${miEq?`⭐ Tu equipo es el de <strong>${ng(miEq)}</strong>`:'No estás en ningún equipo — hablá con la tablet'}</div>
-    ${esTablet?`<button class="btn btn-out" style="margin-bottom:12px;padding:9px;font-size:12px" onclick="paniniSortear()">🔄 Volver a sortear equipos</button>`:''}`;
+  el.innerHTML=`<div class="panini-banner">${miEq?`⭐ Tu equipo es el de <strong>${ng(miEq)}</strong>`:'No estás en ningún equipo — hablá con la tablet'}</div>`;
 }
 
 // Sorteo real (no truqueado): cada novio ancla su equipo, el resto se reparte parejo al azar.
