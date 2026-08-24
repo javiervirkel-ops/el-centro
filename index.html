@@ -356,6 +356,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tt-control-timer{font-size:13px;font-weight:700;color:var(--az);justify-content:center;margin-bottom:2px}
 .tt-control-venc{font-size:10.5px;color:var(--gr)}
 .tt-control-sin{font-size:12px;color:var(--gr);padding:6px 0}
+.admin-content-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.admin-content-cell{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--sf);border:1.5px solid var(--bd)}
+.admin-content-cell img,.admin-content-cell video{width:100%;height:100%;object-fit:cover;display:block}
+.admin-content-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(192,57,43,.9);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.admin-content-autor{position:absolute;bottom:0;left:0;right:0;background:rgba(8,26,58,.65);color:#fff;font-size:9.5px;font-weight:700;padding:3px 6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tt-eq{flex:1;padding:10px;border-radius:10px;text-align:center}
 .tt-eq-a{background:var(--sf);border:1.5px solid var(--bd)}
 .tt-eq-r{background:var(--ro2);border:1.5px solid #F5C6C2}
@@ -606,8 +611,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 <div class="umenu" id="umenu">
   <div class="umenu-hdr"><div class="umenu-nm" id="um-nm">—</div><div class="umenu-rol" id="um-rol">Jugador</div></div>
   <div class="umenu-item" id="um-notif-item" onclick="toggleNotifs()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/></svg>Silenciar notificaciones</div>
-  <div class="umenu-item" id="um-tablet-item" onclick="cerrarMenu();pedirModoTablet()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Modo tablet</div>
-  <div class="umenu-item" onclick="cerrarMenu();abrirAdmin()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Administrador</div>
+  <div class="umenu-item" id="um-tablet-item" onclick="cerrarMenu();pedirModoTablet()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Admin</div>
+  <div class="umenu-item" id="um-admin-item" style="display:none" onclick="cerrarMenu();goJuego('admin')"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Panel de Admin</div>
 </div>
 <div class="ov" id="ov" onclick="cerrarMenu()"></div>
 <div id="toasts"></div>
@@ -659,7 +664,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="enrol-sub">¿Quién sos?</div>
   <div class="lista-enrol" id="chips"></div>
   <div class="div"></div>
-  <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Soy la tablet del grupo</span></button>
+  <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Soy el Admin</span></button>
   <div style="text-align:center"><span class="admin-lnk ico-in" onclick="abrirAdmin()"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Acceso administrador</span></div>
 </div>
 
@@ -1214,56 +1219,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     </div>
   </div>
 </div>
-<div class="modal-bg" id="modal-admin-pass">
-  <div class="modal"><div class="modal-top"></div>
-    <div class="modal-emo">🔐</div><div class="modal-tit">ADMIN</div>
-    <div class="modal-sub">Ingresá la contraseña.</div>
-    <input class="inp" id="adm-pass" type="password" placeholder="Contraseña..." style="margin-bottom:12px;text-align:center" onkeydown="if(event.key==='Enter')checkAdmin()">
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-out" style="flex:1" onclick="document.getElementById('modal-admin-pass').classList.remove('open')">Cancelar</button>
-      <button class="btn btn-az" style="flex:1" onclick="checkAdmin()">Entrar</button>
-    </div>
-    <div id="adm-err" style="color:var(--ro);font-size:12px;margin-top:8px;display:none">Contraseña incorrecta</div>
-  </div>
-</div>
-<div class="modal-bg" id="modal-admin-panel">
-  <div class="modal" style="max-width:400px;text-align:left">
-    <div class="modal-top"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="ico-in" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--az)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>ADMIN</div>
-      <button class="btn-xs btn-xs-r" onclick="document.getElementById('modal-admin-panel').classList.remove('open')">Cerrar</button>
-    </div>
-    <div class="modal-scroll">
-      <div class="admin-tit">💡 Sugerencias</div>
-      <div id="adm-sugerencias"></div>
-      <div class="div"></div>
-      <div class="admin-tit">👥 Jugadores</div>
-      <div id="adm-jugs"></div>
-      <div class="add-row">
-        <input class="inp" id="adm-add" placeholder="Nombre nuevo..." maxlength="20" onkeydown="if(event.key==='Enter')adminAgregar()">
-        <button class="btn-sm btn-sm-az" onclick="adminAgregar()" style="white-space:nowrap">+ Agregar</button>
-      </div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminLimpiarJugs()">Eliminar todos los jugadores</button>
-      <div class="div"></div>
-      <div class="admin-tit">🕵️ Código Secreto</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetCS()">Resetear partida</button>
-      <div class="div"></div>
-      <div class="admin-tit">📸 Novios Panini</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Borrar todas las fotos</button>
-      <div class="div"></div>
-      <div class="admin-tit">🎯 Misiones 2.0 - TA TE TI</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetTT()">Resetear partida</button>
-      <div class="div"></div>
-      <div class="admin-tit">🃏 Truco</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetTruco()">Resetear partida</button>
-      <div class="div"></div>
-      <div class="admin-tit">📰 Feed</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetFeed()">Vaciar el feed</button>
-      <div class="div"></div>
-      <div class="admin-tit">🏆 Puntos</div>
-      <button class="btn btn-ro btn-sm-full" onclick="adminResetPuntos()">Resetear todos los puntos</button>
-    </div>
-  </div>
+<!-- PANEL DE ADMIN (pantalla completa, solo accesible en modo Admin) -->
+<div id="scr-admin" class="scr">
+  <button class="back-btn" onclick="goTab('inicio')">← Feed</button>
+  <span class="lbl" style="margin-top:0">🛠️ Panel de Admin</span>
+  <div class="album-novio-tabs" id="admin-subtabs"></div>
+  <div id="admin-content"></div>
 </div>
 
 <!-- UPLOAD ALBUM -->
@@ -1410,7 +1371,6 @@ function iconoDe(emoji,size){
   return k?ico(k,size||16):(emoji||'📣');
 }
 
-const ADMIN_PASS='holis123';
 const GRIEGO={'Antonio':'Tonos Fridminides','Beker':'Matiades Bekeros','Pako':'Pakostoles',
   'Harry':'Harriclito','Keke':'Kekos Matzkagoras','Litka':'Kevos Litvinopulos',
   'Tute':'Tuton Eskuarzagoras','Naros':'Naros Narosquides','Ray':'Raymonides',
@@ -1506,28 +1466,28 @@ function entrarRapido(n){
 }
 
 function entrarTablet(){
-  const p=prompt('Contraseña de la tablet:');
+  const p=prompt('Contraseña de Admin:');
   if(p!=='holis123'){if(p!==null)alert('Contraseña incorrecta');return;}
-  miNombre='Tablet';esTablet=true;
-  localStorage.setItem('ec_nombre','Tablet');
+  miNombre='Admin';esTablet=true;
+  localStorage.setItem('ec_nombre','Admin');
   localStorage.setItem('ec_tablet','true');
   iniciarApp();
 }
 
 function pedirModoTablet(){
   if(esTablet){
-    // Desde la tablet se puede volver a elegir usuario
-    if(confirm('¿Salir del modo tablet y volver a la pantalla de inicio?')){
+    // Desde el modo admin se puede volver a elegir usuario
+    if(confirm('¿Salir del modo Admin y volver a la pantalla de inicio?')){
       localStorage.removeItem('ec_nombre');
       localStorage.removeItem('ec_tablet');
       location.reload();
     }
     return;
   }
-  const p=prompt('Contraseña de la tablet:');
+  const p=prompt('Contraseña de Admin:');
   if(p!=='holis123'){if(p!==null)alert('Contraseña incorrecta');return;}
-  miNombre='Tablet';esTablet=true;
-  localStorage.setItem('ec_nombre','Tablet');
+  miNombre='Admin';esTablet=true;
+  localStorage.setItem('ec_nombre','Admin');
   localStorage.setItem('ec_tablet','true');
   location.reload();
 }
@@ -1543,9 +1503,11 @@ function iniciarApp(){
   else avEl.textContent=miNombre.charAt(0).toUpperCase();
   document.getElementById('u-nm').textContent=miNombre;
   document.getElementById('um-nm').textContent=miNombre;
-  document.getElementById('um-rol').textContent=esTablet?'📱 Tablet':'👤 Jugador';
+  document.getElementById('um-rol').textContent=esTablet?'🛠️ Admin':'👤 Jugador';
   const umt=document.getElementById('um-tablet-item');
-  if(umt) umt.innerHTML=esTablet?ico('door-open',15)+'Salir de modo tablet':ico('smartphone',15)+'Modo tablet';
+  if(umt) umt.innerHTML=esTablet?ico('door-open',15)+'Salir de Admin':ico('smartphone',15)+'Admin';
+  const uma=document.getElementById('um-admin-item');
+  if(uma) uma.style.display=esTablet?'flex':'none';
   if(esTablet) document.body.classList.add('tablet-mode');
 
   // Registrar jugador
@@ -1816,6 +1778,7 @@ function goJuego(j){
   if(j==='truco') renderTruco();
   if(j==='tabla') renderTabla();
   if(j==='af') renderAF();
+  if(j==='admin') renderAdminSubtabs();
 }
 
 // ════════════════════════════════════════
@@ -1851,19 +1814,53 @@ function cerrarSesion(){
 // ════════════════════════════════════════
 // ADMIN
 // ════════════════════════════════════════
-function abrirAdmin(){
-  document.getElementById('adm-pass').value='';
-  document.getElementById('adm-err').style.display='none';
-  document.getElementById('modal-admin-pass').classList.add('open');
+// ════════════════════════════════════════
+// PANEL DE ADMIN — pantalla completa, sub-pestañas
+// ════════════════════════════════════════
+let adminSub='jugadores';
+const ADMIN_TABS=[['jugadores','👥 Jugadores'],['contenido','📸 Contenido'],['juegos','🎮 Juegos'],['puntos','🏆 Puntos'],['sugerencias','💡 Sugerencias']];
+function renderAdminSubtabs(){
+  if(!esTablet)return;
+  const tabsEl=document.getElementById('admin-subtabs');if(!tabsEl)return;
+  tabsEl.innerHTML=ADMIN_TABS.map(([k,l])=>`<div class="an-tab ${adminSub===k?'on':''}" onclick="setAdminSub('${k}')">${l}</div>`).join('');
+  renderAdminContent();
 }
-function checkAdmin(){
-  if(document.getElementById('adm-pass').value===ADMIN_PASS){
-    document.getElementById('modal-admin-pass').classList.remove('open');
-    renderAdminJugs();
-    renderAdminSugerencias();
-    document.getElementById('modal-admin-panel').classList.add('open');
-    sessionStorage.setItem('ec_admin','true');
-  } else document.getElementById('adm-err').style.display='block';
+function setAdminSub(k){adminSub=k;renderAdminSubtabs();}
+function renderAdminContent(){
+  const el=document.getElementById('admin-content');if(!el)return;
+  if(adminSub==='jugadores')renderAdminJugadoresTab(el);
+  else if(adminSub==='contenido')renderAdminContenidoTab(el);
+  else if(adminSub==='juegos')renderAdminJuegosTab(el);
+  else if(adminSub==='puntos')renderAdminPuntosTab(el);
+  else if(adminSub==='sugerencias')renderAdminSugerenciasTab(el);
+}
+
+function renderAdminJugadoresTab(el){
+  el.innerHTML=`<div id="adm-jugs"></div>
+    <div class="add-row">
+      <input class="inp" id="adm-add" placeholder="Nombre nuevo..." maxlength="20" onkeydown="if(event.key==='Enter')adminAgregar()">
+      <button class="btn-sm btn-sm-az" onclick="adminAgregar()" style="white-space:nowrap">+ Agregar</button>
+    </div>
+    <button class="btn btn-ro btn-sm-full" style="margin-top:10px" onclick="adminLimpiarJugs()">Eliminar todos los jugadores</button>`;
+  renderAdminJugs();
+}
+function renderAdminJugs(){
+  const cont=document.getElementById('adm-jugs');if(!cont)return;
+  const ns=Object.keys(jugadores);
+  cont.innerHTML=ns.length?ns.map(n=>`<div class="admin-jug"><span>${n}</span><button class="btn-xs btn-xs-r" onclick="adminEliminar('${n}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin jugadores</div>';
+  const add=document.getElementById('adm-add');if(add)add.value='';
+}
+function adminAgregar(){
+  const v=document.getElementById('adm-add').value.trim();if(!v)return;
+  db.ref('jugadores/'+v).set({nombre:v,online:false});
+  renderAdminJugs();
+}
+function adminEliminar(n){db.ref('jugadores/'+n).remove();}
+function adminLimpiarJugs(){if(!confirm('¿Eliminar todos?'))return;db.ref('jugadores').remove();}
+
+function renderAdminSugerenciasTab(el){
+  el.innerHTML=`<div id="adm-sugerencias"></div>`;
+  renderAdminSugerencias();
 }
 function renderAdminSugerencias(){
   const cont=document.getElementById('adm-sugerencias');if(!cont)return;
@@ -1878,29 +1875,99 @@ function renderAdminSugerencias(){
     </div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin sugerencias todavía</div>';
 }
 function adminBorrarSugerencia(id){db.ref('sugerencias/'+id).remove();renderAdminSugerencias();}
-function renderAdminJugs(){
-  const cont=document.getElementById('adm-jugs');if(!cont)return;
-  const ns=Object.keys(jugadores);
-  cont.innerHTML=ns.length?ns.map(n=>`<div class="admin-jug"><span>${n}</span><button class="btn-xs btn-xs-r" onclick="adminEliminar('${n}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin jugadores</div>';
-  document.getElementById('adm-add').value='';
+
+function renderAdminJuegosTab(el){
+  el.innerHTML=`
+    <div class="admin-tit">🕵️ Código Secreto</div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetCS()">Resetear partida</button>
+    <div class="div"></div>
+    <div class="admin-tit">📸 Novios Panini</div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Borrar todas las fotos</button>
+    <div class="div"></div>
+    <div class="admin-tit">🎯 Misiones 2.0 - TA TE TI</div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetTT()">Resetear partida</button>
+    <div class="div"></div>
+    <div class="admin-tit">🃏 Truco</div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetTruco()">Resetear partida</button>
+    <div class="div"></div>
+    <div class="admin-tit">🏆 Amigo Fiel</div>
+    <button class="btn btn-ro btn-sm-full" onclick="afReset()">Resetear partida</button>
+    <div class="div"></div>
+    <div class="admin-tit">📰 Feed</div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetFeed()">Vaciar el feed</button>`;
 }
-function adminAgregar(){
-  const v=document.getElementById('adm-add').value.trim();if(!v)return;
-  db.ref('jugadores/'+v).set({nombre:v,online:false});
-  renderAdminJugs();
-}
-function adminEliminar(n){db.ref('jugadores/'+n).remove();}
-function adminLimpiarJugs(){if(!confirm('¿Eliminar todos?'))return;db.ref('jugadores').remove();}
 function adminResetCS(){if(!confirm('¿Resetear CS?'))return;db.ref('partida').set({activa:false});db.ref('equipos').remove();}
-function adminResetAlbum(){if(!confirm('¿Borrar fotos?'))return;db.ref('album').remove();db.ref('album_orden').remove();}
+function adminResetAlbum(){if(!confirm('¿Borrar fotos?'))return;db.ref('album').remove();db.ref('album_orden').remove();db.ref('panini_equipos').remove();}
 function adminResetTT(){if(!confirm('¿Resetear Misiones 2.0 - TA TE TI?'))return;db.ref('tateti').set({activa:false});}
 function adminResetTruco(){if(!confirm('¿Resetear Truco?'))return;db.ref('truco').set({activa:false});}
 function adminResetFeed(){
   if(!confirm('¿Vaciar el feed? Se borran todos los posts y sus comentarios.'))return;
   db.ref('posts').remove();
-  cerrarAdminPanel();
+}
+
+function renderAdminPuntosTab(el){
+  el.innerHTML=`
+    <div class="admin-tit">Ajustar puntos a mano</div>
+    <select class="inp" id="adm-pts-nombre" style="margin-bottom:8px">${JUGADORES.map(n=>`<option value="${n}">${ng(n)}</option>`).join('')}</select>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input class="inp" id="adm-pts-delta" type="number" placeholder="ej: 5 o -3" style="flex:1">
+      <button class="btn-sm btn-sm-az" onclick="adminAjustarPuntos()" style="white-space:nowrap">Aplicar</button>
+    </div>
+    <div class="div"></div>
+    <div class="admin-tit">Puntos actuales</div>
+    <div id="adm-pts-lista"></div>
+    <div class="div"></div>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetPuntos()">Resetear todos los puntos</button>`;
+  const lista=document.getElementById('adm-pts-lista');
+  const entries=JUGADORES.map(n=>[n,puntos[n]||0]).sort((a,b)=>b[1]-a[1]);
+  lista.innerHTML=entries.map(([n,p])=>`<div class="admin-jug"><span>${ng(n)}</span><span style="font-weight:700;color:var(--az)">${p} pts</span></div>`).join('');
+}
+function adminAjustarPuntos(){
+  const nombre=document.getElementById('adm-pts-nombre').value;
+  const delta=parseInt(document.getElementById('adm-pts-delta').value,10);
+  if(!nombre||isNaN(delta))return;
+  sumarPtosLista([nombre],delta);
+  renderAdminPuntosTab(document.getElementById('admin-content'));
 }
 function adminResetPuntos(){if(!confirm('¿Resetear puntos?'))return;db.ref('puntos').remove();db.ref('album_orden').remove();}
+
+// Junta todas las fotos/videos de posts, comentarios y el album en una sola grilla,
+// con opcion de borrar cualquiera (no solo lo tuyo).
+let adminContenidoItems=[];
+function renderAdminContenidoTab(el){
+  const toArr=v=>v?(Array.isArray(v)?v.map((x,i)=>[i,x]):Object.entries(v)):[];
+  const items=[];
+  Object.entries(posts).forEach(([id,p])=>{
+    if(!p)return;
+    if(p.img) items.push({tipo:'img',url:p.img,autor:p.autor,ts:p.ts,borrar:()=>db.ref('posts/'+id+'/img').remove()});
+    if(p.video) items.push({tipo:'video',url:p.video,autor:p.autor,ts:p.ts,borrar:()=>db.ref('posts/'+id+'/video').remove()});
+    toArr(p.coms).forEach(([cid,c])=>{
+      if(c&&c.img) items.push({tipo:'img',url:c.img,autor:c.nombre,ts:c.ts,borrar:()=>db.ref('posts/'+id+'/coms/'+cid).remove()});
+    });
+  });
+  Object.entries(albumData).forEach(([novio,fotos])=>{
+    Object.entries(fotos||{}).forEach(([pos,raw])=>{
+      const url=raw&&typeof raw==='object'?raw.url:raw;
+      const autor=raw&&typeof raw==='object'?raw.autor:null;
+      if(url) items.push({tipo:'img',url,autor,ts:0,borrar:()=>db.ref('album/'+novio+'/'+pos).remove()});
+    });
+  });
+  items.sort((a,b)=>(b.ts||0)-(a.ts||0));
+  adminContenidoItems=items;
+  el.innerHTML=items.length?`<div class="admin-content-grid">${items.map((it,i)=>`
+      <div class="admin-content-cell">
+        ${it.tipo==='video'?`<video src="${it.url}" muted></video>`:`<img src="${it.url}">`}
+        <button class="admin-content-del" onclick="adminBorrarContenido(${i})">✕</button>
+        <div class="admin-content-autor">${escaparHTML(ng(it.autor)||'?')}</div>
+      </div>`).join('')}</div>`
+    :'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin fotos ni videos todavía</div>';
+}
+function adminBorrarContenido(i){
+  const it=adminContenidoItems[i];if(!it)return;
+  if(!confirm('¿Eliminar este archivo?'))return;
+  it.borrar();
+  setTimeout(()=>renderAdminContenidoTab(document.getElementById('admin-content')),400);
+}
 
 // ════════════════════════════════════════
 // TABLA
@@ -2143,7 +2210,7 @@ function renderFeed(){
       <div class="post-hdr">
         ${avatarHTML(p.autor,38)}
         <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?`<span class="post-efi">${ico('hourglass',11)}24 h</span>`:''}</div></div>
-        ${p.autor===miNombre?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
+        ${p.autor===miNombre||esTablet?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
       ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata"></video>`:''}
@@ -2253,7 +2320,7 @@ function publicarPost(){
 
 function borrarPost(id){
   const p=posts[id];
-  if(!p||p.autor!==miNombre)return;
+  if(!p||(p.autor!==miNombre&&!esTablet))return;
   if(!confirm('¿Borrar este post?'))return;
   db.ref('posts/'+id).remove();
   if(postAbierto===id){postAbierto=null;goTab('inicio');}
@@ -2756,7 +2823,7 @@ function asignarEq(n,color){
 // Lista completa: los 15 del viaje + cualquiera agregado por admin
 function todosLosJugadores(){
   const set=new Set(JUGADORES);
-  Object.keys(jugadores||{}).forEach(n=>{if(n&&n!=='Tablet')set.add(n);});
+  Object.keys(jugadores||{}).forEach(n=>{if(n&&n!=='Admin')set.add(n);});
   return [...set];
 }
 
@@ -3092,7 +3159,7 @@ function renderAlbumNovio(){
     const autor=raw&&typeof raw==='object'?raw.autor:null;
     cell.className='album-cell'+(url?' comp':'');
     if(url){
-      const puedeBorrar=autor===miNombre;
+      const puedeBorrar=autor===miNombre||esTablet;
       cell.innerHTML=`<img src="${url}"><div class="album-check">✓</div><div class="album-cell-lbl">${pos}</div>${puedeBorrar?`<button class="album-del" onclick="event.stopPropagation();eliminarFotoAlbum('${albumNovio}',${i})">✕</button>`:''}`;
       cell.onclick=()=>abrirImgChat(url); // ver en grande
     } else {
@@ -3163,7 +3230,7 @@ function eliminarFotoAlbum(novio,pos){
   db.ref('album/'+novio+'/'+pos).once('value').then(snap=>{
     const raw=snap.val();
     const autor=raw&&typeof raw==='object'?raw.autor:null;
-    if(autor!==miNombre)return; // solo el que la subió puede borrarla
+    if(autor!==miNombre&&!esTablet)return; // solo el que la subio, o el admin, puede borrarla
     if(!confirm('¿Eliminar esta figurita?'))return;
     db.ref('album/'+novio+'/'+pos).remove();
   });
