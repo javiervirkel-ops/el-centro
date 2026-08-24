@@ -304,6 +304,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .an-tab.mine::after{content:'★';margin-left:4px;color:#2E9E5B}
 .an-tab.mine.on{background:#E3F6EC;color:#217A45;border-color:#2E9E5B}
 .panini-banner{background:#E3F6EC;border:1.5px solid #2E9E5B;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#217A45;font-weight:600;text-align:center}
+.cloud-loading{display:none;position:fixed;inset:0;background:rgba(8,26,58,.75);z-index:900;align-items:center;justify-content:center}
+.cloud-loading.open{display:flex}
+.cloud-loading-box{background:#fff;border-radius:16px;padding:24px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:13px;font-weight:700;color:var(--az)}
+.cloud-spinner{width:32px;height:32px;border:3.5px solid var(--sf);border-top-color:var(--az);border-radius:50%;animation:cloudSpin .8s linear infinite}
+@keyframes cloudSpin{to{transform:rotate(360deg)}}
 .panini-equipos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .panini-eq-card{background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:9px}
 .panini-eq-tit{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--az);margin-bottom:5px}
@@ -923,7 +928,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="comp-hint">💡 ¿Tenés una idea para que haga todo el grupo? Tirala como consigna en vez de un post común.</div>
     <textarea class="comp-txt" id="comp-inp" placeholder="Un pensamiento, una foto, lo que sea..." maxlength="600"></textarea>
     <div class="comp-zona" id="comp-zona" onclick="document.getElementById('post-file').click()">
-      <div>📷 Agregar una foto (opcional)</div>
+      <div>📷🎥 Agregar una foto o video (opcional)</div>
     </div>
     <label class="comp-efimero comp-consigna" id="comp-cons-lbl" onclick="toggleConsigna(event)">
       <span class="comp-check" id="comp-cons-check">✓</span>
@@ -939,7 +944,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     </div>
   </div>
 </div>
-<input type="file" id="post-file" accept="image/*" style="display:none" onchange="previewPostFoto(event)">
+<input type="file" id="post-file" accept="image/*,video/*" style="display:none" onchange="previewPostFoto(event)">
 
 <!-- EDITOR DE IMAGEN -->
 <div class="ed-modal" id="ed-modal">
@@ -1262,6 +1267,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 </div>
 
 <!-- UPLOAD ALBUM -->
+<div id="cloud-loading" class="cloud-loading">
+  <div class="cloud-loading-box">
+    <div class="cloud-spinner"></div>
+    <span>Subiendo...</span>
+  </div>
+</div>
+
 <div class="upload-modal" id="upload-modal">
   <div class="upload-sheet">
     <div class="upload-tit" id="up-tit">Subir foto</div>
@@ -1427,7 +1439,7 @@ let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
-let posts={},postAbierto=null,postFotoURL=null,postEfimero=false,postConsigna=false,comFotoURL=null;
+let posts={},postAbierto=null,postFotoURL=null,postVideoURL=null,postEfimero=false,postConsigna=false,comFotoURL=null;
 let ttSorteo=null;
 
 // ════════════════════════════════════════
@@ -2119,6 +2131,7 @@ function renderFeed(){
         ${p.autor===miNombre?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
+      ${p.video?`<video class="post-img" src="${p.video}" controls preload="metadata"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
       <div class="post-bar" onclick="abrirPost('${p.id}')">
         <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
@@ -2134,6 +2147,7 @@ function escaparHTML(t){
 // ── Composer ──
 function abrirComposer(){
   postFotoURL=null;
+  postVideoURL=null;
   postEfimero=false;
   postConsigna=false;
   const efi=document.getElementById('comp-efi-lbl');
@@ -2141,7 +2155,7 @@ function abrirComposer(){
   const cons=document.getElementById('comp-cons-lbl');
   if(cons) cons.classList.remove('on');
   document.getElementById('comp-inp').value='';
-  document.getElementById('comp-zona').innerHTML='<div>📷 Agregar una foto (opcional)</div>';
+  document.getElementById('comp-zona').innerHTML='<div>📷🎥 Agregar una foto o video (opcional)</div>';
   document.getElementById('post-file').value='';
   document.getElementById('comp-modal').classList.add('open');
   setTimeout(()=>document.getElementById('comp-inp').focus(),100);
@@ -2163,6 +2177,20 @@ function toggleConsigna(e){
 function previewPostFoto(e){
   const file=e.target.files[0];if(!file)return;
   e.target.value='';
+  if(file.type.startsWith('video/')){
+    postFotoURL=null;
+    if(file.size>100*1024*1024){alert('El video es muy pesado (máx 100MB).');return;}
+    mostrarSubiendo('Subiendo video...');
+    subirACloudinary(file,'video')
+      .then(url=>{
+        ocultarSubiendo();
+        postVideoURL=url;
+        document.getElementById('comp-zona').innerHTML=`<video src="${url}" controls style="width:100%;border-radius:10px;display:block"></video>`;
+      })
+      .catch(err=>{ocultarSubiendo();console.error(err);alert('No se pudo subir el video. Probá de nuevo.');});
+    return;
+  }
+  postVideoURL=null;
   abrirEditor(file,url=>{
     postFotoURL=url;
     document.getElementById('comp-zona').innerHTML=`<img src="${url}">`;
@@ -2192,16 +2220,18 @@ function irANoticia(etiqueta){
 
 function publicarPost(){
   const txt=document.getElementById('comp-inp').value.trim();
-  if(!txt&&!postFotoURL){alert('Escribí algo o subí una foto');return;}
+  if(!txt&&!postFotoURL&&!postVideoURL){alert('Escribí algo o subí una foto/video');return;}
   const post={autor:miNombre,ts:Date.now()};
   if(txt) post.texto=txt;
   if(postFotoURL) post.img=postFotoURL;
+  if(postVideoURL) post.video=postVideoURL;
   if(postEfimero) post.vence=Date.now()+24*60*60*1000;
   if(postConsigna) post.consigna=true;
   db.ref('posts').push(post);
   if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯',true,'todos');
   else notificar(miNombre+' subió algo al feed','📰');
   postFotoURL=null;
+  postVideoURL=null;
   postConsigna=false;
   cerrarComposer();
 }
@@ -2259,6 +2289,7 @@ function renderPostDetalle(){
         <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
       </div>
       ${p.img?`<img class="post-img" src="${p.img}" onclick="abrirImgChat('${p.img}')">`:''}
+      ${p.video?`<video class="post-img" src="${p.video}" controls preload="metadata"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
     </div>`+comentariosHTML(p);
 }
@@ -2518,11 +2549,50 @@ function cerrarEditor(){
 }
 function confirmarEditor(){
   const sel=ed.sel; ed.sel=null; edDibujar();   // exportar sin el recuadro de selección
-  const url=document.getElementById('ed-canvas').toDataURL('image/jpeg',0.85);
+  const cv=document.getElementById('ed-canvas');
   const cb=ed.cb;
   document.getElementById('ed-modal').classList.remove('open');
   ed.cb=null; ed.sel=sel;
-  if(cb) cb(url);
+  if(!cb)return;
+  cv.toBlob(blob=>{
+    if(!blob){alert('No se pudo procesar la imagen.');return;}
+    mostrarSubiendo('Subiendo foto...');
+    subirACloudinary(blob,'image')
+      .then(url=>{ocultarSubiendo();cb(url);})
+      .catch(err=>{ocultarSubiendo();console.error(err);alert('No se pudo subir la foto. Probá de nuevo.');});
+  },'image/jpeg',0.85);
+}
+
+// ════════════════════════════════════════
+// CLOUDINARY — subida de fotos y videos
+// ════════════════════════════════════════
+const CLOUDINARY_CLOUD='gb5y76hu';
+const CLOUDINARY_PRESET='g8ztmsjx';
+function subirACloudinary(archivo,tipo){
+  return new Promise((resolve,reject)=>{
+    const fd=new FormData();
+    fd.append('file',archivo);
+    fd.append('upload_preset',CLOUDINARY_PRESET);
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${tipo}/upload`);
+    xhr.onload=()=>{
+      if(xhr.status>=200&&xhr.status<300){
+        try{ resolve(JSON.parse(xhr.responseText).secure_url); }
+        catch(e){ reject(e); }
+      } else reject(new Error('Cloudinary status '+xhr.status));
+    };
+    xhr.onerror=()=>reject(new Error('Error de red'));
+    xhr.send(fd);
+  });
+}
+function mostrarSubiendo(texto){
+  const el=document.getElementById('cloud-loading');if(!el)return;
+  el.querySelector('span').textContent=texto||'Subiendo...';
+  el.classList.add('open');
+}
+function ocultarSubiendo(){
+  const el=document.getElementById('cloud-loading');if(!el)return;
+  el.classList.remove('open');
 }
 
 // ════════════════════════════════════════
