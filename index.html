@@ -748,7 +748,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- TRUCO -->
 <div id="scr-truco" class="scr">
-  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
 
   <!-- Selección de 6 jugadores -->
   <div id="truco-sel">
@@ -810,7 +810,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- TABLA -->
 <div id="scr-tabla" class="scr">
-  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
   <span class="lbl" style="margin-top:0">Tabla de Posiciones</span>
   <div class="tabla-info">
     <strong>Cómo se suman puntos:</strong><br>
@@ -989,7 +989,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- JUEGO CS -->
 <div id="scr-cs" class="scr">
-  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
   <div id="cs-setup">
     <span class="lbl" style="margin-top:0">Código Secreto · Versión Pibes</span>
     <div class="card" style="margin-bottom:14px">
@@ -1073,7 +1073,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- JUEGO ALBUM -->
 <div id="scr-album" class="scr">
-  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
   <span class="lbl" style="margin-top:0">Novios Panini</span>
   <div class="album-reglas">
     En cada foto tiene que aparecer el <strong>tatuaje de la novia</strong> puesto en la <strong>parte del cuerpo</strong> que pide la casilla. El primero en completar las 9 gana.
@@ -1085,7 +1085,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- JUEGO TATETI -->
 <div id="scr-tt" class="scr">
-  <button class="back-btn" onclick="goTab('juegos')">← Juegos</button>
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
   <div id="tt-setup">
     <span class="lbl" style="margin-top:0">TA TE TI · Misiones del Centro</span>
     <div class="card" style="margin-bottom:14px">
@@ -1652,6 +1652,11 @@ function goSub(n){
   }
 }
 
+let origenJuego='juegos';
+function volverDeJuego(){
+  goTab(origenJuego);
+  origenJuego='juegos';
+}
 function goJuego(j){
   // Ocultar TODAS las pantallas incluyendo juegos
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
@@ -2014,7 +2019,9 @@ function irANoticia(etiqueta){
     'Rifa de Sábanas':()=>goTab('sorteo')
   };
   const ir=destinos[etiqueta];
-  if(ir) ir();
+  if(!ir)return;
+  if(etiqueta!=='Rifa de Sábanas') origenJuego='inicio';
+  ir();
 }
 
 function publicarPost(){
