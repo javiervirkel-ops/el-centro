@@ -416,6 +416,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .truco-eq-card{background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:12px;margin-top:12px;font-size:12px}
 .truco-eq-card b{color:var(--az);font-family:'Cinzel',serif;letter-spacing:.5px}
 
+.af-score{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.af-score-eq{flex:1;background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:12px;text-align:center}
+.af-score-nm{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--az);margin-bottom:4px}
+.af-score-pts{font-size:28px;font-weight:900;color:var(--txt)}
+.af-score-vs{font-family:'Cinzel',serif;font-size:11px;color:var(--gr);font-weight:700}
+.af-card{background:var(--bl);border:1.5px solid var(--bd);border-radius:16px;padding:20px;text-align:center}
+.af-card-eq{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gr);text-transform:uppercase;margin-bottom:6px}
+.af-card-novio{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--az);margin-bottom:14px}
+.af-card-txt{font-size:16px;line-height:1.4;color:var(--txt);margin-bottom:18px}
+.af-card-prog{font-size:11px;color:var(--gr);margin-bottom:14px}
+.af-btns{display:flex;gap:8px}
+.af-btn{flex:1;padding:16px 0;border-radius:10px;border:none;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;font-size:14px}
+.af-btn:active{transform:scale(.95)}
+.af-btn-0{background:var(--sf);color:var(--gr);border:1.5px solid var(--bd)}
+.af-btn-1{background:#FCE8B0;color:#8A6100}
+.af-btn-2{background:var(--az);color:#fff}
+.af-espera{text-align:center;color:var(--gr);font-size:13px;padding:20px}
+.af-final{text-align:center;padding:20px}
+.af-final .big{font-size:40px;margin-bottom:10px}
+
 /* FEED */
 .feed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .chat-badge{background:var(--ro);color:#fff;border-radius:20px;min-width:19px;height:19px;padding:0 6px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;animation:badgeIn .3s ease}
@@ -740,6 +760,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="juego-info"><h3>Truco</h3><p>Contador de fósforos</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
+  <div class="juego-card" onclick="goJuego('af')">
+    <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="1" y2="4"/><line x1="10" x2="10" y1="1" y2="4"/><line x1="14" x2="14" y1="1" y2="4"/></svg></div>
+    <div class="juego-info"><h3>Amigo Fiel</h3><p>¿Cuánto conocés a los novios?</p></div>
+    <div class="badge badge-on">ACTIVO</div>
+  </div>
   <div class="juego-card" onclick="goJuego('tabla')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></div>
     <div class="juego-info"><h3>Tabla de posiciones</h3><p>Puntos de todos los juegos</p></div>
@@ -806,6 +831,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <button class="btn btn-ro" style="flex:1;padding:11px;font-size:12px" onclick="salirTruco()">✕ Cambiar jugadores</button>
     </div>
   </div>
+</div>
+
+<!-- AMIGO FIEL -->
+<div id="scr-af" class="scr">
+  <button class="back-btn" onclick="volverDeJuego()">← Juegos</button>
+  <span class="lbl" style="margin-top:0">Amigo Fiel</span>
+  <div class="af-score">
+    <div class="af-score-eq"><div class="af-score-nm">Equipo 1</div><div class="af-score-pts" id="af-pts1">0</div></div>
+    <div class="af-score-vs">VS</div>
+    <div class="af-score-eq"><div class="af-score-nm">Equipo 2</div><div class="af-score-pts" id="af-pts2">0</div></div>
+  </div>
+  <div id="af-cuerpo"></div>
 </div>
 
 <!-- TABLA -->
@@ -1228,6 +1265,32 @@ const functions = firebase.functions();
 // ════════════════════════════════════════
 const JUGADORES = ['Antonio','Javi IAS','Beker','Pako','Tomi','Javi Vir','Harry','Keke','Litka','Tute','Naros','MP','Ray','Gasti','Juan'];
 const NOVIOS = ['Juan','Pako','Ray','Antonio','Harry'];
+
+// AMIGO FIEL — equipos fijos (el "sorteo" en pantalla es solo animacion, no cambia esto).
+// Cada novio tiene 2-3 preguntas repartidas en la lista de abajo. Placeholders hasta que
+// Javi mande las preguntas reales de cada novio.
+const AF_EQUIPO1 = ['Ray','Harry','Juan','Keke','Tomi','Gasti','MP'];
+const AF_EQUIPO2 = ['Pako','Antonio','Javi Vir','Beker','Tute','Litka','Naros'];
+const AF_PREGUNTAS = [
+  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #1'},
+  {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #1'},
+  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #2'},
+  {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #2'},
+  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #3'},
+  {equipo:2,novio:'Ray',texto:'[Placeholder] Pregunta sobre Ray #3'},
+  {equipo:1,novio:'Pako',texto:'[Placeholder] Pregunta sobre Pako #4'},
+  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #1'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #1'},
+  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #2'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #2'},
+  {equipo:2,novio:'Harry',texto:'[Placeholder] Pregunta sobre Harry #3'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #3'},
+  {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #1'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #4'},
+  {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #2'},
+  {equipo:1,novio:'Antonio',texto:'[Placeholder] Pregunta sobre Antonio #5'},
+  {equipo:2,novio:'Juan',texto:'[Placeholder] Pregunta sobre Juan #3'},
+];
 const POSICIONES = ['Panza random','Espalda random','Bíceps random','Antebrazo random','Hombre 18-30','Mujer 18-30','Hombre 45-60 (lugar a elección)','Mujer 45-60 (lugar a elección)','Persona durmiendo'];
 const CARTAS = [
   {n:"Bondi & Andrea",e:"📖",img:"bondi_andrea.jpeg"},
@@ -1531,6 +1594,12 @@ function iniciarApp(){
     if(en)renderTT();
   });
 
+  db.ref('amigoFiel').on('value',snap=>{
+    afRespuestas=(snap.val()&&snap.val().respuestas)||[];
+    const en=document.getElementById('scr-af').classList.contains('on');
+    if(en)renderAF();
+  });
+
   db.ref('equipos').on('value',snap=>{
     equipos=snap.val()||{};
     renderEqSection();
@@ -1668,6 +1737,7 @@ function goJuego(j){
   if(j==='tt') renderTT();
   if(j==='truco') renderTruco();
   if(j==='tabla') renderTabla();
+  if(j==='af') renderAF();
 }
 
 // ════════════════════════════════════════
@@ -3243,6 +3313,64 @@ setInterval(()=>{
     renderTTGame();
   }
 },1000);
+
+// ════════════════════════════════════════
+// AMIGO FIEL — trivia sobre los novios
+// ════════════════════════════════════════
+function afEquipoDe(nombre){
+  if(AF_EQUIPO1.includes(nombre)) return 1;
+  if(AF_EQUIPO2.includes(nombre)) return 2;
+  return null;
+}
+function afPuntosEquipo(eq){
+  let pts=0;
+  afRespuestas.forEach((p,i)=>{ if(AF_PREGUNTAS[i] && AF_PREGUNTAS[i].equipo===eq) pts+=p; });
+  return pts;
+}
+function renderAF(){
+  document.getElementById('af-pts1').textContent=afPuntosEquipo(1);
+  document.getElementById('af-pts2').textContent=afPuntosEquipo(2);
+  const cuerpo=document.getElementById('af-cuerpo');if(!cuerpo)return;
+  const i=afRespuestas.length;
+  const miEq=afEquipoDe(miNombre);
+  if(i>=AF_PREGUNTAS.length){
+    const p1=afPuntosEquipo(1),p2=afPuntosEquipo(2);
+    const gan=p1===p2?'¡Empate!':(p1>p2?'Ganó Equipo 1 🏆':'Ganó Equipo 2 🏆');
+    cuerpo.innerHTML=`<div class="af-final"><div class="big">🏁</div><div style="font-family:'Cinzel',serif;font-weight:700;color:var(--az);font-size:16px">${gan}</div></div>
+      ${esTablet?`<button class="btn btn-out" style="margin-top:16px" onclick="afReset()">🔄 Volver a jugar</button>`:''}`;
+    return;
+  }
+  const preg=AF_PREGUNTAS[i];
+  if(esTablet){
+    cuerpo.innerHTML=`<div class="af-card">
+      <div class="af-card-prog">Pregunta ${i+1} de ${AF_PREGUNTAS.length}</div>
+      <div class="af-card-eq">Responde Equipo ${preg.equipo}</div>
+      <div class="af-card-novio">Sobre: ${preg.novio}</div>
+      <div class="af-card-txt">${preg.texto}</div>
+      <div class="af-btns">
+        <button class="af-btn af-btn-0" onclick="afPuntuar(0)">0 pts</button>
+        <button class="af-btn af-btn-1" onclick="afPuntuar(1)">1 pt</button>
+        <button class="af-btn af-btn-2" onclick="afPuntuar(2)">2 pts</button>
+      </div>
+    </div>`;
+  } else {
+    cuerpo.innerHTML=`<div class="af-card">
+      <div class="af-card-prog">Pregunta ${i+1} de ${AF_PREGUNTAS.length}</div>
+      <div class="af-card-eq">Responde Equipo ${preg.equipo}${miEq===preg.equipo?' (¡tu equipo!)':''}</div>
+      <div class="af-card-novio">Sobre: ${preg.novio}</div>
+    </div>
+    <div class="af-espera">Esperando que la tablet ponga el puntaje…</div>`;
+  }
+}
+function afPuntuar(pts){
+  if(!esTablet)return;
+  db.ref('amigoFiel').set({respuestas:[...afRespuestas,pts]});
+}
+function afReset(){
+  if(!esTablet)return;
+  if(!confirm('¿Reiniciar Amigo Fiel de cero?'))return;
+  db.ref('amigoFiel').remove();
+}
 
 // ════════════════════════════════════════
 // TRUCO — CONTADOR DE FÓSFOROS
