@@ -2200,6 +2200,7 @@ function renderFeed(){
         <div class="not-hdr" style="cursor:pointer" onclick="irANoticia('${p.etiqueta||''}')">
           <div class="not-icono">${iconoDe(p.icono,20)}</div>
           <div><div class="not-etiqueta">${p.etiqueta||'Novedad'}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
+          ${esTablet?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
         </div>
         <div class="not-txt" style="cursor:pointer" onclick="irANoticia('${p.etiqueta||''}')">${escaparHTML(p.texto||'')}</div>
         <div class="post-bar" onclick="abrirPost('${p.id}')">
