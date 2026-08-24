@@ -3396,7 +3396,8 @@ function renderAF(){
         <button class="af-btn af-btn-1" onclick="afPuntuar(1)">1 pt</button>
         <button class="af-btn af-btn-2" onclick="afPuntuar(2)">2 pts</button>
       </div>
-    </div>`;
+    </div>
+    <button class="btn btn-out" style="margin-top:14px;padding:10px;font-size:12px" onclick="afReset()">🔄 Reiniciar juego desde cero</button>`;
   } else {
     cuerpo.innerHTML=`<div class="af-card">
       <div class="af-card-prog">Pregunta ${i+1} de ${AF_PREGUNTAS.length}</div>
