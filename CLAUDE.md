@@ -212,22 +212,9 @@ eliminar foto propia en Novios Panini, y consignas en el feed)_
   **izquierda** = les gusta el lujo pero lo miden, se hacen los que no les sale gastar
   aunque tienen con qué, y escatiman en lo que sienten al pedo.
 
-### Esperando material mío
-- **Cartas del Código Secreto**: van 80 situaciones absurdas de a dos personas
-  ("besándose en un glaciar", "cambiando figuritas en un boliche"). Yo genero las imágenes
-  con IA y las subo al lado del `index.html`. Hoy hay solo 2 cartas con foto real y el resto
-  son emojis de relleno.
-- **Logos de los equipos**: un monstruo con látigo para Derecha y un vago fumando para
-  Izquierda. Reemplazan los emojis ☭ y 🎩.
-
-### Sin definir
-- **"Facts" políticos**: que ser de un bando te dé un beneficio o un costo dentro de cada
-  juego. Ideas tiradas: nacionalizar una carta neutral, tercerizar una misión, comprarle una
-  casilla al rival.
-- **Castigo del TA TE TI**: que el equipo ganador elija un castigo para los perdedores.
-- **Video en el feed**: postergado hasta que el flujo de fotos esté probado. Va a requerir
-  activar Firebase Storage, porque hoy las imágenes se guardan en base64 dentro de la base y
-  con video eso no escala.
+_(25 ago 2026: se dieron de baja las cartas del Código Secreto con imágenes de IA, los logos de
+equipo, los "facts" políticos y el castigo del TA TE TI — no se van a hacer. El video en el feed
+ya está resuelto, se implementó con Cloudinary en vez de Firebase Storage.)_
 
 ---
 
