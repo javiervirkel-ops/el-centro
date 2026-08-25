@@ -1220,26 +1220,62 @@ const NOVIOS = ['Juan','Pako','Ray','Antonio','Harry'];
 // Javi mande las preguntas reales de cada novio.
 const AF_EQUIPO1 = ['Ray','Harry','Juan','Keke','Tomi','Gasti','MP'];
 const AF_EQUIPO2 = ['Pako','Antonio','Javi Vir','Beker','Tute','Litka','Naros'];
-const AF_PREGUNTAS = [
-  {equipo:1,novio:'Pako',texto:'¿Digimon, Pokémon o Dragon Ball Z?'},
-  {equipo:2,novio:'Ray',texto:'¿Cuál es el nombre de mis 2 hermanas?'},
-  {equipo:1,novio:'Antonio',texto:'¿Cómo se llama la persona que trabajó en mi casa en mi infancia, y cómo se llama su esposo? (nombres completos, no vale diminutivo)'},
-  {equipo:2,novio:'Harry',texto:'¿Cómo surgió mi apodo?'},
-  {equipo:1,novio:'Pako',texto:'¿Cuál es mi principal fuente de proteína?'},
-  {equipo:2,novio:'Juan',texto:'¿Qué apodo me puso Nico Szwarc?'},
-  {equipo:1,novio:'Antonio',texto:'¿Cuánto calzo?'},
-  {equipo:2,novio:'Ray',texto:'¿En qué país de Asia viví 6 meses?'},
-  {equipo:1,novio:'Pako',texto:'¿Cuál es mi animal preferido?'},
-  {equipo:2,novio:'Harry',texto:'¿Dónde conocí a Manu? (con historia completa)'},
-  {equipo:1,novio:'Antonio',texto:'¿Dónde me corto el pelo?'},
-  {equipo:2,novio:'Juan',texto:'¿De qué posición jugaba al fútbol en Lamroth?'},
-  {equipo:1,novio:'Pako',texto:'¿Qué es lo que más odio de Buenos Aires?'},
-  {equipo:2,novio:'Ray',texto:'¿En qué año del colegio me fui a vivir a Brasil?'},
-  {equipo:1,novio:'Antonio',texto:'¿Qué comida elegiría como última cena?'},
-  {equipo:2,novio:'Harry',texto:'¿Quién fue mi primera novia del primario?'},
-  {equipo:1,novio:'Antonio',texto:'¿Dónde fue nuestro primer beso con Tana, y en qué año?'},
-  {equipo:2,novio:'Juan',texto:'¿Quién me llevó a Iadeinu por primera vez, y en qué año?'},
+// Banco completo de preguntas por novio. Cada partida nueva sortea al azar cuántas hace
+// falta de cada uno (ver AF_CUPO/afGenerarPreguntas) para no repetir siempre las mismas.
+const AF_POOL = {
+  Pako: [
+    '¿Cuál es mi animal preferido?',
+    '¿Cuál es mi principal fuente de proteína?',
+    '¿Cómo se llamaba mi primer perro?',
+    '¿Digimon, Pokémon o Dragon Ball Z?',
+    '¿Qué es lo que más odio de Buenos Aires?',
+    '¿Quién fue el primero de los Pibes en conocer a Maru, y en qué ocasión?',
+  ],
+  Harry: [
+    '¿Cómo surgió mi apodo?',
+    '¿Dónde conocí a Manu? (con historia completa)',
+    '¿Quién fue mi primera novia del primario?',
+  ],
+  Ray: [
+    '¿Cuál es el nombre de mis 2 hermanas?',
+    '¿En qué país de Asia viví 6 meses?',
+    '¿En qué año del colegio me fui a vivir a Brasil?',
+  ],
+  Antonio: [
+    '¿Qué comida elegiría como última cena?',
+    '¿Cómo se llama la persona que trabajó en mi casa en mi infancia, y cómo se llama su esposo? (nombres completos, no vale diminutivo)',
+    '¿Cómo se llamaba mi vecino de Las Heras 1230?',
+    '¿Cuánto calzo?',
+    '¿Cómo se llaman los wenrys?',
+    '¿Dónde me corto el pelo?',
+    '¿Dónde fue nuestro primer beso con Tana, y en qué año?',
+  ],
+  Juan: [
+    '¿De qué posición jugaba al fútbol en Lamroth?',
+    '¿Qué apodo me puso Nico Szwarc?',
+    '¿Quién me llevó a Iadeinu por primera vez, y en qué año?',
+    '¿Bajo qué contexto me di mi primer beso con Juli?',
+  ],
+};
+// Orden intercalado fijo (equipo/novio) para que los 5 novios aparezcan pronto en la partida.
+// Cuántas veces aparece cada novio acá define cuántas preguntas de su pool se usan por partida.
+const AF_ESTRUCTURA = [
+  {equipo:1,novio:'Pako'},{equipo:2,novio:'Ray'},{equipo:1,novio:'Antonio'},{equipo:2,novio:'Harry'},
+  {equipo:1,novio:'Pako'},{equipo:2,novio:'Juan'},{equipo:1,novio:'Antonio'},{equipo:2,novio:'Ray'},
+  {equipo:1,novio:'Pako'},{equipo:2,novio:'Harry'},{equipo:1,novio:'Antonio'},{equipo:2,novio:'Juan'},
+  {equipo:1,novio:'Pako'},{equipo:2,novio:'Ray'},{equipo:1,novio:'Antonio'},{equipo:2,novio:'Harry'},
+  {equipo:1,novio:'Antonio'},{equipo:2,novio:'Juan'},
 ];
+// Arma las 18 preguntas de una partida: para cada novio, mezcla su pool completo y usa las
+// primeras que hagan falta segun AF_ESTRUCTURA. Se guarda en la base para que todos vean lo mismo.
+function afGenerarPreguntas(){
+  const colas={};
+  return AF_ESTRUCTURA.map(slot=>{
+    if(!colas[slot.novio]) colas[slot.novio]=shuf(AF_POOL[slot.novio]);
+    const texto=colas[slot.novio].shift();
+    return {equipo:slot.equipo,novio:slot.novio,texto};
+  });
+}
 const POSICIONES = ['Panza random','Espalda random','Bíceps random','Antebrazo random','Hombre 18-30','Mujer 18-30','Hombre 45-60 (lugar a elección)','Mujer 45-60 (lugar a elección)','Persona durmiendo'];
 const CARTAS = [
   {n:"Bondi & Andrea",e:"📖",img:"bondi_andrea.jpeg"},
@@ -1566,10 +1602,11 @@ function iniciarApp(){
     const rObj=v.respuestas||{};
     // Object.keys ordena bien los ids de push() porque son cronologicamente ordenables como texto.
     afRespuestas=Array.isArray(rObj)?rObj:Object.keys(rObj).sort().map(k=>rObj[k]);
+    afPreguntas=Array.isArray(v.preguntas)?v.preguntas:(v.preguntas?Object.values(v.preguntas):[]);
     afSorteado=!!v.sorteado||afRespuestas.length>0; // partidas viejas (antes del sorteo) ya cuentan como sorteadas
     const en=document.getElementById('scr-af').classList.contains('on');
     if(en)renderAF();
-    if(esTablet&&!v.premiado&&afRespuestas.length>=AF_PREGUNTAS.length) afAdjudicarGanador(afRespuestas);
+    if(esTablet&&!v.premiado&&afPreguntas.length>0&&afRespuestas.length>=afPreguntas.length) afAdjudicarGanador(afRespuestas);
   });
 
   db.ref('equipos').on('value',snap=>{
@@ -3824,6 +3861,7 @@ setInterval(()=>{
 // AMIGO FIEL — trivia sobre los novios
 // ════════════════════════════════════════
 let afRespuestas=[];
+let afPreguntas=[];
 let afSorteado=false;
 let afSorteando=false;
 function afEquipoDe(nombre){
@@ -3833,7 +3871,7 @@ function afEquipoDe(nombre){
 }
 function afPuntosEquipo(eq){
   let pts=0;
-  afRespuestas.forEach((p,i)=>{ if(AF_PREGUNTAS[i] && AF_PREGUNTAS[i].equipo===eq) pts+=p; });
+  afRespuestas.forEach((p,i)=>{ if(afPreguntas[i] && afPreguntas[i].equipo===eq) pts+=p; });
   return pts;
 }
 function afEquiposHTML(){
@@ -3867,7 +3905,7 @@ function afSortear(){
 }
 function afEmpezar(){
   if(!esTablet)return;
-  db.ref('amigoFiel').set({sorteado:true});
+  db.ref('amigoFiel').set({sorteado:true,preguntas:afGenerarPreguntas()});
 }
 function renderAF(){
   document.getElementById('af-pts1').textContent=afPuntosEquipo(1);
@@ -3881,17 +3919,21 @@ function renderAF(){
   }
   const i=afRespuestas.length;
   const miEq=afEquipoDe(miNombre);
-  if(i>=AF_PREGUNTAS.length){
+  if(!afPreguntas.length){
+    cuerpo.innerHTML=`<div class="af-espera">Generando preguntas…</div>`;
+    return;
+  }
+  if(i>=afPreguntas.length){
     const p1=afPuntosEquipo(1),p2=afPuntosEquipo(2);
     const gan=p1===p2?'¡Empate!':(p1>p2?'Ganó Equipo 1 🏆':'Ganó Equipo 2 🏆');
     cuerpo.innerHTML=`<div class="af-final"><div class="big">🏁</div><div style="font-family:'Cinzel',serif;font-weight:700;color:var(--az);font-size:16px">${gan}</div></div>
       ${esTablet?`<button class="btn btn-out" style="margin-top:16px" onclick="afReset()">🔄 Volver a jugar</button>`:''}`;
     return;
   }
-  const preg=AF_PREGUNTAS[i];
+  const preg=afPreguntas[i];
   if(esTablet){
     cuerpo.innerHTML=`<div class="af-card">
-      <div class="af-card-prog">Pregunta ${i+1} de ${AF_PREGUNTAS.length}</div>
+      <div class="af-card-prog">Pregunta ${i+1} de ${afPreguntas.length}</div>
       <div class="af-card-eq">Responde Equipo ${preg.equipo}</div>
       <div class="af-card-novio">Sobre: ${preg.novio}</div>
       <div class="af-card-txt">${preg.texto}</div>
@@ -3904,7 +3946,7 @@ function renderAF(){
     <button class="btn btn-out" style="margin-top:14px;padding:10px;font-size:12px" onclick="afReset()">🔄 Reiniciar juego desde cero</button>`;
   } else {
     cuerpo.innerHTML=`<div class="af-card">
-      <div class="af-card-prog">Pregunta ${i+1} de ${AF_PREGUNTAS.length}</div>
+      <div class="af-card-prog">Pregunta ${i+1} de ${afPreguntas.length}</div>
       <div class="af-card-eq">Responde Equipo ${preg.equipo}${miEq===preg.equipo?' (¡tu equipo!)':''}</div>
       <div class="af-card-novio">Sobre: ${preg.novio}</div>
     </div>
@@ -3921,7 +3963,7 @@ function afPuntuar(pts){
 // El flag "premiado" evita sumar los puntos dos veces si el listener se vuelve a disparar.
 function afAdjudicarGanador(respuestas){
   let p1=0,p2=0;
-  respuestas.forEach((p,i)=>{ if(AF_PREGUNTAS[i].equipo===1)p1+=p; else p2+=p; });
+  respuestas.forEach((p,i)=>{ if(afPreguntas[i].equipo===1)p1+=p; else p2+=p; });
   db.ref('amigoFiel/premiado').set(true);
   if(p1===p2)return;
   const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
