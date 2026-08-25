@@ -844,7 +844,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     🕵️ Código Secreto: equipo ganador +1 pt por partida<br>
     📸 Novios Panini: 1°=5pts · 2°=4pts · 3°=3pts · 4°=2pts · 5°=1pt<br>
     🎯 Misiones 2.0 - TA TE TI: equipo ganador +5 pts<br>
-    🃏 Truco: +1 pt a cada ganador del partido
+    🃏 Truco: +1 pt a cada ganador del partido<br>
+    🏆 Amigo Fiel: +3 pts cada uno del equipo ganador
   </div>
   <div id="tabla-rows"></div>
 </div>
@@ -4077,9 +4078,9 @@ async function afFinalizar(){
   if(p1===p2)return;
   const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
   const nEq=p1>p2?1:2;
-  sumarPtosLista(ganador,5,'Amigo Fiel');
-  notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
-  publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
+  sumarPtosLista(ganador,3,'Amigo Fiel');
+  notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +3 pts para cada uno','🏆');
+  publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +3 pts para cada uno.`);
 }
 async function afReset(){
   if(!esTablet)return;
