@@ -149,6 +149,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tabla-pts span{font-size:10px;color:var(--gr);font-weight:400;font-family:'Inter',sans-serif}
 .tabla-bar-wrap{background:var(--bd);border-radius:4px;height:4px;margin-top:4px;overflow:hidden}
 .tabla-bar{height:100%;background:var(--az);border-radius:4px;transition:width .5s}
+.tabla-desglose{background:var(--sf);border-radius:10px;padding:8px 14px;margin:-4px 0 8px;font-size:12px;color:var(--gr)}
+.tabla-desglose-item{display:flex;justify-content:space-between;padding:3px 0}
 .tabla-info{background:var(--sf);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gr);line-height:1.8;border:1px solid var(--bd)}
 .tabla-info strong{color:var(--az)}
 
@@ -1401,7 +1403,7 @@ function eqCardHTML(titulo,nombres,clase,size){
 // ESTADO
 // ════════════════════════════════════════
 let miNombre='',esTablet=false;
-let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null;
+let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},puntosLog={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null;
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
@@ -1598,6 +1600,12 @@ function iniciarApp(){
 
   db.ref('puntos').on('value',snap=>{
     puntos=snap.val()||{};
+    const en=document.getElementById('scr-tabla').classList.contains('on');
+    if(en)renderTabla();
+  });
+
+  db.ref('puntosLog').on('value',snap=>{
+    puntosLog=snap.val()||{};
     const en=document.getElementById('scr-tabla').classList.contains('on');
     if(en)renderTabla();
   });
@@ -2047,10 +2055,10 @@ function adminAjustarPuntos(){
   const nombre=document.getElementById('adm-pts-nombre').value;
   const delta=parseInt(document.getElementById('adm-pts-delta').value,10);
   if(!nombre||isNaN(delta))return;
-  sumarPtosLista([nombre],delta);
+  sumarPtosLista([nombre],delta,'Ajuste manual');
   renderAdminPuntosTab(document.getElementById('admin-content'));
 }
-async function adminResetPuntos(){if(!(await confirmApp('¿Resetear puntos?')))return;db.ref('puntos').remove();db.ref('album_orden').remove();}
+async function adminResetPuntos(){if(!(await confirmApp('¿Resetear puntos?')))return;db.ref('puntos').remove();db.ref('puntosLog').remove();db.ref('album_orden').remove();}
 
 // Junta todas las fotos/videos de posts, comentarios y el album en una sola grilla,
 // con opcion de borrar cualquiera (no solo lo tuyo).
@@ -2094,6 +2102,18 @@ async function adminBorrarContenido(i){
 // ════════════════════════════════════════
 // TABLA
 // ════════════════════════════════════════
+let tablaExpandido=new Set();
+function toggleTablaFila(n){
+  if(tablaExpandido.has(n)) tablaExpandido.delete(n); else tablaExpandido.add(n);
+  renderTabla();
+}
+function desglosePts(nombre){
+  const porJuego={};
+  Object.values(puntosLog||{}).forEach(e=>{
+    if(e&&e.nombre===nombre) porJuego[e.juego]=(porJuego[e.juego]||0)+e.pts;
+  });
+  return porJuego;
+}
 function renderTabla(){
   const cont=document.getElementById('tabla-rows');if(!cont)return;
   const ns=JUGADORES;
@@ -2101,19 +2121,30 @@ function renderTabla(){
   const sorted=ns.map(n=>({n,p:puntos[n]||0})).sort((a,b)=>b.p-a.p);
   const max=sorted[0].p||1;
   const medals=['g','s','b'];
-  cont.innerHTML=sorted.map((x,i)=>`
-    <div class="tabla-row">
+  cont.innerHTML=sorted.map((x,i)=>{
+    const abierto=tablaExpandido.has(x.n);
+    let desgloseHTML='';
+    if(abierto){
+      const d=Object.entries(desglosePts(x.n)).sort((a,b)=>b[1]-a[1]);
+      desgloseHTML=`<div class="tabla-desglose">${d.length?d.map(([juego,pts])=>
+        `<div class="tabla-desglose-item"><span>${escaparHTML(juego)}</span><span>${pts>0?'+':''}${pts} pts</span></div>`).join('')
+        :'Sin puntos todavía'}</div>`;
+    }
+    return `<div class="tabla-row" style="cursor:pointer" onclick="toggleTablaFila('${x.n}')">
       <div class="tabla-pos ${medals[i]||''}">${['🥇','🥈','🥉'][i]||i+1}</div>
       <div><div class="tabla-nm">${ng(x.n)}${x.n===miNombre?' <span style="font-size:10px;color:var(--gr)">(vos)</span>':''}</div>
       <div class="tabla-bar-wrap"><div class="tabla-bar" style="width:${x.p?Math.round(x.p/max*100):0}%"></div></div></div>
       <div class="tabla-pts">${x.p}<span> pts</span></div>
-    </div>`).join('');
+    </div>${desgloseHTML}`;
+  }).join('');
 }
 
-function sumarPtosLista(lista,pts){
+function sumarPtosLista(lista,pts,juego){
   const p={...puntos};
   lista.forEach(n=>{p[n]=(p[n]||0)+pts;});
   db.ref('puntos').set(p);
+  const ts=Date.now();
+  lista.forEach(n=>db.ref('puntosLog').push({nombre:n,pts,juego:juego||'Otro',ts}));
 }
 
 // ════════════════════════════════════════
@@ -3225,7 +3256,7 @@ function tocarCarta(i){
 function sumarPtosCS(g){
   const eq=g==='a'?'a':'r';
   const lista=todosLosJugadores().filter(n=>equipos[n]===eq);
-  sumarPtosLista(lista,1);
+  sumarPtosLista(lista,1,'Código Secreto');
 }
 
 function darPista(){
@@ -3404,7 +3435,7 @@ function confirmarFoto(){
           const nueva=[...orden,upNovio];
           db.ref('album_orden').set(nueva);
           const pts=[5,4,3,2,1][nueva.length-1]||1;
-          sumarPtosLista((paniniEquipos&&paniniEquipos[upNovio])||[upNovio],pts);
+          sumarPtosLista((paniniEquipos&&paniniEquipos[upNovio])||[upNovio],pts,'Novios Panini');
           notificar('¡El álbum de '+upNovio+' está completo! +'+pts+' pts','🏆');
           publicarNoticia('Novios Panini','🏆',
             `¡El álbum de ${ng(upNovio)} está completo! Las 9 figuritas pegadas. +${pts} pts.`);
@@ -3702,7 +3733,7 @@ async function cambiarMision(){
         `${nmMio} se quedó sin tiempo dos veces en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
       if(gano){
         ganador=rival;
-        sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5);
+        sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
         notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
         publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
       }
@@ -3815,7 +3846,7 @@ function aprobarMision(idx){
   if(rivalPerdio) notificar('El otro equipo llegó primero a la casilla '+(p.pos+1)+' — elegí otra','⚠️');
   if(gano){
     ganador=p.equipo;
-    sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5);
+    sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
     notificar('¡Misiones 2.0! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
     publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
   } else {
@@ -4038,7 +4069,7 @@ async function afFinalizar(){
   if(p1===p2)return;
   const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
   const nEq=p1>p2?1:2;
-  sumarPtosLista(ganador,5);
+  sumarPtosLista(ganador,5,'Amigo Fiel');
   notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
   publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
 }
@@ -4117,7 +4148,7 @@ function puntoTruco(eq,delta){
     upd.ganador=eq;
     const toArr=x=>x?Array.isArray(x)?x:Object.values(x):[];
     const lista=toArr(eq==='a'?truco.equipoA:truco.equipoR);
-    sumarPtosLista(lista,1);
+    sumarPtosLista(lista,1,'Truco');
     const perd=toArr(eq==='a'?truco.equipoR:truco.equipoA);
     const ptsPerd=eq==='a'?(truco.ptsR||0):(truco.ptsA||0);
     notificar('Truco: gana '+(eq==='a'?'NOSOTROS':'ELLOS')+' ('+lista.join(', ')+') — +1 pt','🃏');
