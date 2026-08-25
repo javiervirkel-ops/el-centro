@@ -520,9 +520,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .cons-banner-txt b{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;opacity:.9;margin-bottom:2px}
 .cons-banner-cta{font-size:11px;font-weight:800;background:rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;white-space:nowrap;flex-shrink:0}
 .aviso-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--ro),#E8604A);border-radius:14px;padding:12px 14px;margin-bottom:12px;color:#fff}
-.aviso-banner-ico{font-size:22px;flex-shrink:0}
-.aviso-banner-txt{flex:1;font-size:13px;font-weight:700;line-height:1.35;min-width:0}
-.aviso-banner-txt b{display:block;font-size:16px;margin-bottom:2px;font-weight:800}
+.aviso-banner-icos{display:flex;gap:5px;flex-shrink:0}
+.aviso-banner-ico{font-size:16px;width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.aviso-banner-txt{flex:1;font-size:14.5px;font-weight:800;line-height:1.35;min-width:0}
 .aviso-banner-x{font-size:16px;opacity:.85;cursor:pointer;flex-shrink:0;padding:2px 4px}
 .aviso-admin-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
 .aviso-admin-row .inp{flex:1}
@@ -2223,7 +2223,7 @@ function renderAvisoBanner(){
   const b=document.getElementById('aviso-banner');if(!b)return;
   if(!aviso||!aviso.texto||(aviso.hasta&&aviso.hasta<=Date.now())){b.style.display='none';return;}
   b.style.display='flex';
-  b.innerHTML=`<div class="aviso-banner-ico">📌</div><div class="aviso-banner-txt"><b>❗</b>${escaparHTML(aviso.texto)}</div>${esTablet?'<div class="aviso-banner-x" onclick="adminAvisoLimpiar()">✕</div>':''}`;
+  b.innerHTML=`<div class="aviso-banner-icos"><div class="aviso-banner-ico">📌</div><div class="aviso-banner-ico">❗</div></div><div class="aviso-banner-txt">${escaparHTML(aviso.texto)}</div>${esTablet?'<div class="aviso-banner-x" onclick="adminAvisoLimpiar()">✕</div>':''}`;
 }
 function renderAvisoAdmin(){
   const el=document.getElementById('aviso-admin');if(!el)return;
