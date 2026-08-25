@@ -1784,24 +1784,24 @@ function goTab(n){
 // CALENDARIO — el admin puede agregar/sacar ítems por día
 // ════════════════════════════════════════
 const CALENDARIO_META={
-  d1:{num:'DÍA 1',emo:'✈️',fecha:'Miércoles 2 de Septiembre'},
-  d2:{num:'DÍA 2',emo:'🔥',fecha:'Jueves 3 de Septiembre'},
-  d3:{num:'DÍA 3',emo:'🏖️',fecha:'Viernes 4 de Septiembre'},
-  d4:{num:'DÍA 4',emo:'🌊',fecha:'Sábado 5 de Septiembre'},
-  d5:{num:'DÍA 5',emo:'🥂',fecha:'Domingo 6 de Septiembre'},
-  d6:{num:'DÍA 6',emo:'🍖',fecha:'Lunes 7 de Septiembre'},
-  d7:{num:'DÍA 7',emo:'⛵',fecha:'Martes 8 de Septiembre'},
-  d8:{num:'DÍA 8',emo:'🏠',fecha:'Miércoles 9 de Septiembre'}
+  d1:{num:'DÍA 1',emo:'✈️',fecha:'Miércoles 2 de Septiembre · Llegada 14:30'},
+  d2:{num:'DÍA 2',emo:'🌅',fecha:'Jueves 3 de Septiembre · Chora + Sunset'},
+  d3:{num:'DÍA 3',emo:'🎉',fecha:'Viernes 4 de Septiembre · Alemagou Day'},
+  d4:{num:'DÍA 4',emo:'🧘',fecha:'Sábado 5 de Septiembre · Recovery Mode'},
+  d5:{num:'DÍA 5',emo:'🥂',fecha:'Domingo 6 de Septiembre · Scorpios'},
+  d6:{num:'DÍA 6',emo:'🌤️',fecha:'Lunes 7 de Septiembre · Chill Day'},
+  d7:{num:'DÍA 7',emo:'⛵',fecha:'Martes 8 de Septiembre · Boat Day'},
+  d8:{num:'DÍA 8',emo:'🏠',fecha:'Miércoles 9 de Septiembre · Última vuelta'}
 };
 const CALENDARIO_DEFAULT={
-  d1:[{texto:'Llegada'}],
-  d2:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Asado'},{texto:'Centro'}],
-  d3:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Alemagou'},{texto:'Jodita picante',hot:true}],
-  d4:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Centro'}],
-  d5:[{texto:'Desayuno'},{texto:'Almuerzo en casa'},{texto:'Scorpios'},{texto:'Jodita picante',hot:true}],
-  d6:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Mega asado'}],
-  d7:[{texto:'Desayuno'},{texto:'Barco'},{texto:'Libre'}],
-  d8:[{texto:'Check out'}]
+  d1:[{texto:'Aterrizaje suave',hot:true},{texto:'Check-in'},{texto:'Tarde tranquila en hotel/playa'},{texto:'Cena relajada'}],
+  d2:[{texto:'Primera noche seria',hot:true},{texto:'Playa/relax de día'},{texto:'Chora por la tarde'},{texto:'Sunset + cena'},{texto:'Negrita 23:30'}],
+  d3:[{texto:'Big party',hot:true},{texto:'Mañana tranquila/playa'},{texto:'Almuerzo liviano'},{texto:'Descanso'},{texto:'Alemagou desde las 17:00'},{texto:'Sunset + party'},{texto:'VOID opcional'}],
+  d4:[{texto:'Recuperación con estilo',hot:true},{texto:'Día de recuperación'},{texto:'Playa linda + almuerzo tranquilo'},{texto:'Tarde libre'},{texto:'Cena'}],
+  d5:[{texto:'Party time',hot:true},{texto:'Mañana tranquila/playa'},{texto:'Almuerzo'},{texto:'Descanso'},{texto:'Scorpios'}],
+  d6:[{texto:'Reset',hot:true},{texto:'Playa + almuerzo'},{texto:'Tarde libre'},{texto:'Sunset / Chora + cena'}],
+  d7:[{texto:'Rhenia + calas',hot:true},{texto:'Mar y música'},{texto:'Volver por la tarde'},{texto:'Cena tranquila'}],
+  d8:[{texto:'Final',hot:true},{texto:'Desayuno'},{texto:'Check-out y salida'}]
 };
 function itemsDeDia(dk){
   const raw=calendarioData[dk];
