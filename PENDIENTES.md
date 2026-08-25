@@ -28,8 +28,9 @@ Van 12. La idea es llegar a unas 20 y que el juego **sortee 9 al azar** en cada 
 12. Convencé a **[T]** de que te mire porque "tenés algo en el ojo" y lográ que te sople el
     ojo para sacártelo.
 
-**Ojo**: la función `generarPregunta()` traduce cada misión en una pregunta para el target
-("¿Te cantaron algo?"). Si cambia el banco, hay que actualizarla.
+(25 ago 2026: se sacó `generarPregunta()` del código — era una función vieja, sin conectar a
+nada, de una versión anterior del juego. Hoy la tablet aprueba/rechaza mirando directo el texto
+de la misión, sin generar una pregunta aparte, y así está bien.)
 
 ---
 

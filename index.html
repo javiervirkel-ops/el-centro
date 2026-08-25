@@ -3755,23 +3755,6 @@ function renderPendientesTT(){
       </div></div>`).join('');
 }
 
-function generarPregunta(mision){
-  // Convertir la misión en una pregunta para el target
-  if(mision.includes('eructo')) return '¿Te soplaron un eructo de cerca?';
-  if(mision.includes('abrazo')) return '¿Te dieron un abrazo diciéndote que estaban tristes?';
-  if(mision.includes('quiero')) return '¿Te hicieron decir "te quiero"?';
-  if(mision.includes('comer')) return '¿Te dieron de comer algo con la mano?';
-  if(mision.includes('cinco')) return '¿Te chocaron los cinco varias veces con excusas raras?';
-  if(mision.includes('trago')) return '¿Te invitaron un trago o comida solo con miradas y gestos?';
-  if(mision.includes('palabra nueva')) return '¿Usaste una palabra inventada sin darte cuenta?';
-  if(mision.includes('mimo')) return '¿Te hicieron un mimo en el pelo o una caricia en la espalda?';
-  if(mision.includes('brindis')) return '¿Hiciste un brindis ridículo en voz alta?';
-  if(mision.includes('fobia')) return '¿Contaste tu mayor miedo o fobia?';
-  if(mision.includes('puntúe')) return '¿Te pusieron puntaje en algo absurdo?';
-  if(mision.includes('ojo')) return '¿Te soplaron el ojo para "sacarte algo"?';
-  return '¿Cumplieron la misión contigo?';
-}
-
 function aprobarMision(idx){
   if(!tt)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
