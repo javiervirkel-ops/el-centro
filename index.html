@@ -451,6 +451,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .af-score-nm{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--az);margin-bottom:4px}
 .af-score-pts{font-size:28px;font-weight:900;color:var(--txt)}
 .af-score-vs{font-family:'Cinzel',serif;font-size:11px;color:var(--gr);font-weight:700}
+.af-roster{background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--gr);line-height:1.5}
+.af-roster b{color:var(--az);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:800}
 .af-card{background:var(--bl);border:1.5px solid var(--bd);border-radius:16px;padding:20px;text-align:center}
 .af-card-eq{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gr);text-transform:uppercase;margin-bottom:6px}
 .af-card-novio{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--az);margin-bottom:14px}
@@ -824,6 +826,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="af-score-vs">VS</div>
     <div class="af-score-eq"><div class="af-score-nm">Equipo 2</div><div class="af-score-pts" id="af-pts2">0</div></div>
   </div>
+  <div class="af-roster" id="af-roster" style="display:none"></div>
   <div id="af-cuerpo"></div>
 </div>
 
@@ -3921,6 +3924,14 @@ function afEmpezar(){
 function renderAF(){
   document.getElementById('af-pts1').textContent=afPuntosEquipo(1);
   document.getElementById('af-pts2').textContent=afPuntosEquipo(2);
+  // Quien es de que equipo tiene que verse siempre, no solo en la pantalla del sorteo.
+  const rost=document.getElementById('af-roster');
+  if(rost){
+    if(afSorteado){
+      rost.style.display='block';
+      rost.innerHTML=`<div><b>Equipo 1:</b> ${AF_EQUIPO1.map(ng).join(', ')}</div><div style="margin-top:4px"><b>Equipo 2:</b> ${AF_EQUIPO2.map(ng).join(', ')}</div>`;
+    } else rost.style.display='none';
+  }
   const cuerpo=document.getElementById('af-cuerpo');if(!cuerpo)return;
   if(!afSorteado){
     cuerpo.innerHTML=esTablet
