@@ -465,6 +465,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .af-espera{text-align:center;color:var(--gr);font-size:13px;padding:20px}
 .af-final{text-align:center;padding:20px}
 .af-final .big{font-size:40px;margin-bottom:10px}
+.af-extra-row{display:flex;align-items:center;justify-content:space-between;background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:10px 14px;margin-bottom:8px}
+.af-extra-nm{font-family:'Cinzel',serif;font-size:12.5px;font-weight:700;color:var(--az)}
+.af-extra-btns{display:flex;gap:8px}
+.af-extra-btn{width:44px;padding:8px 0;border-radius:8px;border:none;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;font-size:13px}
+.af-extra-btn:active{transform:scale(.95)}
+.af-extra-menos{background:var(--ro2);color:var(--ro)}
+.af-extra-mas{background:var(--az);color:#fff}
 
 /* FEED */
 .feed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -3874,7 +3881,7 @@ function afEquipoDe(nombre){
 function afPuntosEquipo(eq){
   let pts=0;
   afRespuestas.forEach((p,i)=>{ if(afPreguntas[i] && afPreguntas[i].equipo===eq) pts+=p; });
-  afExtras.forEach(e=>{ if(e&&e.equipo===eq) pts+=1; });
+  afExtras.forEach(e=>{ if(e&&e.equipo===eq) pts+=(e.valor||0); });
   return pts;
 }
 function afEquiposHTML(){
@@ -3944,9 +3951,19 @@ function renderAF(){
           <div style="font-family:'Cinzel',serif;font-weight:700;color:var(--az);font-size:14px;margin-top:6px">Terminaron las 18 preguntas</div>
           <div style="font-size:12.5px;color:var(--gr);margin-top:4px">Seguí sumando puntos a mano y finalizá cuando quieran</div>
         </div>
-        <div style="display:flex;gap:10px;margin-bottom:14px">
-          <button class="btn btn-out" style="flex:1" onclick="afSumarExtra(1)">+1 Equipo 1</button>
-          <button class="btn btn-out" style="flex:1" onclick="afSumarExtra(2)">+1 Equipo 2</button>
+        <div class="af-extra-row">
+          <span class="af-extra-nm">Equipo 1</span>
+          <div class="af-extra-btns">
+            <button class="af-extra-btn af-extra-menos" onclick="afSumarExtra(1,-1)">−1</button>
+            <button class="af-extra-btn af-extra-mas" onclick="afSumarExtra(1,1)">+1</button>
+          </div>
+        </div>
+        <div class="af-extra-row" style="margin-bottom:14px">
+          <span class="af-extra-nm">Equipo 2</span>
+          <div class="af-extra-btns">
+            <button class="af-extra-btn af-extra-menos" onclick="afSumarExtra(2,-1)">−1</button>
+            <button class="af-extra-btn af-extra-mas" onclick="afSumarExtra(2,1)">+1</button>
+          </div>
         </div>
         <button class="btn btn-az" onclick="afFinalizar()">🏁 Finalizar partida</button>`;
       } else {
@@ -3989,11 +4006,11 @@ function afPuntuar(pts){
   // pisan entre si, sin importar si el anterior todavia no volvio de la base.
   db.ref('amigoFiel/respuestas').push(pts);
 }
-function afSumarExtra(eq){
+function afSumarExtra(eq,delta){
   if(!esTablet)return;
   // push() en vez de un contador leido-y-pisado, mismo motivo que afPuntuar: evita que dos
-  // toques rapidos se pisen entre si.
-  db.ref('amigoFiel/extras').push({equipo:eq});
+  // toques rapidos se pisen entre si. delta puede ser negativo (para corregir un error).
+  db.ref('amigoFiel/extras').push({equipo:eq,valor:delta});
 }
 // El admin decide cuando termina la partida (el juego sigue en vivo por fuera de la app
 // despues de las 18 preguntas fijas). El flag "premiado" evita adjudicar dos veces.
