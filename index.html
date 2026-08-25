@@ -1211,6 +1211,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     </div>
   </div>
 </div>
+<!-- DIALOGO GENERICO (reemplaza alert()/confirm() nativos del navegador) -->
+<div class="modal-bg" id="modal-dialogo">
+  <div class="modal"><div class="modal-top"></div>
+    <div class="modal-emo" id="dlg-emo">❓</div>
+    <div class="modal-sub" id="dlg-msg" style="white-space:pre-line"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-out" id="dlg-cancelar" style="flex:1;display:none">Cancelar</button>
+      <button class="btn btn-az" id="dlg-ok" style="flex:1">Ok</button>
+    </div>
+  </div>
+</div>
+
 <!-- PANEL DE ADMIN (pantalla completa, solo accesible en modo Admin) -->
 <div id="scr-admin" class="scr">
   <button class="back-btn" onclick="goTab('inicio')">← Feed</button>
@@ -2218,6 +2230,35 @@ function renderFeed(){
 
 function escaparHTML(t){
   return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ════════════════════════════════════════
+// DIALOGOS PROPIOS — reemplazan alert()/confirm() nativos del navegador
+// ════════════════════════════════════════
+function alertApp(msg){
+  return new Promise(resolve=>{
+    document.getElementById('dlg-emo').textContent='ℹ️';
+    document.getElementById('dlg-msg').textContent=msg;
+    const cancelar=document.getElementById('dlg-cancelar');
+    cancelar.style.display='none';
+    const ok=document.getElementById('dlg-ok');
+    ok.textContent='Ok';
+    ok.onclick=()=>{document.getElementById('modal-dialogo').classList.remove('open');resolve();};
+    document.getElementById('modal-dialogo').classList.add('open');
+  });
+}
+function confirmApp(msg){
+  return new Promise(resolve=>{
+    document.getElementById('dlg-emo').textContent='❓';
+    document.getElementById('dlg-msg').textContent=msg;
+    const cancelar=document.getElementById('dlg-cancelar');
+    cancelar.style.display='block';
+    cancelar.onclick=()=>{document.getElementById('modal-dialogo').classList.remove('open');resolve(false);};
+    const ok=document.getElementById('dlg-ok');
+    ok.textContent='Confirmar';
+    ok.onclick=()=>{document.getElementById('modal-dialogo').classList.remove('open');resolve(true);};
+    document.getElementById('modal-dialogo').classList.add('open');
+  });
 }
 
 // ── Composer ──
