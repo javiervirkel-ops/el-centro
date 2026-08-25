@@ -3864,6 +3864,7 @@ let afRespuestas=[];
 let afPreguntas=[];
 let afSorteado=false;
 let afSorteando=false;
+let afGenerandoPreguntas=false;
 function afEquipoDe(nombre){
   if(AF_EQUIPO1.includes(nombre)) return 1;
   if(AF_EQUIPO2.includes(nombre)) return 2;
@@ -3920,9 +3921,17 @@ function renderAF(){
   const i=afRespuestas.length;
   const miEq=afEquipoDe(miNombre);
   if(!afPreguntas.length){
+    // Partidas viejas (de antes de que existiera el banco de preguntas) quedan con
+    // sorteado=true pero sin preguntas — se autorepara escribiendolas ahora, en vez de
+    // quedar trabado para siempre sin boton de salida.
+    if(esTablet&&!afGenerandoPreguntas){
+      afGenerandoPreguntas=true;
+      db.ref('amigoFiel/preguntas').set(afGenerarPreguntas());
+    }
     cuerpo.innerHTML=`<div class="af-espera">Generando preguntas…</div>`;
     return;
   }
+  afGenerandoPreguntas=false;
   if(i>=afPreguntas.length){
     const p1=afPuntosEquipo(1),p2=afPuntosEquipo(2);
     const gan=p1===p2?'¡Empate!':(p1>p2?'Ganó Equipo 1 🏆':'Ganó Equipo 2 🏆');
