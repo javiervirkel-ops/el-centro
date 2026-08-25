@@ -2061,7 +2061,8 @@ function adminAjustarPuntos(){
   const delta=parseInt(document.getElementById('adm-pts-delta').value,10);
   const motivo=document.getElementById('adm-pts-motivo').value.trim();
   if(!nombre||isNaN(delta))return;
-  sumarPtosLista([nombre],delta,motivo||'Ajuste manual');
+  if(!motivo){alertApp('Escribí el motivo antes de aplicar los puntos');return;}
+  sumarPtosLista([nombre],delta,motivo);
   renderAdminPuntosTab(document.getElementById('admin-content'));
 }
 async function adminResetPuntos(){if(!(await confirmApp('¿Resetear puntos?')))return;db.ref('puntos').remove();db.ref('puntosLog').remove();db.ref('album_orden').remove();}
