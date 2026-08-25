@@ -2267,6 +2267,8 @@ function limpiarVencidos(){
     if(p&&p.vence&&p.vence<=ahora) db.ref('posts/'+id).remove();
   });
   if(aviso&&aviso.hasta&&aviso.hasta<=ahora) db.ref('aviso').remove();
+  // La consigna destacada tiene que dejar de estar pineada a las 24hs (sigue como post normal).
+  if(document.getElementById('scr-inicio').classList.contains('on')) renderConsignaBanner();
 }
 
 // ── Aviso pineado del admin (estilo "HOY PLAYA"), dura 3hs y se borra solo ──
@@ -2303,7 +2305,9 @@ function cantComs(p){
 
 function renderConsignaBanner(){
   const b=document.getElementById('cons-banner');if(!b)return;
-  const activa=postsOrdenados().find(p=>p.consigna);
+  // Destacada arriba del feed solo durante las primeras 24hs. Despues sigue existiendo
+  // como post normal en el feed (con su hilo de comentarios), solo deja de estar pineada.
+  const activa=postsOrdenados().find(p=>p.consigna&&(Date.now()-(p.ts||0))<24*60*60*1000);
   if(!activa){b.style.display='none';return;}
   b.style.display='flex';
   b.onclick=()=>abrirPost(activa.id);
