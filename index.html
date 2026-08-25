@@ -623,6 +623,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="umenu-item" id="um-notif-item" onclick="toggleNotifs()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/></svg>Silenciar notificaciones</div>
   <div class="umenu-item" id="um-tablet-item" onclick="cerrarMenu();pedirModoTablet()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Admin</div>
   <div class="umenu-item" id="um-admin-item" style="display:none" onclick="cerrarMenu();goJuego('admin')"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Panel de Admin</div>
+  <div class="umenu-item red" id="um-cambiar-item" onclick="cerrarMenu();cerrarSesion()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/></svg>Cambiar de jugador</div>
 </div>
 <div class="ov" id="ov" onclick="cerrarMenu()"></div>
 <div id="toasts"></div>
@@ -1333,6 +1334,16 @@ function avatarHTML(nombre,size,extra){
 }
 const CHAT_COLORS=['#1A4B9C','#C0392B','#1A8A4A','#7B2D8B','#C67A00','#0A7B8C','#2E86C1','#A93226','#1D8348','#6C3483','#C07F00','#0E7490','#B45309','#0F766E','#92400E'];
 
+// Chip de "avatar + nombre" reusado en todas las pantallas de equipos (Código Secreto,
+// Truco, Amigo Fiel, Novios Panini, sorteo de camas).
+function eqMemberHTML(nombre,size,badge){
+  return `<div class="eq-member">${avatarHTML(nombre,size||26)}<span>${ng(nombre)}${badge||''}</span></div>`;
+}
+// Tarjeta de equipo completa: título + lista de miembros con eqMemberHTML.
+function eqCardHTML(titulo,nombres,clase,size){
+  return `<div class="eq-card eq-${clase}"><div class="eq-tit">${titulo}</div>${nombres.map(n=>eqMemberHTML(n,size)).join('')}</div>`;
+}
+
 // ════════════════════════════════════════
 // ESTADO
 // ════════════════════════════════════════
@@ -1796,8 +1807,8 @@ function cerrarMenu(){
   document.getElementById('umenu').classList.remove('open');
   document.getElementById('ov').classList.remove('on');
 }
-function cerrarSesion(){
-  cerrarMenu();
+async function cerrarSesion(){
+  if(!(await confirmApp('¿Cambiar de jugador? Vas a volver a la pantalla de elegir nombre.')))return;
   miNombre='';esTablet=false;
   localStorage.removeItem('ec_nombre');
   localStorage.removeItem('ec_tablet');
@@ -1922,7 +1933,7 @@ function renderAdminSugerencias(){
   const lista=toArr(sugerencias).sort((a,b)=>(b.ts||0)-(a.ts||0));
   cont.innerHTML=lista.length?lista.map(s=>`<div class="admin-jug" style="align-items:flex-start;flex-direction:column;gap:4px">
       <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-        <span style="font-weight:700;font-size:12px">${escaparHTML(ng(s.autor))} · ${haceCuanto(s.ts||0)}</span>
+        <span style="font-weight:700;font-size:12px">${ng(s.autor)} · ${haceCuanto(s.ts||0)}</span>
         <button class="btn-xs btn-xs-r" onclick="adminBorrarSugerencia('${s.id}')">Eliminar</button>
       </div>
       <div style="font-size:12.5px;color:var(--txt)">${escaparHTML(s.texto||'')}</div>
@@ -2013,7 +2024,7 @@ function renderAdminContenidoTab(el){
         ${it.tipo==='video'?`<video src="${it.url}" muted></video>`:`<img src="${it.url}">`}
         <button class="admin-content-del" onclick="adminBorrarContenido(${i})">✕</button>
         <div class="admin-content-fuente">${escaparHTML(it.fuente)}</div>
-        <div class="admin-content-autor">${escaparHTML(ng(it.autor)||'?')}</div>
+        <div class="admin-content-autor">${ng(it.autor)||'?'}</div>
       </div>`).join('')}</div>`
     :'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin fotos ni videos todavía</div>';
 }
@@ -2837,7 +2848,7 @@ async function ejecutarSorteo(){
       res.innerHTML=`<div class="nov-wrap">`+eqs.map((e,i)=>`
         <div class="nov-card">
           <div class="nov-tit">Equipo ${i+1} · ${ng(e[0])}</div>
-          ${e.map((n,j)=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}${j===0?' <span style="font-size:10px;color:var(--az);font-weight:700">NOVIO</span>':''}</span></div>`).join('')}
+          ${e.map((n,j)=>eqMemberHTML(n,26,j===0?' <span style="font-size:10px;color:var(--az);font-weight:700">NOVIO</span>':'')).join('')}
         </div>`).join('')+`</div>
         <button class="btn btn-out" style="margin-top:12px" onclick="ejecutarSorteo()"><span class="ico-in">${ico('shuffle',14)}Sortear de nuevo</span></button>`;
       res.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -2851,8 +2862,8 @@ async function ejecutarSorteo(){
     setTimeout(()=>{
       res.style.display='block';
       res.innerHTML=`<div class="eq-wrap" style="margin-bottom:12px">
-        <div class="eq-card eq-izq"><div class="eq-tit">${eq1}</div>${lista.slice(0,mid).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}</span></div>`).join('')}</div>
-        <div class="eq-card eq-der"><div class="eq-tit">${eq2}</div>${lista.slice(mid).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${ng(n)}</span></div>`).join('')}</div>
+        ${eqCardHTML(eq1,lista.slice(0,mid),'izq')}
+        ${eqCardHTML(eq2,lista.slice(mid),'der')}
       </div><button class="btn btn-out" onclick="ejecutarSorteo()"><span class="ico-in">${ico('shuffle',14)}Sortear de nuevo</span></button>`;
     },1500);
     return;
@@ -3219,7 +3230,7 @@ function renderAlbumSorteo(){
     el.innerHTML=`<div class="panini-equipos-grid">${NOVIOS.map(n=>`
       <div class="panini-eq-card">
         <div class="panini-eq-tit">${ng(n)}</div>
-        ${(paniniEquipos[n]||[]).map(m=>`<div class="eq-member">${avatarHTML(m,22)}<span>${ng(m)}</span></div>`).join('')}
+        ${(paniniEquipos[n]||[]).map(m=>eqMemberHTML(m,22)).join('')}
       </div>`).join('')}</div>
       <button class="btn btn-out" style="margin:12px 0;padding:9px;font-size:12px" onclick="paniniSortear()">🔄 Volver a sortear equipos</button>`;
     return;
@@ -3827,8 +3838,8 @@ function afPuntosEquipo(eq){
 }
 function afEquiposHTML(){
   return `<div class="eq-wrap" style="margin-bottom:14px">
-    <div class="eq-card eq-izq"><div class="eq-tit">EQUIPO 1</div>${AF_EQUIPO1.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
-    <div class="eq-card eq-der"><div class="eq-tit">EQUIPO 2</div>${AF_EQUIPO2.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+    ${eqCardHTML('EQUIPO 1',AF_EQUIPO1,'izq')}
+    ${eqCardHTML('EQUIPO 2',AF_EQUIPO2,'der')}
   </div>`;
 }
 // El "sorteo" es puro teatro: siempre termina en AF_EQUIPO1/AF_EQUIPO2 fijos.
@@ -3841,8 +3852,8 @@ function afSortear(){
   const iv=setInterval(()=>{
     const mezcla=shuf([...JUGADORES]);
     cuerpo.innerHTML=`<div class="eq-wrap" style="margin-bottom:14px">
-      <div class="eq-card eq-izq"><div class="eq-tit">EQUIPO 1</div>${mezcla.slice(0,7).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
-      <div class="eq-card eq-der"><div class="eq-tit">EQUIPO 2</div>${mezcla.slice(7).map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+      ${eqCardHTML('EQUIPO 1',mezcla.slice(0,7),'izq')}
+      ${eqCardHTML('EQUIPO 2',mezcla.slice(7),'der')}
     </div>`;
     vueltas++;
     if(vueltas>=8){
@@ -3970,8 +3981,8 @@ async function sortearEquiposTruco(){
   const prev=document.getElementById('truco-preview');
   prev.style.display='block';
   prev.innerHTML=`<div class="eq-wrap" style="margin-bottom:12px">
-    <div class="eq-card eq-izq"><div class="eq-tit">NOSOTROS</div>${a.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
-    <div class="eq-card eq-der"><div class="eq-tit">ELLOS</div>${r.map(n=>`<div class="eq-member">${avatarHTML(n,26)}<span>${n}</span></div>`).join('')}</div>
+    ${eqCardHTML('NOSOTROS',a,'izq')}
+    ${eqCardHTML('ELLOS',r,'der')}
   </div>
   <button class="btn btn-out" style="margin-bottom:8px" onclick="sortearEquiposTruco()"><span class="ico-in">${ico('shuffle',14)}Volver a sortear</span></button>
   <button class="btn btn-az" onclick="iniciarTruco(${JSON.stringify(a).replace(/"/g,'&quot;')},${JSON.stringify(r).replace(/"/g,'&quot;')})">Empezar partida ✓</button>`;
