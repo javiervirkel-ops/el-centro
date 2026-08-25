@@ -1319,7 +1319,7 @@ const GRIEGO={'Antonio':'Tonos Fridminides','Beker':'Matiades Bekeros','Pako':'P
   'Gasti':'Esternides','Juan':'Juanos Esteineas','Tomi':'Tomos Mindlinides',
   'Javi Vir':'Javos Virkelias','MP':'Morcos Plohnagoras','Javi IAS':'Javos Iaschinopulos'};
 // Nombre griego para lo ceremonial; el apodo queda para lo funcional
-function ng(n){return GRIEGO[n]||n||'?';}
+function ng(n){return escaparHTML(GRIEGO[n]||n||'?');}
 
 const PERFILES={'Antonio':'ANTONIO','Beker':'BEKER','Gasti':'GASTI','Harry':'HARRY',
   'Javi IAS':'JAVI_IAS','Javi Vir':'JAVI_VIR','Juan':'JUAN','Keke':'KEKE','Litka':'LITKA',
@@ -1898,11 +1898,14 @@ function renderAdminJugadoresTab(el){
 function renderAdminJugs(){
   const cont=document.getElementById('adm-jugs');if(!cont)return;
   const ns=Object.keys(jugadores);
-  cont.innerHTML=ns.length?ns.map(n=>`<div class="admin-jug"><span>${n}</span><button class="btn-xs btn-xs-r" onclick="adminEliminar('${n}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin jugadores</div>';
+  cont.innerHTML=ns.length?ns.map(n=>`<div class="admin-jug"><span>${escaparHTML(n)}</span><button class="btn-xs btn-xs-r" onclick="adminEliminar('${n.replace(/'/g,"")}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin jugadores</div>';
   const add=document.getElementById('adm-add');if(add)add.value='';
 }
-function adminAgregar(){
-  const v=document.getElementById('adm-add').value.trim();if(!v)return;
+async function adminAgregar(){
+  let v=document.getElementById('adm-add').value.trim();if(!v)return;
+  // Sin caracteres que puedan romper HTML/JS al mostrar el nombre en otras pantallas
+  v=v.replace(/['"<>&`]/g,'');
+  if(!v){await alertApp('Ese nombre tiene caracteres no permitidos');return;}
   db.ref('jugadores/'+v).set({nombre:v,online:false});
   renderAdminJugs();
 }
@@ -2157,11 +2160,11 @@ function renderChat(){
     const col=colorFor(m.nombre||'?');
     const cont=m.tipo==='foto'
       ?`<img class="msg-img" src="${m.img}" onclick="abrirImgChat('${m.img}')" onload="chatImgCargada(this)" loading="lazy">`
-      :m.texto||'';
+      :escaparHTML(m.texto||'');
     return `<div class="msg-row ${yo?'yo':''}">
       ${!yo?avatarHTML(m.nombre,30,'margin-bottom:2px'):''}
       <div class="msg-bw">
-        ${!yo?`<div class="msg-nm" style="color:${col}">${m.nombre}</div>`:''}
+        ${!yo?`<div class="msg-nm" style="color:${col}">${ng(m.nombre)}</div>`:''}
         <div class="msg-b ${yo?'yo':'otro'}">${cont}</div>
         <div class="msg-hora">${m.hora}</div>
       </div>
@@ -3692,7 +3695,7 @@ function renderPendientesTT(){
 
   div.innerHTML=`<div class="ico-in" style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--am);letter-spacing:1px;margin-bottom:10px;justify-content:center;width:100%">${ico('hourglass',13)}MISIONES PENDIENTES DE APROBACIÓN</div>`+
     pendientesArr.map((p,i)=>`<div class="tt-pend">
-      <div class="tt-pend-tit ico-in">${p.equipo==='a'?ico('circle',11)+'Izquierda':ico('x',11)+'Derecha'} · Casilla ${p.pos+1} · ${p.solicitante}</div>
+      <div class="tt-pend-tit ico-in">${p.equipo==='a'?ico('circle',11)+'Izquierda':ico('x',11)+'Derecha'} · Casilla ${p.pos+1} · ${ng(p.solicitante)}</div>
       <div class="tt-pend-txt">${p.mision}</div>
       <div class="tt-pend-btns">
         <button class="btn btn-ro" style="flex:1;padding:10px;font-size:12px" onclick="rechazarMision(${i})"><span class="ico-in">${ico('x',13)}Rechazar</span></button>
