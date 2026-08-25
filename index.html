@@ -2042,6 +2042,7 @@ function renderAdminPuntosTab(el){
   el.innerHTML=`
     <div class="admin-tit">Ajustar puntos a mano</div>
     <select class="inp" id="adm-pts-nombre" style="margin-bottom:8px">${JUGADORES.map(n=>`<option value="${n}">${ng(n)}</option>`).join('')}</select>
+    <input class="inp" id="adm-pts-motivo" placeholder="Motivo (ej: bonus por buena onda)" maxlength="60" style="margin-bottom:8px">
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <input class="inp" id="adm-pts-delta" type="number" placeholder="ej: 5 o -3" style="flex:1">
       <button class="btn-sm btn-sm-az" onclick="adminAjustarPuntos()" style="white-space:nowrap">Aplicar</button>
@@ -2058,8 +2059,9 @@ function renderAdminPuntosTab(el){
 function adminAjustarPuntos(){
   const nombre=document.getElementById('adm-pts-nombre').value;
   const delta=parseInt(document.getElementById('adm-pts-delta').value,10);
+  const motivo=document.getElementById('adm-pts-motivo').value.trim();
   if(!nombre||isNaN(delta))return;
-  sumarPtosLista([nombre],delta,'Ajuste manual');
+  sumarPtosLista([nombre],delta,motivo||'Ajuste manual');
   renderAdminPuntosTab(document.getElementById('admin-content'));
 }
 async function adminResetPuntos(){if(!(await confirmApp('¿Resetear puntos?')))return;db.ref('puntos').remove();db.ref('puntosLog').remove();db.ref('album_orden').remove();}
