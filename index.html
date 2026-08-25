@@ -468,10 +468,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .af-extra-row{display:flex;align-items:center;justify-content:space-between;background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;padding:10px 14px;margin-bottom:8px}
 .af-extra-nm{font-family:'Cinzel',serif;font-size:12.5px;font-weight:700;color:var(--az)}
 .af-extra-btns{display:flex;gap:8px}
-.af-extra-btn{width:44px;padding:8px 0;border-radius:8px;border:none;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;font-size:13px}
+.af-extra-btn{width:38px;padding:8px 0;border-radius:8px;border:none;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;font-size:16px}
 .af-extra-btn:active{transform:scale(.95)}
 .af-extra-menos{background:var(--ro2);color:var(--ro)}
 .af-extra-mas{background:var(--az);color:#fff}
+.af-extra-qty{width:46px;text-align:center;border:1.5px solid var(--bd);border-radius:8px;padding:8px 0;font-size:14px;font-weight:700;color:var(--txt);font-family:'Inter',sans-serif}
 
 /* FEED */
 .feed-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -3954,15 +3955,17 @@ function renderAF(){
         <div class="af-extra-row">
           <span class="af-extra-nm">Equipo 1</span>
           <div class="af-extra-btns">
-            <button class="af-extra-btn af-extra-menos" onclick="afSumarExtra(1,-1)">−1</button>
-            <button class="af-extra-btn af-extra-mas" onclick="afSumarExtra(1,1)">+1</button>
+            <button class="af-extra-btn af-extra-menos" onclick="afAplicarExtra(1,-1)">−</button>
+            <input type="number" class="af-extra-qty" id="af-qty-1" value="1" min="1">
+            <button class="af-extra-btn af-extra-mas" onclick="afAplicarExtra(1,1)">+</button>
           </div>
         </div>
         <div class="af-extra-row" style="margin-bottom:14px">
           <span class="af-extra-nm">Equipo 2</span>
           <div class="af-extra-btns">
-            <button class="af-extra-btn af-extra-menos" onclick="afSumarExtra(2,-1)">−1</button>
-            <button class="af-extra-btn af-extra-mas" onclick="afSumarExtra(2,1)">+1</button>
+            <button class="af-extra-btn af-extra-menos" onclick="afAplicarExtra(2,-1)">−</button>
+            <input type="number" class="af-extra-qty" id="af-qty-2" value="1" min="1">
+            <button class="af-extra-btn af-extra-mas" onclick="afAplicarExtra(2,1)">+</button>
           </div>
         </div>
         <button class="btn btn-az" onclick="afFinalizar()">🏁 Finalizar partida</button>`;
@@ -4006,11 +4009,13 @@ function afPuntuar(pts){
   // pisan entre si, sin importar si el anterior todavia no volvio de la base.
   db.ref('amigoFiel/respuestas').push(pts);
 }
-function afSumarExtra(eq,delta){
+function afAplicarExtra(eq,signo){
   if(!esTablet)return;
+  const inp=document.getElementById('af-qty-'+eq);
+  const cant=Math.max(1,parseInt(inp.value,10)||1);
   // push() en vez de un contador leido-y-pisado, mismo motivo que afPuntuar: evita que dos
-  // toques rapidos se pisen entre si. delta puede ser negativo (para corregir un error).
-  db.ref('amigoFiel/extras').push({equipo:eq,valor:delta});
+  // toques rapidos se pisen entre si. El signo (+/-) permite corregir un error.
+  db.ref('amigoFiel/extras').push({equipo:eq,valor:signo*cant});
 }
 // El admin decide cuando termina la partida (el juego sigue en vivo por fuera de la app
 // despues de las 18 preguntas fijas). El flag "premiado" evita adjudicar dos veces.
