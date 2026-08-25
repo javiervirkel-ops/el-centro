@@ -149,8 +149,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .tabla-pts span{font-size:10px;color:var(--gr);font-weight:400;font-family:'Inter',sans-serif}
 .tabla-bar-wrap{background:var(--bd);border-radius:4px;height:4px;margin-top:4px;overflow:hidden}
 .tabla-bar{height:100%;background:var(--az);border-radius:4px;transition:width .5s}
-.tabla-desglose{background:var(--sf);border-radius:10px;padding:8px 14px;margin:-4px 0 8px;font-size:12px;color:var(--gr)}
-.tabla-desglose-item{display:flex;justify-content:space-between;padding:3px 0}
+.tabla-desglose{background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin:-4px 0 8px}
+.tabla-desglose-item{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--txt);font-weight:600}
+.tabla-desglose-item span:last-child{color:var(--az);font-weight:800}
+.tabla-chevron{flex-shrink:0;color:var(--gr);transition:transform .2s;margin-left:2px}
+.tabla-chevron.abierto{transform:rotate(180deg)}
 .tabla-info{background:var(--sf);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--gr);line-height:1.8;border:1px solid var(--bd)}
 .tabla-info strong{color:var(--az)}
 
@@ -1327,6 +1330,7 @@ const MISIONES=[
 // ── Íconos Lucide (SVG inline, sin CDN) ──
 const ICONOS={
   bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  'chevron-down':'<path d="m6 9 6 6 6-6"/>',
   info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
   'circle-help':'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
   'bell-off':'<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/>',
@@ -2128,13 +2132,14 @@ function renderTabla(){
       const d=Object.entries(desglosePts(x.n)).sort((a,b)=>b[1]-a[1]);
       desgloseHTML=`<div class="tabla-desglose">${d.length?d.map(([juego,pts])=>
         `<div class="tabla-desglose-item"><span>${escaparHTML(juego)}</span><span>${pts>0?'+':''}${pts} pts</span></div>`).join('')
-        :'Sin puntos todavía'}</div>`;
+        :'<div class="tabla-desglose-item" style="color:var(--gr);font-weight:500">Sin puntos todavía</div>'}</div>`;
     }
     return `<div class="tabla-row" style="cursor:pointer" onclick="toggleTablaFila('${x.n}')">
       <div class="tabla-pos ${medals[i]||''}">${['🥇','🥈','🥉'][i]||i+1}</div>
       <div><div class="tabla-nm">${ng(x.n)}${x.n===miNombre?' <span style="font-size:10px;color:var(--gr)">(vos)</span>':''}</div>
       <div class="tabla-bar-wrap"><div class="tabla-bar" style="width:${x.p?Math.round(x.p/max*100):0}%"></div></div></div>
       <div class="tabla-pts">${x.p}<span> pts</span></div>
+      <div class="tabla-chevron ${abierto?'abierto':''}">${ico('chevron-down',16)}</div>
     </div>${desgloseHTML}`;
   }).join('');
 }
