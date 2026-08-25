@@ -694,79 +694,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="viaje-fecha">2 — 9 de Septiembre 2026</div>
     <div class="viaje-sub">El viaje del Centro. Izquierda y Derecha, pero todos del medio.</div>
   </div>
-  <div class="dia-cards">
-    <div class="dia-card dia-card-d1">
-      <div class="dia-top"><span class="dia-num">DÍA 1</span><span class="dia-emo">✈️</span></div>
-      <div class="dia-fecha">Miércoles 2 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Llegada</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d2">
-      <div class="dia-top"><span class="dia-num">DÍA 2</span><span class="dia-emo">🔥</span></div>
-      <div class="dia-fecha">Jueves 3 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Playa / Casa</div>
-        <div class="dia-item">Asado</div>
-        <div class="dia-item">Centro</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d3">
-      <div class="dia-top"><span class="dia-num">DÍA 3</span><span class="dia-emo">🏖️</span></div>
-      <div class="dia-fecha">Viernes 4 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Playa / Casa</div>
-        <div class="dia-item">Alemagou</div>
-        <div class="dia-item hot">Jodita picante</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d4">
-      <div class="dia-top"><span class="dia-num">DÍA 4</span><span class="dia-emo">🌊</span></div>
-      <div class="dia-fecha">Sábado 5 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Playa / Casa</div>
-        <div class="dia-item">Centro</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d5">
-      <div class="dia-top"><span class="dia-num">DÍA 5</span><span class="dia-emo">🥂</span></div>
-      <div class="dia-fecha">Domingo 6 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Almuerzo en casa</div>
-        <div class="dia-item">Scorpios</div>
-        <div class="dia-item hot">Jodita picante</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d6">
-      <div class="dia-top"><span class="dia-num">DÍA 6</span><span class="dia-emo">🍖</span></div>
-      <div class="dia-fecha">Lunes 7 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Playa / Casa</div>
-        <div class="dia-item">Mega asado</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d7">
-      <div class="dia-top"><span class="dia-num">DÍA 7</span><span class="dia-emo">⛵</span></div>
-      <div class="dia-fecha">Martes 8 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Desayuno</div>
-        <div class="dia-item">Barco</div>
-        <div class="dia-item">Libre</div>
-      </div>
-    </div>
-    <div class="dia-card dia-card-d8">
-      <div class="dia-top"><span class="dia-num">DÍA 8</span><span class="dia-emo">🏠</span></div>
-      <div class="dia-fecha">Miércoles 9 de Septiembre</div>
-      <div class="dia-items">
-        <div class="dia-item">Check out</div>
-      </div>
-    </div>
-  </div>
+  <div class="dia-cards" id="dia-cards"></div>
 </div>
 
 <!-- JUEGOS -->
@@ -1400,7 +1328,7 @@ const CHAT_COLORS=['#1A4B9C','#C0392B','#1A8A4A','#7B2D8B','#C67A00','#0A7B8C','
 // ESTADO
 // ════════════════════════════════════════
 let miNombre='',esTablet=false;
-let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos={},sugerencias={};
+let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},tt=null,equipos={},sugerencias={},calendarioData={};
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
@@ -1636,6 +1564,12 @@ function iniciarApp(){
     if(en){renderAlbumTabs();renderAlbumSorteo();}
   });
 
+  db.ref('calendario').on('value',snap=>{
+    calendarioData=snap.val()||{};
+    if(document.getElementById('scr-calendario').classList.contains('on')) renderCalendario();
+    if(esTablet&&adminSub==='calendario') renderAdminCalItems();
+  });
+
   // Sorteo chips init
   JUGADORES.forEach(n=>sorteoSel.add(n));
   renderSorteoChips();
@@ -1748,7 +1682,58 @@ function goTab(n){
   if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('on');
   if(n==='inicio'){renderFeed();window.scrollTo({top:0,behavior:'smooth'});}
   if(n==='chat'){renderChat();marcarChatLeido();}
+  if(n==='calendario'){renderCalendario();}
   if(n==='sorteo'){renderSorteoChips();if(camasPool!==null||document.getElementById('sm-camas').classList.contains('on'))renderCamas();}
+}
+
+// ════════════════════════════════════════
+// CALENDARIO — el admin puede agregar/sacar ítems por día
+// ════════════════════════════════════════
+const CALENDARIO_META={
+  d1:{num:'DÍA 1',emo:'✈️',fecha:'Miércoles 2 de Septiembre'},
+  d2:{num:'DÍA 2',emo:'🔥',fecha:'Jueves 3 de Septiembre'},
+  d3:{num:'DÍA 3',emo:'🏖️',fecha:'Viernes 4 de Septiembre'},
+  d4:{num:'DÍA 4',emo:'🌊',fecha:'Sábado 5 de Septiembre'},
+  d5:{num:'DÍA 5',emo:'🥂',fecha:'Domingo 6 de Septiembre'},
+  d6:{num:'DÍA 6',emo:'🍖',fecha:'Lunes 7 de Septiembre'},
+  d7:{num:'DÍA 7',emo:'⛵',fecha:'Martes 8 de Septiembre'},
+  d8:{num:'DÍA 8',emo:'🏠',fecha:'Miércoles 9 de Septiembre'}
+};
+const CALENDARIO_DEFAULT={
+  d1:[{texto:'Llegada'}],
+  d2:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Asado'},{texto:'Centro'}],
+  d3:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Alemagou'},{texto:'Jodita picante',hot:true}],
+  d4:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Centro'}],
+  d5:[{texto:'Desayuno'},{texto:'Almuerzo en casa'},{texto:'Scorpios'},{texto:'Jodita picante',hot:true}],
+  d6:[{texto:'Desayuno'},{texto:'Playa / Casa'},{texto:'Mega asado'}],
+  d7:[{texto:'Desayuno'},{texto:'Barco'},{texto:'Libre'}],
+  d8:[{texto:'Check out'}]
+};
+function itemsDeDia(dk){
+  const raw=calendarioData[dk];
+  if(raw) return Object.keys(raw).sort().map(k=>raw[k]);
+  return CALENDARIO_DEFAULT[dk];
+}
+function renderCalendario(){
+  const cont=document.getElementById('dia-cards');if(!cont)return;
+  cont.innerHTML=Object.keys(CALENDARIO_META).map(dk=>{
+    const m=CALENDARIO_META[dk],items=itemsDeDia(dk);
+    return `<div class="dia-card dia-card-${dk}">
+      <div class="dia-top"><span class="dia-num">${m.num}</span><span class="dia-emo">${m.emo}</span></div>
+      <div class="dia-fecha">${m.fecha}</div>
+      <div class="dia-items">${items.map(it=>`<div class="dia-item ${it.hot?'hot':''}">${escaparHTML(it.texto)}</div>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+// Si el día todavía no fue tocado en la base, lo migra (con sus ítems por defecto) antes de editarlo.
+async function migrarDiaSiHaceFalta(dk){
+  if(calendarioData[dk]) return;
+  const updates={};
+  CALENDARIO_DEFAULT[dk].forEach(it=>{
+    const key=db.ref('calendario/'+dk).push().key;
+    updates[dk+'/'+key]={texto:it.texto,hot:!!it.hot};
+  });
+  await db.ref('calendario').update(updates);
 }
 
 function goSub(n){
@@ -1823,7 +1808,7 @@ function cerrarSesion(){
 // PANEL DE ADMIN — pantalla completa, sub-pestañas
 // ════════════════════════════════════════
 let adminSub='jugadores';
-const ADMIN_TABS=[['jugadores','👥 Jugadores'],['contenido','📸 Contenido'],['juegos','🎮 Juegos'],['puntos','🏆 Puntos'],['sugerencias','💡 Sugerencias']];
+const ADMIN_TABS=[['jugadores','👥 Jugadores'],['contenido','📸 Contenido'],['calendario','📅 Calendario'],['juegos','🎮 Juegos'],['puntos','🏆 Puntos'],['sugerencias','💡 Sugerencias']];
 function renderAdminSubtabs(){
   if(!esTablet)return;
   const tabsEl=document.getElementById('admin-subtabs');if(!tabsEl)return;
@@ -1835,9 +1820,56 @@ function renderAdminContent(){
   const el=document.getElementById('admin-content');if(!el)return;
   if(adminSub==='jugadores')renderAdminJugadoresTab(el);
   else if(adminSub==='contenido')renderAdminContenidoTab(el);
+  else if(adminSub==='calendario')renderAdminCalendarioTab(el);
   else if(adminSub==='juegos')renderAdminJuegosTab(el);
   else if(adminSub==='puntos')renderAdminPuntosTab(el);
   else if(adminSub==='sugerencias')renderAdminSugerenciasTab(el);
+}
+
+let adminCalDia='d1';
+function renderAdminCalendarioTab(el){
+  el.innerHTML=`
+    <div class="admin-tit">📅 Elegí el día</div>
+    <div class="sorteo-chips" id="adm-cal-dias" style="margin-bottom:12px"></div>
+    <div id="adm-cal-items"></div>
+    <div class="add-row">
+      <input class="inp" id="adm-cal-add" placeholder="Nuevo ítem..." maxlength="60" onkeydown="if(event.key==='Enter')adminCalAgregar()">
+      <button class="btn-sm btn-sm-az" onclick="adminCalAgregar()" style="white-space:nowrap">+ Agregar</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:var(--gr)">
+      <input type="checkbox" id="adm-cal-hot" style="width:auto"> 🌶️ Marcar como destacado/picante
+    </label>`;
+  renderAdminCalDias();
+  renderAdminCalItems();
+}
+function renderAdminCalDias(){
+  const cont=document.getElementById('adm-cal-dias');if(!cont)return;
+  cont.innerHTML=Object.keys(CALENDARIO_META).map(dk=>
+    `<button class="s-chip ${adminCalDia===dk?'on':''}" onclick="setAdminCalDia('${dk}')">${CALENDARIO_META[dk].emo} ${dk.toUpperCase()}</button>`).join('');
+}
+function setAdminCalDia(dk){adminCalDia=dk;renderAdminCalDias();renderAdminCalItems();}
+function renderAdminCalItems(){
+  const cont=document.getElementById('adm-cal-items');if(!cont)return;
+  const items=itemsDeDia(adminCalDia);
+  cont.innerHTML=items.length?items.map((it,i)=>`<div class="admin-jug"><span>${it.hot?'🌶️ ':''}${escaparHTML(it.texto)}</span><button class="btn-xs btn-xs-r" onclick="adminCalEliminar('${adminCalDia}',${i})">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin ítems</div>';
+  const add=document.getElementById('adm-cal-add');if(add)add.value='';
+  const hot=document.getElementById('adm-cal-hot');if(hot)hot.checked=false;
+}
+async function adminCalAgregar(){
+  const inp=document.getElementById('adm-cal-add');
+  const v=inp.value.trim();if(!v)return;
+  const hot=document.getElementById('adm-cal-hot').checked;
+  await migrarDiaSiHaceFalta(adminCalDia);
+  await db.ref('calendario/'+adminCalDia).push({texto:v,hot:!!hot});
+  renderAdminCalItems();
+}
+async function adminCalEliminar(dk,idx){
+  await migrarDiaSiHaceFalta(dk);
+  const snap=await db.ref('calendario/'+dk).once('value');
+  const obj=snap.val()||{};
+  const key=Object.keys(obj).sort()[idx];
+  if(key) await db.ref('calendario/'+dk+'/'+key).remove();
+  renderAdminCalItems();
 }
 
 function renderAdminJugadoresTab(el){
