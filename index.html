@@ -1469,19 +1469,19 @@ function entrarRapido(n){
   iniciarApp();
 }
 
-function entrarTablet(){
+async function entrarTablet(){
   const p=prompt('Contraseña de Admin:');
-  if(p!=='holis123'){if(p!==null)alert('Contraseña incorrecta');return;}
+  if(p!=='holis123'){if(p!==null)await alertApp('Contraseña incorrecta');return;}
   miNombre='Admin';esTablet=true;
   localStorage.setItem('ec_nombre','Admin');
   localStorage.setItem('ec_tablet','true');
   iniciarApp();
 }
 
-function pedirModoTablet(){
+async function pedirModoTablet(){
   if(esTablet){
     // Desde el modo admin se puede volver a elegir usuario
-    if(confirm('¿Salir del modo Admin y volver a la pantalla de inicio?')){
+    if(await confirmApp('¿Salir del modo Admin y volver a la pantalla de inicio?')){
       localStorage.removeItem('ec_nombre');
       localStorage.removeItem('ec_tablet');
       location.reload();
@@ -1489,7 +1489,7 @@ function pedirModoTablet(){
     return;
   }
   const p=prompt('Contraseña de Admin:');
-  if(p!=='holis123'){if(p!==null)alert('Contraseña incorrecta');return;}
+  if(p!=='holis123'){if(p!==null)await alertApp('Contraseña incorrecta');return;}
   miNombre='Admin';esTablet=true;
   localStorage.setItem('ec_nombre','Admin');
   localStorage.setItem('ec_tablet','true');
@@ -1653,16 +1653,16 @@ function notificar(texto,emoji,push,para,postId){
 // ── Notificaciones del sistema + badge en el ícono ──
 function notifsActivas(){return localStorage.getItem('ec_notifs')!=='off';}
 
-function toggleNotifs(){
+async function toggleNotifs(){
   cerrarMenu();
   if(notifsActivas()){
     localStorage.setItem('ec_notifs','off');
     if(miNombre) db.ref('fcmTokens/'+miNombre).remove();
-    alert('Notificaciones silenciadas');
+    await alertApp('Notificaciones silenciadas');
   } else {
     localStorage.setItem('ec_notifs','on');
     pedirPermisoNotifs();
-    alert('Notificaciones activadas');
+    await alertApp('Notificaciones activadas');
   }
   actualizarItemNotifs();
 }
@@ -1860,7 +1860,7 @@ function adminAgregar(){
   renderAdminJugs();
 }
 function adminEliminar(n){db.ref('jugadores/'+n).remove();}
-function adminLimpiarJugs(){if(!confirm('¿Eliminar todos?'))return;db.ref('jugadores').remove();}
+async function adminLimpiarJugs(){if(!(await confirmApp('¿Eliminar todos?')))return;db.ref('jugadores').remove();}
 
 function renderAdminSugerenciasTab(el){
   el.innerHTML=`<div id="adm-sugerencias"></div>`;
@@ -1900,12 +1900,12 @@ function renderAdminJuegosTab(el){
     <div class="admin-tit">📰 Feed</div>
     <button class="btn btn-ro btn-sm-full" onclick="adminResetFeed()">Vaciar el feed</button>`;
 }
-function adminResetCS(){if(!confirm('¿Resetear CS?'))return;db.ref('partida').set({activa:false});db.ref('equipos').remove();}
-function adminResetAlbum(){if(!confirm('¿Borrar fotos?'))return;db.ref('album').remove();db.ref('album_orden').remove();db.ref('panini_equipos').remove();}
-function adminResetTT(){if(!confirm('¿Resetear Misiones 2.0 - TA TE TI?'))return;db.ref('tateti').set({activa:false});}
-function adminResetTruco(){if(!confirm('¿Resetear Truco?'))return;db.ref('truco').set({activa:false});}
-function adminResetFeed(){
-  if(!confirm('¿Vaciar el feed? Se borran todos los posts y sus comentarios.'))return;
+async function adminResetCS(){if(!(await confirmApp('¿Resetear CS?')))return;db.ref('partida').set({activa:false});db.ref('equipos').remove();}
+async function adminResetAlbum(){if(!(await confirmApp('¿Borrar fotos?')))return;db.ref('album').remove();db.ref('album_orden').remove();db.ref('panini_equipos').remove();}
+async function adminResetTT(){if(!(await confirmApp('¿Resetear Misiones 2.0 - TA TE TI?')))return;db.ref('tateti').set({activa:false});}
+async function adminResetTruco(){if(!(await confirmApp('¿Resetear Truco?')))return;db.ref('truco').set({activa:false});}
+async function adminResetFeed(){
+  if(!(await confirmApp('¿Vaciar el feed? Se borran todos los posts y sus comentarios.')))return;
   db.ref('posts').remove();
 }
 
@@ -1933,7 +1933,7 @@ function adminAjustarPuntos(){
   sumarPtosLista([nombre],delta);
   renderAdminPuntosTab(document.getElementById('admin-content'));
 }
-function adminResetPuntos(){if(!confirm('¿Resetear puntos?'))return;db.ref('puntos').remove();db.ref('album_orden').remove();}
+async function adminResetPuntos(){if(!(await confirmApp('¿Resetear puntos?')))return;db.ref('puntos').remove();db.ref('album_orden').remove();}
 
 // Junta todas las fotos/videos de posts, comentarios y el album en una sola grilla,
 // con opcion de borrar cualquiera (no solo lo tuyo).
@@ -1967,9 +1967,9 @@ function renderAdminContenidoTab(el){
       </div>`).join('')}</div>`
     :'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin fotos ni videos todavía</div>';
 }
-function adminBorrarContenido(i){
+async function adminBorrarContenido(i){
   const it=adminContenidoItems[i];if(!it)return;
-  if(!confirm('¿Eliminar este archivo?'))return;
+  if(!(await confirmApp('¿Eliminar este archivo?')))return;
   it.borrar();
   setTimeout(()=>renderAdminContenidoTab(document.getElementById('admin-content')),400);
 }
@@ -2291,12 +2291,12 @@ function toggleConsigna(e){
   document.getElementById('comp-cons-lbl').classList.toggle('on',postConsigna);
 }
 
-function previewPostFoto(e){
+async function previewPostFoto(e){
   const file=e.target.files[0];if(!file)return;
   e.target.value='';
   if(file.type.startsWith('video/')){
     postFotoURL=null;
-    if(file.size>100*1024*1024){alert('El video es muy pesado (máx 100MB).');return;}
+    if(file.size>100*1024*1024){await alertApp('El video es muy pesado (máx 100MB).');return;}
     mostrarSubiendo('Subiendo video...');
     subirACloudinary(file,'video')
       .then(url=>{
@@ -2304,7 +2304,7 @@ function previewPostFoto(e){
         postVideoURL=url;
         document.getElementById('comp-zona').innerHTML=`<video src="${url}" controls style="width:100%;border-radius:10px;display:block"></video>`;
       })
-      .catch(err=>{ocultarSubiendo();console.error(err);alert('No se pudo subir el video. Probá de nuevo.');});
+      .catch(err=>{ocultarSubiendo();console.error(err);alertApp('No se pudo subir el video. Probá de nuevo.');});
     return;
   }
   postVideoURL=null;
@@ -2335,9 +2335,9 @@ function irANoticia(etiqueta){
   ir();
 }
 
-function publicarPost(){
+async function publicarPost(){
   const txt=document.getElementById('comp-inp').value.trim();
-  if(!txt&&!postFotoURL&&!postVideoURL){alert('Escribí algo o subí una foto/video');return;}
+  if(!txt&&!postFotoURL&&!postVideoURL){await alertApp('Escribí algo o subí una foto/video');return;}
   const post={autor:miNombre,ts:Date.now()};
   if(txt) post.texto=txt;
   if(postFotoURL) post.img=postFotoURL;
@@ -2353,10 +2353,10 @@ function publicarPost(){
   cerrarComposer();
 }
 
-function borrarPost(id){
+async function borrarPost(id){
   const p=posts[id];
   if(!p||(p.autor!==miNombre&&!esTablet))return;
-  if(!confirm('¿Borrar este post?'))return;
+  if(!(await confirmApp('¿Borrar este post?')))return;
   db.ref('posts/'+id).remove();
   if(postAbierto===id){postAbierto=null;goTab('inicio');}
 }
@@ -2671,12 +2671,12 @@ function confirmarEditor(){
   document.getElementById('ed-modal').classList.remove('open');
   ed.cb=null; ed.sel=sel;
   if(!cb)return;
-  cv.toBlob(blob=>{
-    if(!blob){alert('No se pudo procesar la imagen.');return;}
+  cv.toBlob(async blob=>{
+    if(!blob){await alertApp('No se pudo procesar la imagen.');return;}
     mostrarSubiendo('Subiendo foto...');
     subirACloudinary(blob,'image')
       .then(url=>{ocultarSubiendo();cb(url);})
-      .catch(err=>{ocultarSubiendo();console.error(err);alert('No se pudo subir la foto. Probá de nuevo.');});
+      .catch(err=>{ocultarSubiendo();console.error(err);alertApp('No se pudo subir la foto. Probá de nuevo.');});
   },'image/jpeg',0.85);
 }
 
@@ -2738,16 +2738,16 @@ function setTipo(t){
   if(av) av.style.display=t==='novios'?'block':'none';
 }
 let dadoInt=null,dadoRX=0,dadoRY=0;
-function ejecutarSorteo(){
+async function ejecutarSorteo(){
   const lista=shuf([...sorteoSel]);
-  if(!lista.length){alert('Elegí al menos 1 participante');return;}
+  if(!lista.length){await alertApp('Elegí al menos 1 participante');return;}
   const res=document.getElementById('s-res');
   res.style.display='none';res.innerHTML='';
   if(sorteoTipo==='novios'){
     // Un novio por equipo, el resto repartido parejo al azar
     const novios=shuf(NOVIOS.filter(n=>sorteoSel.has(n)));
     const resto=shuf([...sorteoSel].filter(n=>!NOVIOS.includes(n)));
-    if(novios.length<2){alert('Elegí al menos 2 novios: '+NOVIOS.join(', '));return;}
+    if(novios.length<2){await alertApp('Elegí al menos 2 novios: '+NOVIOS.join(', '));return;}
     const eqs=novios.map(n=>[n]);
     resto.forEach(n=>{
       const menor=eqs.reduce((a,b)=>b.length<a.length?b:a);
@@ -2876,9 +2876,9 @@ function sortearBalanceado(nombres){
   return {a,r};
 }
 
-function sortearEquiposCS(){
+async function sortearEquiposCS(){
   const ns=todosLosJugadores();
-  if(ns.length<2){alert('Necesitás al menos 2 jugadores');return;}
+  if(ns.length<2){await alertApp('Necesitás al menos 2 jugadores');return;}
   const {a,r}=sortearBalanceado(ns);
   const eq={};
   a.forEach(n=>eq[n]='a');
@@ -3150,9 +3150,9 @@ function renderAlbumSorteo(){
 }
 
 // Sorteo real (no truqueado): cada novio ancla su equipo, el resto se reparte parejo al azar.
-function paniniSortear(){
+async function paniniSortear(){
   if(!esTablet)return;
-  if(paniniEquipos&&!confirm('¿Volver a sortear? Se pierden los equipos actuales.'))return;
+  if(paniniEquipos&&!(await confirmApp('¿Volver a sortear? Se pierden los equipos actuales.')))return;
   const resto=shuf(JUGADORES.filter(n=>!NOVIOS.includes(n)));
   const eqs={};
   NOVIOS.forEach(n=>eqs[n]=[n]);
@@ -3205,9 +3205,9 @@ function renderAlbumNovio(){
   });
 }
 
-function abrirUpload(novio,pos,posNm){
+async function abrirUpload(novio,pos,posNm){
   if(paniniEquipos&&paniniEquipoDe(miNombre)!==novio){
-    alert(`🚫 Este álbum es del equipo de ${ng(novio)}. Vos sos del equipo de ${ng(paniniEquipoDe(miNombre))||'nadie — hablá con la tablet'}.`);
+    await alertApp(`🚫 Este álbum es del equipo de ${ng(novio)}. Vos sos del equipo de ${ng(paniniEquipoDe(miNombre))||'nadie — hablá con la tablet'}.`);
     return;
   }
   upNovio=novio;upPos=pos;upURL=null;
@@ -3244,7 +3244,7 @@ function confirmarFoto(){
   db.ref('album/'+upNovio).once('value').then(snap=>{
     const fotos=snap.val()||{};
     if(Object.keys(fotos).length>=9){
-      db.ref('album_orden').once('value').then(s2=>{
+      db.ref('album_orden').once('value').then(async s2=>{
         const orden=s2.val()||[];
         if(!orden.includes(upNovio)){
           const nueva=[...orden,upNovio];
@@ -3254,7 +3254,7 @@ function confirmarFoto(){
           notificar('¡El álbum de '+upNovio+' está completo! +'+pts+' pts','🏆');
           publicarNoticia('Novios Panini','🏆',
             `¡El álbum de ${ng(upNovio)} está completo! Las 9 figuritas pegadas. +${pts} pts.`);
-          alert(`🏆 ¡${upNovio} completó su álbum! +${pts} puntos`);
+          await alertApp(`🏆 ¡${upNovio} completó su álbum! +${pts} puntos`);
         }
       });
     }
@@ -3262,11 +3262,11 @@ function confirmarFoto(){
 }
 
 function eliminarFotoAlbum(novio,pos){
-  db.ref('album/'+novio+'/'+pos).once('value').then(snap=>{
+  db.ref('album/'+novio+'/'+pos).once('value').then(async snap=>{
     const raw=snap.val();
     const autor=raw&&typeof raw==='object'?raw.autor:null;
     if(autor!==miNombre&&!esTablet)return; // solo el que la subio, o el admin, puede borrarla
-    if(!confirm('¿Eliminar esta figurita?'))return;
+    if(!(await confirmApp('¿Eliminar esta figurita?')))return;
     db.ref('album/'+novio+'/'+pos).remove();
   });
 }
@@ -3291,9 +3291,9 @@ function renderTT(){
   }
 }
 
-function sortearEquiposTT(){
+async function sortearEquiposTT(){
   const ns=todosLosJugadores();
-  if(ns.length<2){alert('Necesitás al menos 2 jugadores');return;}
+  if(ns.length<2){await alertApp('Necesitás al menos 2 jugadores');return;}
   const bal=sortearBalanceado(ns);
   ttSorteo={a:bal.a,r:bal.r};
   const prev=document.getElementById('tt-sorteo-preview');if(!prev)return;
@@ -3510,9 +3510,9 @@ function puedeCambiarMision(){
   return {puede:false,motivo:'',pos,restante:inicio?Math.max(0,TT_LIMITE_MS-transcurrido):null};
 }
 
-function cambiarMision(){
+async function cambiarMision(){
   const chk=puedeCambiarMision();
-  if(!chk.puede){alert('Todavía no podés cambiar de misión.');return;}
+  if(!chk.puede){await alertApp('Todavía no podés cambiar de misión.');return;}
   const miEq=miEqTT();if(!miEq||!tt)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const tablero=toArr(tt.tablero).map(x=>({...x}));
@@ -3560,7 +3560,7 @@ function cambiarMision(){
 
   // Buscar una misión del banco que no esté en juego
   const disponibles=MISIONES.map((_,i)=>i).filter(i=>!usadas.includes(i));
-  if(!disponibles.length){alert('No quedan misiones nuevas en el banco.');return;}
+  if(!disponibles.length){await alertApp('No quedan misiones nuevas en el banco.');return;}
   const nueva=disponibles[Math.floor(Math.random()*disponibles.length)];
 
   // Reemplazar la misión de esa casilla y reiniciar el reloj
@@ -3579,14 +3579,14 @@ function cambiarMision(){
   notificar((miEq==='a'?'⭕ Izquierda':'❌ Derecha')+' cambió su misión ('+(chk.motivo==='tiempo'?'se acabó el tiempo':'iba en desventaja')+')','🔄');
 }
 
-function reportarMision(pos){
+async function reportarMision(pos){
   if(!tt)return;const miEq=miEqTT();if(!miEq)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const tablero=toArr(tt.tablero);
   const cell=tablero[pos];
-  if(!cell||cell.estado!=='libre'){alert('Esa casilla ya fue ocupada.');return;}
+  if(!cell||cell.estado!=='libre'){await alertApp('Esa casilla ya fue ocupada.');return;}
   const pendientes=toArr(tt.pendientes);
-  if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){alert('Ya reportaste esta misión. Esperá la aprobación de la tablet.');return;}
+  if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){await alertApp('Ya reportaste esta misión. Esperá la aprobación de la tablet.');return;}
   const target=miEq==='a'?cell.targetIzq:cell.targetDer;
   const mision=MISIONES[cell.misionIdx].replace('[T]',target);
   db.ref('tateti').set({...tt,tablero,
@@ -3595,7 +3595,7 @@ function reportarMision(pos){
     eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
     ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
   notificar(miNombre+' dice que cumplió una misión — a confirmar por la tablet','🎯');
-  alert('✅ Misión reportada. La tablet la tiene que aprobar.');
+  await alertApp('✅ Misión reportada. La tablet la tiene que aprobar.');
 }
 
 function renderPendientesTT(){
@@ -3708,9 +3708,9 @@ function chequearTT(tablero,eq){
   return[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(l=>l.every(i=>tablero[i].estado==='ocupada'&&tablero[i].equipo===eq));
 }
 
-function resetTTTablet(){
+async function resetTTTablet(){
   if(!esTablet)return;
-  if(!confirm('¿Resetear Misiones 2.0 - TA TE TI? Se borra la partida para todos.'))return;
+  if(!(await confirmApp('¿Resetear Misiones 2.0 - TA TE TI? Se borra la partida para todos.')))return;
   db.ref('tateti').set({activa:false});
 }
 
@@ -3840,9 +3840,9 @@ function afAdjudicarGanador(respuestas){
   notificar('Amigo Fiel: ganó el Equipo '+nEq+' — +5 pts para cada uno','🏆');
   publicarNoticia('Amigo Fiel','🏆',`Terminó Amigo Fiel. Ganó el Equipo ${nEq} (${ganador.map(ng).join(', ')}) por ${Math.max(p1,p2)} a ${Math.min(p1,p2)}. +5 pts para cada uno.`);
 }
-function afReset(){
+async function afReset(){
   if(!esTablet)return;
-  if(!confirm('¿Reiniciar Amigo Fiel de cero?'))return;
+  if(!(await confirmApp('¿Reiniciar Amigo Fiel de cero?')))return;
   db.ref('amigoFiel').remove();
 }
 
@@ -3874,18 +3874,18 @@ function renderTrucoChips(){
   if(btn) btn.disabled=trucoSel.size!==6;
 }
 
-function toggleTrucoChip(n){
+async function toggleTrucoChip(n){
   if(trucoSel.has(n)) trucoSel.delete(n);
   else{
-    if(trucoSel.size>=6){alert('Ya elegiste 6 jugadores');return;}
+    if(trucoSel.size>=6){await alertApp('Ya elegiste 6 jugadores');return;}
     trucoSel.add(n);
   }
   document.getElementById('truco-preview').style.display='none';
   renderTrucoChips();
 }
 
-function sortearEquiposTruco(){
-  if(trucoSel.size!==6){alert('Tenés que elegir exactamente 6 jugadores');return;}
+async function sortearEquiposTruco(){
+  if(trucoSel.size!==6){await alertApp('Tenés que elegir exactamente 6 jugadores');return;}
   const mez=shuf([...trucoSel]);
   const a=mez.slice(0,3),r=mez.slice(3);
   const prev=document.getElementById('truco-preview');
@@ -3973,17 +3973,17 @@ function renderTrucoGame(){
     +(truco.ganador?`<div style="text-align:center;margin-top:12px;font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--az)">🏆 Gana ${truco.ganador==='a'?'NOSOTROS':'ELLOS'} — +3 pts</div>`:'');
 }
 
-function reiniciarTruco(){
+async function reiniciarTruco(){
   if(!truco)return;
-  if(!confirm('¿Nueva partida con los mismos equipos?'))return;
+  if(!(await confirmApp('¿Nueva partida con los mismos equipos?')))return;
   const upd={...truco,ptsA:0,ptsR:0,ganador:null};
   truco=upd;
   db.ref('truco').set(upd);
   renderTrucoGame();
 }
 
-function salirTruco(){
-  if(!confirm('¿Volver a elegir jugadores?'))return;
+async function salirTruco(){
+  if(!(await confirmApp('¿Volver a elegir jugadores?')))return;
   db.ref('truco').set({activa:false});
   truco={activa:false};
   trucoSel.clear();
@@ -4032,19 +4032,19 @@ function renderCamasAsignadas(){
     </div>`).join('');
 }
 
-function reiniciarCamas(){
+async function reiniciarCamas(){
   if(rifaCorriendo)return;
-  if(camasAsignadas.length&&!confirm('¿Reiniciar el sorteo de camas? Se borran las asignaciones.'))return;
+  if(camasAsignadas.length&&!(await confirmApp('¿Reiniciar el sorteo de camas? Se borran las asignaciones.')))return;
   camasPool=todosLosJugadores();
   camasAsignadas=[];
   document.getElementById('rifa-escena').style.display='none';
   renderCamas();
 }
 
-function sortearCama(){
+async function sortearCama(){
   if(rifaCorriendo)return;
   if(camasPool===null) camasPool=todosLosJugadores();
-  if(!camasPool.length){alert('Ya todos tienen cama asignada');return;}
+  if(!camasPool.length){await alertApp('Ya todos tienen cama asignada');return;}
 
   rifaCorriendo=true;
   const numCama=camasAsignadas.length+1;
