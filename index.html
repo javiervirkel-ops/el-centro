@@ -1609,10 +1609,12 @@ function iniciarApp(){
     // Object.keys ordena bien los ids de push() porque son cronologicamente ordenables como texto.
     afRespuestas=Array.isArray(rObj)?rObj:Object.keys(rObj).sort().map(k=>rObj[k]);
     afPreguntas=Array.isArray(v.preguntas)?v.preguntas:(v.preguntas?Object.values(v.preguntas):[]);
+    const eObj=v.extras||{};
+    afExtras=Array.isArray(eObj)?eObj:Object.values(eObj);
+    afPremiado=!!v.premiado;
     afSorteado=!!v.sorteado||afRespuestas.length>0; // partidas viejas (antes del sorteo) ya cuentan como sorteadas
     const en=document.getElementById('scr-af').classList.contains('on');
     if(en)renderAF();
-    if(esTablet&&!v.premiado&&afPreguntas.length>0&&afRespuestas.length>=afPreguntas.length) afAdjudicarGanador(afRespuestas);
   });
 
   db.ref('equipos').on('value',snap=>{
@@ -3859,6 +3861,8 @@ setInterval(()=>{
 // ════════════════════════════════════════
 let afRespuestas=[];
 let afPreguntas=[];
+let afExtras=[];
+let afPremiado=false;
 let afSorteado=false;
 let afSorteando=false;
 let afGenerandoPreguntas=false;
@@ -3870,6 +3874,7 @@ function afEquipoDe(nombre){
 function afPuntosEquipo(eq){
   let pts=0;
   afRespuestas.forEach((p,i)=>{ if(afPreguntas[i] && afPreguntas[i].equipo===eq) pts+=p; });
+  afExtras.forEach(e=>{ if(e&&e.equipo===eq) pts+=1; });
   return pts;
 }
 function afEquiposHTML(){
@@ -3930,6 +3935,25 @@ function renderAF(){
   }
   afGenerandoPreguntas=false;
   if(i>=afPreguntas.length){
+    if(!afPremiado){
+      // Se terminaron las 18 preguntas pero el juego sigue por fuera de la app (en vivo,
+      // sin preguntas fijas) — el admin sigue sumando puntos a mano hasta que finaliza.
+      if(esTablet){
+        cuerpo.innerHTML=`<div class="af-final" style="margin-bottom:14px">
+          <div class="big">🎉</div>
+          <div style="font-family:'Cinzel',serif;font-weight:700;color:var(--az);font-size:14px;margin-top:6px">Terminaron las 18 preguntas</div>
+          <div style="font-size:12.5px;color:var(--gr);margin-top:4px">Seguí sumando puntos a mano y finalizá cuando quieran</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px">
+          <button class="btn btn-out" style="flex:1" onclick="afSumarExtra(1)">+1 Equipo 1</button>
+          <button class="btn btn-out" style="flex:1" onclick="afSumarExtra(2)">+1 Equipo 2</button>
+        </div>
+        <button class="btn btn-az" onclick="afFinalizar()">🏁 Finalizar partida</button>`;
+      } else {
+        cuerpo.innerHTML=`<div class="af-espera">Terminaron las preguntas. Esperando que la tablet finalice la partida…</div>`;
+      }
+      return;
+    }
     const p1=afPuntosEquipo(1),p2=afPuntosEquipo(2);
     const gan=p1===p2?'¡Empate!':(p1>p2?'Ganó Equipo 1 🏆':'Ganó Equipo 2 🏆');
     cuerpo.innerHTML=`<div class="af-final"><div class="big">🏁</div><div style="font-family:'Cinzel',serif;font-weight:700;color:var(--az);font-size:16px">${gan}</div></div>
@@ -3965,11 +3989,18 @@ function afPuntuar(pts){
   // pisan entre si, sin importar si el anterior todavia no volvio de la base.
   db.ref('amigoFiel/respuestas').push(pts);
 }
-// Se llama sola desde el listener de amigoFiel cuando ya estan las 18 respuestas.
-// El flag "premiado" evita sumar los puntos dos veces si el listener se vuelve a disparar.
-function afAdjudicarGanador(respuestas){
-  let p1=0,p2=0;
-  respuestas.forEach((p,i)=>{ if(afPreguntas[i].equipo===1)p1+=p; else p2+=p; });
+function afSumarExtra(eq){
+  if(!esTablet)return;
+  // push() en vez de un contador leido-y-pisado, mismo motivo que afPuntuar: evita que dos
+  // toques rapidos se pisen entre si.
+  db.ref('amigoFiel/extras').push({equipo:eq});
+}
+// El admin decide cuando termina la partida (el juego sigue en vivo por fuera de la app
+// despues de las 18 preguntas fijas). El flag "premiado" evita adjudicar dos veces.
+async function afFinalizar(){
+  if(!esTablet)return;
+  if(!(await confirmApp('¿Finalizar la partida de Amigo Fiel?')))return;
+  const p1=afPuntosEquipo(1),p2=afPuntosEquipo(2);
   db.ref('amigoFiel/premiado').set(true);
   if(p1===p2)return;
   const ganador=p1>p2?AF_EQUIPO1:AF_EQUIPO2;
