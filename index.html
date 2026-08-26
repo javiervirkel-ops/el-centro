@@ -1796,12 +1796,12 @@ document.addEventListener('focusout',e=>{
   if(e.target.matches('input[type="text"],textarea')){
     // No la muestres de nuevo si estamos en post detalle (ahi va oculta a proposito) o sin sesion.
     const enPost=document.getElementById('scr-post')&&document.getElementById('scr-post').classList.contains('on');
-    if(miNombre&&!enPost) document.getElementById('tabs').style.display='flex';
+    if(miNombre&&!enPost&&!esInvitado) document.getElementById('tabs').style.display='flex';
   }
 });
 
 function goTab(n){
-  document.getElementById('tabs').style.display='flex';
+  document.getElementById('tabs').style.display=esInvitado?'none':'flex';
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('scr-'+n).classList.add('on');
