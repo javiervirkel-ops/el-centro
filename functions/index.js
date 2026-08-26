@@ -34,6 +34,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   const emoji = data.emoji || "📣";
   const de = data.de || "";
   const postId = data.postId || "";
+  const para = data.para || null; // null/"todos" = a todos; un nombre puntual = solo a esa persona
 
   const db = admin.database();
   const tokensSnap = await db.ref("fcmTokens").get();
@@ -43,6 +44,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   const tokens = [];
   for (const nombre in tokensObj) {
     if (nombre === de) continue; // no avisarle a quien lo genero
+    if (para && para !== "todos" && nombre !== para) continue; // aviso dirigido a una persona puntual
     const t = tokensObj[nombre];
     if (t) tokens.push({ nombre, token: t });
   }
