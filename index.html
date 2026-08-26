@@ -51,14 +51,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .ov.on{display:block}
 
 /* TABS */
-.tabs{display:flex;background:#fff;border-top:2px solid var(--bd);position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;z-index:99;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 12px rgba(13,43,94,.08);transform:translateZ(0);will-change:transform}
+.tabs{display:flex;background:#fff;border-top:2px solid var(--bd);position:sticky;bottom:0;z-index:99;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 12px rgba(13,43,94,.08)}
 .tab{flex:1;padding:14px 4px 10px;text-align:center;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gr);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab.on{color:var(--az);border-bottom-color:var(--az)}
 .tab i{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:3px;font-style:normal}
 .tab .chat-badge{position:absolute;top:-5px;right:-9px;min-width:15px;height:15px;font-size:9px;padding:0 4px}
 
 /* SCREENS */
-.scr{display:none;padding:16px 16px calc(112px + env(safe-area-inset-bottom,0px))}
+.scr{display:none;padding:16px 16px 24px}
 .scr.on{display:block}
 
 /* UTILS */
@@ -669,14 +669,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 </div>
 
 <!-- TABS -->
-<nav class="tabs" id="tabs" style="display:none">
-  <div class="tab on" onclick="goTab('inicio')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></i>Feed</div>
-  <div class="tab" onclick="goTab('juegos')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg></i>Juegos</div>
-  <div class="tab" onclick="goTab('chat')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span class="chat-badge" id="chat-badge" style="display:none">0</span></i>Chat</div>
-  <div class="tab" onclick="goTab('calendario')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></i>Calendario</div>
-  <div class="tab" onclick="goTab('sorteo')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></i>Sortear</div>
-</nav>
-
 <!-- PASSCODE -->
 <div id="scr-passcode" class="scr on">
   <div class="enrol-emo">🔒</div>
@@ -1214,6 +1206,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 <input type="file" id="album-file" accept="image/*" style="display:none" onchange="previewFoto(event)">
+
+<!-- El menu de abajo va al final del body a proposito: con position:sticky (en vez de fixed)
+     necesita ser el ultimo en el flujo del documento para quedar pegado abajo sin el bug de
+     iOS donde un elemento "fixed" se despega/flota durante el scroll rapido. -->
+<nav class="tabs" id="tabs" style="display:none">
+  <div class="tab on" onclick="goTab('inicio')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></i>Feed</div>
+  <div class="tab" onclick="goTab('juegos')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg></i>Juegos</div>
+  <div class="tab" onclick="goTab('chat')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span class="chat-badge" id="chat-badge" style="display:none">0</span></i>Chat</div>
+  <div class="tab" onclick="goTab('calendario')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></i>Calendario</div>
+  <div class="tab" onclick="goTab('sorteo')"><i><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg></i>Sortear</div>
+</nav>
 
 <script>
 // ════════════════════════════════════════
