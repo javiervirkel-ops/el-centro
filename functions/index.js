@@ -33,6 +33,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   const texto = data.texto || "";
   const emoji = data.emoji || "📣";
   const de = data.de || "";
+  const postId = data.postId || "";
 
   const db = admin.database();
   const tokensSnap = await db.ref("fcmTokens").get();
@@ -53,6 +54,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
     data: {
       titulo: "El Centro",
       texto: `${emoji} ${texto}`,
+      postId: postId, // FCM exige que los valores de "data" sean siempre strings
     },
   };
 

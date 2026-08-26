@@ -22,23 +22,31 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(titulo, {
     body: texto,
     icon: 'icon-192.png',
-    tag: 'el-centro'
+    tag: 'el-centro',
+    data: { postId: d.postId || '' }
   });
   try{
     if(self.setAppBadge) self.setAppBadge(1);
   }catch(e){}
 });
 
-// Al tocar la notificacion: si la app ya esta abierta en una pestana, la enfoca.
-// Si no, abre una nueva (el root siempre arranca en el feed/Inicio).
+// Al tocar la notificacion: si la app ya esta abierta en una pestana, la enfoca y le avisa
+// (por postMessage) que abra el post puntual. Si no esta abierta, abre una nueva con el id
+// del post en la URL, y la app misma lo interpreta al arrancar (ver postIdDesdeNotificacion).
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const postId = (event.notification.data && event.notification.data.postId) || '';
+  const targetUrl = postId ? ('/?post=' + encodeURIComponent(postId)) : '/';
   event.waitUntil(
     clients.matchAll({type: 'window', includeUncontrolled: true}).then((clientList) => {
       for (const client of clientList) {
-        if ('focus' in client) return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          if (postId) client.postMessage({ type: 'abrirPost', postId });
+          return;
+        }
       }
-      if (clients.openWindow) return clients.openWindow('/');
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
 });

@@ -1244,6 +1244,19 @@ firebase.initializeApp({
 const db = firebase.database();
 const functions = firebase.functions();
 
+// Si se abrió desde una notificacion push, la URL trae ?post=ID (ver firebase-messaging-sw.js).
+// Se guarda ahora porque location.search se limpia mas abajo, y se usa recien cuando termina
+// de iniciar la sesion (iniciarApp), que es cuando ya estan los posts cargados.
+let postIdDesdeNotificacion = new URLSearchParams(location.search).get('post');
+if(postIdDesdeNotificacion) history.replaceState(null,'',location.pathname);
+// Si la app ya estaba abierta (no hizo falta abrir una ventana nueva), el service worker
+// avisa por acá directamente en vez de por la URL.
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',e=>{
+    if(e.data&&e.data.type==='abrirPost'&&e.data.postId) abrirPostDesdeNotificacion(e.data.postId);
+  });
+}
+
 // ════════════════════════════════════════
 // CONSTANTES
 // ════════════════════════════════════════
@@ -1422,7 +1435,7 @@ function eqCardHTML(titulo,nombres,clase,size){
 // ESTADO
 // ════════════════════════════════════════
 let miNombre='',esTablet=false,esInvitado=false;
-let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},puntosLog={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null;
+let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},puntosLog={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null,invitados={};
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
@@ -1500,10 +1513,13 @@ async function entrarInvitado(){
   v=v.replace(/['"<>&`]/g,'');
   if(!v){await alertApp('Ese nombre tiene caracteres no permitidos');return;}
   if(JUGADORES.includes(v)){await alertApp('Ese nombre ya es de uno de los 15 — elegí otro para no confundirse');return;}
+  const yaExiste=await db.ref('invitados/'+v).once('value');
+  if(yaExiste.exists()){await alertApp('Ya hay un invitado con ese nombre — elegí otro para no confundirse');return;}
   miNombre=v;esTablet=false;esInvitado=true;
   localStorage.setItem('ec_nombre',v);
   localStorage.setItem('ec_tablet','false');
   localStorage.setItem('ec_invitado','true');
+  db.ref('invitados/'+v).set({nombre:v,ts:Date.now()});
   iniciarApp();
 }
 
@@ -1569,6 +1585,11 @@ function iniciarApp(){
     renderAdminJugs();
   });
 
+  db.ref('invitados').on('value',snap=>{
+    invitados=snap.val()||{};
+    renderAdminJugs();
+  });
+
   db.ref('sugerencias').on('value',snap=>{
     sugerencias=snap.val()||{};
     renderAdminSugerencias();
@@ -1622,6 +1643,12 @@ function iniciarApp(){
     });
     if(document.getElementById('scr-inicio').classList.contains('on')) renderFeed();
     if(document.getElementById('scr-post').classList.contains('on')) renderPostDetalle();
+    // Se abrió desde una notificacion push (?post=ID) — recien ahora hay datos reales
+    // para saber si ese post existe. Se consume una sola vez.
+    if(postIdDesdeNotificacion){
+      if(posts[postIdDesdeNotificacion]) abrirPostDesdeNotificacion(postIdDesdeNotificacion);
+      postIdDesdeNotificacion=null;
+    }
   });
 
   db.ref('partida').on('value',snap=>{
@@ -2019,7 +2046,10 @@ function renderAdminJugadoresTab(el){
       <input class="inp" id="adm-add" placeholder="Nombre nuevo..." maxlength="20" onkeydown="if(event.key==='Enter')adminAgregar()">
       <button class="btn-sm btn-sm-az" onclick="adminAgregar()" style="white-space:nowrap">+ Agregar</button>
     </div>
-    <button class="btn btn-ro btn-sm-full" style="margin-top:10px" onclick="adminLimpiarJugs()">Eliminar todos los jugadores</button>`;
+    <button class="btn btn-ro btn-sm-full" style="margin-top:10px" onclick="adminLimpiarJugs()">Eliminar todos los jugadores</button>
+    <div class="div"></div>
+    <div class="admin-tit">👋 Invitados (solo ven y comentan el feed)</div>
+    <div id="adm-invitados"></div>`;
   renderAdminJugs();
 }
 function renderAdminJugs(){
@@ -2027,7 +2057,11 @@ function renderAdminJugs(){
   const ns=Object.keys(jugadores);
   cont.innerHTML=ns.length?ns.map(n=>`<div class="admin-jug"><span>${escaparHTML(n)}</span><button class="btn-xs btn-xs-r" onclick="adminEliminar('${n.replace(/'/g,"")}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin jugadores</div>';
   const add=document.getElementById('adm-add');if(add)add.value='';
+  const contInv=document.getElementById('adm-invitados');if(!contInv)return;
+  const ins=Object.keys(invitados);
+  contInv.innerHTML=ins.length?ins.map(n=>`<div class="admin-jug"><span>${escaparHTML(n)}</span><button class="btn-xs btn-xs-r" onclick="adminEliminarInvitado('${n.replace(/'/g,"")}')">Eliminar</button></div>`).join(''):'<div style="font-size:12px;color:var(--gr);padding:6px 0">Sin invitados todavía</div>';
 }
+function adminEliminarInvitado(n){db.ref('invitados/'+n).remove();}
 async function adminAgregar(){
   let v=document.getElementById('adm-add').value.trim();if(!v)return;
   // Sin caracteres que puedan romper HTML/JS al mostrar el nombre en otras pantallas
@@ -2586,9 +2620,9 @@ async function publicarPost(){
   if(postVideoURL) post.video=postVideoURL;
   if(postEfimero) post.vence=Date.now()+24*60*60*1000;
   if(postConsigna) post.consigna=true;
-  db.ref('posts').push(post);
-  if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯',true,'todos');
-  else notificar(miNombre+' subió algo al feed','📰');
+  const nuevoRef=db.ref('posts').push(post);
+  if(postConsigna) notificar(miNombre+' tiró una consigna 🎯 — sumate','🎯',true,'todos',nuevoRef.key);
+  else notificar(miNombre+' subió algo al feed','📰',true,null,nuevoRef.key);
   postFotoURL=null;
   postVideoURL=null;
   postConsigna=false;
@@ -2605,6 +2639,13 @@ async function borrarPost(id){
 
 // ── Post con su hilo de comentarios ──
 function abrirPost(id){postAbierto=id;goSub('post');}
+// Al entrar desde una notificacion push, en vez de arrancar mostrando el principio del post
+// (donde puede no verse el comentario nuevo que la genero), se va directo al final del hilo.
+function abrirPostDesdeNotificacion(id){
+  abrirPost(id);
+  const s=document.getElementById('pd-scroll');
+  if(s) s.scrollTop=s.scrollHeight;
+}
 
 function comentariosHTML(p){
   const cm=p.coms;
