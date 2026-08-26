@@ -1736,8 +1736,13 @@ function iniciarApp(){
 // NOTIFICACIONES
 // ════════════════════════════════════════
 const appStartTs=Date.now();
+// Dev y prod comparten la misma base de datos real: si esto no se corta acá, cualquier prueba
+// en dev manda una notificacion push real al celular de todo el grupo (con el icono de prod,
+// que es el que la mayoria tiene instalado) y la abre en prod aunque se haya generado en dev.
+// Por eso el push real queda reservado solo al dominio real de produccion.
+const ES_PROD=location.hostname==='mykonos-pibes---el-centro.web.app';
 function notificar(texto,emoji,push,para,postId){
-  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:push!==false,para:para||null,postId:postId||null});
+  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:(push!==false)&&ES_PROD,para:para||null,postId:postId||null});
 }
 // ── Notificaciones del sistema + badge en el ícono ──
 function notifsActivas(){return localStorage.getItem('ec_notifs')!=='off';}
