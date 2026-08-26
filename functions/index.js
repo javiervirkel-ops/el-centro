@@ -41,12 +41,20 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   if (!tokensSnap.exists()) return;
 
   const tokensObj = tokensSnap.val();
+  const deToken = tokensObj[de] || null;
+  // Una misma persona/celular puede haber quedado registrada bajo varios nombres (pruebas
+  // con distintas identidades). Se agrupa por token real para que ese celular reciba un
+  // unico push, y se excluye por token (no solo por nombre) para que a quien genero el
+  // aviso nunca le llegue una copia via un alias suyo.
+  const vistos = new Set();
+  if (deToken) vistos.add(deToken);
   const tokens = [];
   for (const nombre in tokensObj) {
-    if (nombre === de) continue; // no avisarle a quien lo genero
     if (para && para !== "todos" && nombre !== para) continue; // aviso dirigido a una persona puntual
     const t = tokensObj[nombre];
-    if (t) tokens.push({ nombre, token: t });
+    if (!t || vistos.has(t)) continue;
+    vistos.add(t);
+    tokens.push({ nombre, token: t });
   }
   if (tokens.length === 0) return;
 
