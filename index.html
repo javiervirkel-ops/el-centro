@@ -2670,7 +2670,7 @@ function comentariosHTML(p){
   const cm=p.coms;
   const coms=!cm?[]:(Array.isArray(cm)?cm.filter(Boolean):Object.values(cm)).sort((a,b)=>(a.ts||0)-(b.ts||0));
   const sigo=!!(p.seguidores&&p.seguidores[miNombre]);
-  return `${esInvitado?'':`<div class="pd-seguir${sigo?' on':''}" onclick="toggleSeguirPost()">${ico(sigo?'bell':'bell-off',14)}${sigo?'Siguiendo este hilo':'Seguir este hilo'}</div>`}
+  return `${esInvitado?'':`<div class="pd-seguir${sigo?' on':''}" onclick="toggleSeguirPost()">${ico(sigo?'bell':'bell-off',14)}${sigo?'Recibiendo notificaciones de este hilo':'Recibir notificaciones de este hilo'}</div>`}
     <span class="lbl">${coms.length?'Comentarios':'Sin comentarios todavía'}</span>
     <div class="pd-coms">${coms.map(m=>{
       const yo=m.nombre===miNombre;
