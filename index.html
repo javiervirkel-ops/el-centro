@@ -553,6 +553,8 @@ body.modo-invitado .btn-attach{display:none}
 .pd-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px - env(safe-area-inset-bottom,0px))}
 .pd-scroll{flex:1;overflow-y:auto}
 .pd-coms{padding-top:6px;display:flex;flex-direction:column;gap:10px}
+.pd-seguir{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--gr);background:#F1F3F8;border-radius:20px;padding:6px 12px;margin-top:4px;cursor:pointer;width:fit-content}
+.pd-seguir.on{color:#fff;background:var(--az)}
 .pd-sin{text-align:center;padding:20px;color:var(--gr);font-size:13px}
 
 /* EDITOR DE IMAGEN */
@@ -2650,6 +2652,12 @@ async function borrarPost(id){
 
 // ── Post con su hilo de comentarios ──
 function abrirPost(id){postAbierto=id;goSub('post');}
+function toggleSeguirPost(){
+  if(!postAbierto||!miNombre)return;
+  const p=posts[postAbierto];if(!p)return;
+  const sigo=!!(p.seguidores&&p.seguidores[miNombre]);
+  db.ref('posts/'+postAbierto+'/seguidores/'+miNombre).set(sigo?null:true);
+}
 // Al entrar desde una notificacion push, en vez de arrancar mostrando el principio del post
 // (donde puede no verse el comentario nuevo que la genero), se va directo al final del hilo.
 function abrirPostDesdeNotificacion(id){
@@ -2661,7 +2669,9 @@ function abrirPostDesdeNotificacion(id){
 function comentariosHTML(p){
   const cm=p.coms;
   const coms=!cm?[]:(Array.isArray(cm)?cm.filter(Boolean):Object.values(cm)).sort((a,b)=>(a.ts||0)-(b.ts||0));
-  return `<span class="lbl">${coms.length?'Comentarios':'Sin comentarios todavía'}</span>
+  const sigo=!!(p.seguidores&&p.seguidores[miNombre]);
+  return `${esInvitado?'':`<div class="pd-seguir${sigo?' on':''}" onclick="toggleSeguirPost()">${ico(sigo?'bell':'bell-off',14)}${sigo?'Siguiendo este hilo':'Seguir este hilo'}</div>`}
+    <span class="lbl">${coms.length?'Comentarios':'Sin comentarios todavía'}</span>
     <div class="pd-coms">${coms.map(m=>{
       const yo=m.nombre===miNombre;
       const col=colorFor(m.nombre||'?');
@@ -2729,8 +2739,14 @@ function enviarComentario(){
   if(txt) com.texto=txt;
   if(comFotoURL) com.img=comFotoURL;
   db.ref('posts/'+postAbierto+'/coms').push(com);
+  db.ref('posts/'+postAbierto+'/seguidores/'+miNombre).set(true); // comentar te anota al hilo
   const p=posts[postAbierto];
-  if(p&&p.autor&&p.autor!==miNombre) notificar(miNombre+' comentó el post de '+p.autor,'💬',true,p.autor,postAbierto);
+  if(p){
+    const destinatarios=new Set(p.seguidores?Object.keys(p.seguidores):[]);
+    if(p.autor) destinatarios.add(p.autor);
+    destinatarios.delete(miNombre);
+    destinatarios.forEach(n=>notificar(miNombre+' comentó el post de '+p.autor,'💬',true,n,postAbierto));
+  }
   inp.value='';
   quitarComFoto();
 }
