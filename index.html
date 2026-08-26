@@ -489,6 +489,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .chat-badge{background:var(--ro);color:#fff;border-radius:20px;min-width:19px;height:19px;padding:0 6px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;animation:badgeIn .3s ease}
 @keyframes badgeIn{from{transform:scale(0)}to{transform:scale(1)}}
 .composer{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--bd);border-radius:26px;padding:8px 8px 8px 10px;margin-bottom:18px;cursor:pointer}
+/* Invitado: solo ve y comenta el feed en texto — sin crear posts, sin fotos en comentarios */
+body.modo-invitado .composer{display:none}
+body.modo-invitado .btn-attach{display:none}
 .composer-ph{flex:1;color:var(--gr);font-size:13.5px}
 .composer-cam{font-size:19px;background:var(--sf);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
@@ -689,6 +692,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   <div class="enrol-sub">¿Quién sos?</div>
   <div class="lista-enrol" id="chips"></div>
   <div class="div"></div>
+  <div style="font-size:11px;color:var(--gr);text-align:center;margin-bottom:8px">¿No sos de los 15? Entrá como invitado — solo podés ver y comentar</div>
+  <div class="add-row" style="margin-top:0;margin-bottom:16px">
+    <input class="inp" id="invitado-nombre" placeholder="Tu nombre..." maxlength="20" onkeydown="if(event.key==='Enter')entrarInvitado()">
+    <button class="btn-sm btn-sm-az" onclick="entrarInvitado()" style="white-space:nowrap">Entrar</button>
+  </div>
   <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Soy el Admin</span></button>
 </div>
 
@@ -1413,7 +1421,7 @@ function eqCardHTML(titulo,nombres,clase,size){
 // ════════════════════════════════════════
 // ESTADO
 // ════════════════════════════════════════
-let miNombre='',esTablet=false;
+let miNombre='',esTablet=false,esInvitado=false;
 let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},puntosLog={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null;
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
@@ -1465,7 +1473,8 @@ function arrancarApp(){
   renderChips();
   const n=localStorage.getItem('ec_nombre');
   const t=localStorage.getItem('ec_tablet')==='true';
-  if(n){miNombre=n;esTablet=t;iniciarApp();}
+  const inv=localStorage.getItem('ec_invitado')==='true';
+  if(n){miNombre=n;esTablet=t;esInvitado=inv;iniciarApp();}
 }
 
 function renderChips(){
@@ -1478,9 +1487,23 @@ function renderChips(){
 }
 
 function entrarRapido(n){
-  miNombre=n;esTablet=false;
+  miNombre=n;esTablet=false;esInvitado=false;
   localStorage.setItem('ec_nombre',n);
   localStorage.setItem('ec_tablet','false');
+  localStorage.removeItem('ec_invitado');
+  iniciarApp();
+}
+async function entrarInvitado(){
+  let v=document.getElementById('invitado-nombre').value.trim();
+  if(!v)return;
+  // Mismo filtro que el nombre de jugador del admin: sin comillas ni simbolos de HTML.
+  v=v.replace(/['"<>&`]/g,'');
+  if(!v){await alertApp('Ese nombre tiene caracteres no permitidos');return;}
+  if(JUGADORES.includes(v)){await alertApp('Ese nombre ya es de uno de los 15 — elegí otro para no confundirse');return;}
+  miNombre=v;esTablet=false;esInvitado=true;
+  localStorage.setItem('ec_nombre',v);
+  localStorage.setItem('ec_tablet','false');
+  localStorage.setItem('ec_invitado','true');
   iniciarApp();
 }
 
@@ -1513,7 +1536,7 @@ async function pedirModoTablet(){
 
 function iniciarApp(){
   document.getElementById('scr-enrol').classList.remove('on');
-  document.getElementById('tabs').style.display='flex';
+  document.getElementById('tabs').style.display=esInvitado?'none':'flex';
   document.getElementById('hdr-sello').style.display='none';
   document.getElementById('hdr-user').style.display='block';
   const avEl=document.getElementById('u-av');
@@ -1522,15 +1545,19 @@ function iniciarApp(){
   else avEl.textContent=miNombre.charAt(0).toUpperCase();
   document.getElementById('u-nm').textContent=miNombre;
   document.getElementById('um-nm').textContent=miNombre;
-  document.getElementById('um-rol').textContent=esTablet?'🛠️ Admin':'👤 Jugador';
+  document.getElementById('um-rol').textContent=esTablet?'🛠️ Admin':(esInvitado?'👋 Invitado':'👤 Jugador');
   const umt=document.getElementById('um-tablet-item');
   if(umt) umt.innerHTML=esTablet?ico('door-open',15)+'Salir de Admin':ico('smartphone',15)+'Admin';
   const uma=document.getElementById('um-admin-item');
   if(uma) uma.style.display=esTablet?'flex':'none';
   if(esTablet) document.body.classList.add('tablet-mode');
+  document.body.classList.toggle('modo-invitado',esInvitado);
+  // Un invitado no es un jugador real: no entra al roster de jugadores/equipos (no aparece en
+  // sorteos ni chips de ningun juego), no tiene barra de navegacion, y solo ve el feed — nada mas
+  // (iniciarApp ya termina en goTab('inicio') para todos, asi que cae ahi solo).
 
   // Registrar jugador
-  if(!esTablet) db.ref('jugadores/'+miNombre).set({nombre:miNombre,online:true});
+  if(!esTablet&&!esInvitado) db.ref('jugadores/'+miNombre).set({nombre:miNombre,online:true});
 
   // Si ya habia dado permiso de notificaciones antes, renovar el token de push
   if(notifsActivas() && 'Notification' in window && Notification.permission==='granted') registrarPush();
@@ -1566,10 +1593,10 @@ function iniciarApp(){
     }
   });
 
-  document.getElementById('hdr-sugerencias').style.display='block';
+  document.getElementById('hdr-sugerencias').style.display=esInvitado?'none':'block';
 
   // Campanita — historial de notificaciones que me involucran a mi
-  document.getElementById('hdr-campanita').style.display='block';
+  document.getElementById('hdr-campanita').style.display=esInvitado?'none':'block';
   db.ref('notif').limitToLast(50).on('value',snap=>{
     misNotifs=notifsParaMi(snap.val());
     actualizarBadgeCampanita();
@@ -1897,9 +1924,10 @@ function cerrarMenu(){
 }
 async function cerrarSesion(){
   if(!(await confirmApp('¿Cambiar de jugador? Vas a volver a la pantalla de elegir nombre.')))return;
-  miNombre='';esTablet=false;
+  miNombre='';esTablet=false;esInvitado=false;
   localStorage.removeItem('ec_nombre');
   localStorage.removeItem('ec_tablet');
+  localStorage.removeItem('ec_invitado');
   document.body.classList.remove('tablet-mode');
   document.getElementById('tabs').style.display='none';
   document.getElementById('hdr-sello').style.display='block';
@@ -2534,6 +2562,7 @@ function publicarNoticia(etiqueta,icono,texto){
 
 // Lleva del feed al juego/pantalla correspondiente segun la etiqueta de la noticia
 function irANoticia(etiqueta){
+  if(esInvitado)return; // el invitado no navega fuera del feed
   const destinos={
     'Código Secreto':()=>goJuego('cs'),
     'Novios Panini':()=>goJuego('album'),
