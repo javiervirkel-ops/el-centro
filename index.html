@@ -1248,12 +1248,14 @@ const functions = firebase.functions();
 // Se guarda ahora porque location.search se limpia mas abajo, y se usa recien cuando termina
 // de iniciar la sesion (iniciarApp), que es cuando ya estan los posts cargados.
 let postIdDesdeNotificacion = new URLSearchParams(location.search).get('post');
-if(postIdDesdeNotificacion) history.replaceState(null,'',location.pathname);
+let chatDesdeNotificacion = new URLSearchParams(location.search).get('chat')==='1';
+if(postIdDesdeNotificacion || chatDesdeNotificacion) history.replaceState(null,'',location.pathname);
 // Si la app ya estaba abierta (no hizo falta abrir una ventana nueva), el service worker
 // avisa por acá directamente en vez de por la URL.
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',e=>{
     if(e.data&&e.data.type==='abrirPost'&&e.data.postId) abrirPostDesdeNotificacion(e.data.postId);
+    if(e.data&&e.data.type==='abrirChat'&&!esInvitado) goTab('chat');
   });
 }
 
@@ -1730,6 +1732,10 @@ function iniciarApp(){
 
   renderFeed();
   goTab('inicio');
+  // Se abrió desde una notificacion push de chat (?chat=1) — se consume una sola vez.
+  // Un invitado no tiene pestaña de chat, asi que se ignora en ese caso.
+  if(chatDesdeNotificacion && !esInvitado){ goTab('chat'); }
+  chatDesdeNotificacion=false;
 }
 
 // ════════════════════════════════════════
@@ -1741,8 +1747,8 @@ const appStartTs=Date.now();
 // que es el que la mayoria tiene instalado) y la abre en prod aunque se haya generado en dev.
 // Por eso el push real queda reservado solo al dominio real de produccion.
 const ES_PROD=location.hostname==='mykonos-pibes---el-centro.web.app';
-function notificar(texto,emoji,push,para,postId){
-  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:(push!==false)&&ES_PROD,para:para||null,postId:postId||null});
+function notificar(texto,emoji,push,para,postId,destino){
+  db.ref('notif').push({texto,emoji:emoji||'📣',ts:Date.now(),de:miNombre,push:(push!==false)&&ES_PROD,para:para||null,postId:postId||null,destino:destino||null});
 }
 // ── Notificaciones del sistema + badge en el ícono ──
 function notifsActivas(){return localStorage.getItem('ec_notifs')!=='off';}
@@ -2249,7 +2255,7 @@ function enviarMsg(){
   const inp=document.getElementById('chat-inp');
   const txt=inp.value.trim();if(!txt||!miNombre)return;
   db.ref('chat').push({nombre:miNombre,texto:txt,hora:hora(),ts:Date.now(),tipo:'texto'});
-  notificar(miNombre+': '+txt,'💬');
+  notificar(miNombre+': '+txt,'💬',true,null,null,'chat');
   inp.value='';
 }
 function abrirImgChat(src){

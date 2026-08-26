@@ -34,6 +34,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
   const emoji = data.emoji || "📣";
   const de = data.de || "";
   const postId = data.postId || "";
+  const destino = data.destino || "";
   const para = data.para || null; // null/"todos" = a todos; un nombre puntual = solo a esa persona
 
   const db = admin.database();
@@ -65,6 +66,7 @@ exports.enviarPush = onValueCreated("/notif/{notifId}", async (event) => {
       titulo: "El Centro",
       texto: `${emoji} ${texto}`,
       postId: postId, // FCM exige que los valores de "data" sean siempre strings
+      destino: destino,
     },
   };
 
