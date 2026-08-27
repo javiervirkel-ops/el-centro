@@ -134,6 +134,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .juego-info p{font-size:12px;color:var(--gr)}
 .badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 9px;border-radius:20px;margin-left:auto;flex-shrink:0}
 .badge-on{background:var(--az);color:#fff}
+.badge-espera{background:var(--sf);color:var(--gr)}
+.juego-card-bloqueada{opacity:.6;cursor:default}
+.juego-card-bloqueada:active{border-color:var(--bd);background:#fff}
 .badge-off{background:#E2EAF7;color:var(--gr)}
 .back-btn{background:none;border:none;color:var(--az);font-size:13px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;margin-bottom:14px}
 .back-fab{width:38px;height:38px;border-radius:50%;background:var(--sf);border:1.5px solid var(--bd);color:var(--az);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px}
@@ -738,25 +741,25 @@ body.modo-invitado .btn-attach{display:none}
     <div class="juego-info"><h3>Código Secreto</h3><p>Versión Pibes</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
-  <div class="juego-card" onclick="goJuego('album')">
+  <div class="juego-card" id="juego-card-album" onclick="goJuego('album')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></div>
-    <div class="juego-info"><h3>Novios Panini</h3><p></p></div>
-    <div class="badge badge-on">ACTIVO</div>
+    <div class="juego-info"><h3>Novios Panini</h3><p id="juego-sub-album"></p></div>
+    <div class="badge badge-on" id="juego-badge-album">ACTIVO</div>
   </div>
-  <div class="juego-card" onclick="goJuego('tt')">
+  <div class="juego-card" id="juego-card-tt" onclick="goJuego('tt')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-    <div class="juego-info"><h3>Misiones 2.0 - TA TE TI</h3><p></p></div>
-    <div class="badge badge-on">ACTIVO</div>
+    <div class="juego-info"><h3>Misiones 2.0 - TA TE TI</h3><p id="juego-sub-tt"></p></div>
+    <div class="badge badge-on" id="juego-badge-tt">ACTIVO</div>
   </div>
   <div class="juego-card" onclick="goJuego('truco')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg></div>
     <div class="juego-info"><h3>Truco</h3><p>Contador de fósforos</p></div>
     <div class="badge badge-on">ACTIVO</div>
   </div>
-  <div class="juego-card" onclick="goJuego('af')">
+  <div class="juego-card" id="juego-card-af" onclick="goJuego('af')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="1" y2="4"/><line x1="10" x2="10" y1="1" y2="4"/><line x1="14" x2="14" y1="1" y2="4"/></svg></div>
-    <div class="juego-info"><h3>Amigo Fiel</h3><p>¿Cuánto conocés a los novios?</p></div>
-    <div class="badge badge-on">ACTIVO</div>
+    <div class="juego-info"><h3>Amigo Fiel</h3><p id="juego-sub-af">¿Cuánto conocés a los novios?</p></div>
+    <div class="badge badge-on" id="juego-badge-af">ACTIVO</div>
   </div>
   <div class="juego-card juego-card-destacado" onclick="goJuego('tabla')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></div>
@@ -1688,6 +1691,7 @@ function iniciarApp(){
     tt=snap.val()||{activa:false};
     const en=document.getElementById('scr-tt').classList.contains('on');
     if(en)renderTT();
+    renderJuegosLista();
   });
 
   db.ref('amigoFiel').on('value',snap=>{
@@ -1702,6 +1706,7 @@ function iniciarApp(){
     afSorteado=!!v.sorteado||afRespuestas.length>0; // partidas viejas (antes del sorteo) ya cuentan como sorteadas
     const en=document.getElementById('scr-af').classList.contains('on');
     if(en)renderAF();
+    renderJuegosLista();
   });
 
   db.ref('equipos').on('value',snap=>{
@@ -1714,6 +1719,7 @@ function iniciarApp(){
     paniniEquipos=snap.val();
     const en=document.getElementById('scr-album').classList.contains('on');
     if(en){renderAlbumTabs();renderAlbumSorteo();}
+    renderJuegosLista();
   });
 
   db.ref('calendario').on('value',snap=>{
@@ -1935,7 +1941,34 @@ function volverDeJuego(){
   goTab(origenJuego);
   origenJuego='juegos';
 }
+// Ta Te Ti, Novios Panini y Amigo Fiel quedan ocultos (ni clickeables ni con detalle)
+// hasta que el admin los arranca de verdad — así nadie sabe de qué van de antemano.
+function renderJuegosLista(){
+  const config=[
+    {key:'tt', arrancado: !!(tt&&tt.activa)},
+    {key:'album', arrancado: !!paniniEquipos},
+    {key:'af', arrancado: afSorteado}
+  ];
+  config.forEach(({key,arrancado})=>{
+    const card=document.getElementById('juego-card-'+key);
+    const sub=document.getElementById('juego-sub-'+key);
+    const badge=document.getElementById('juego-badge-'+key);
+    if(!card)return;
+    const desbloqueado = arrancado || esTablet; // el admin siempre puede entrar a prepararlo
+    card.classList.toggle('juego-card-bloqueada', !desbloqueado);
+    badge.textContent = arrancado ? 'ACTIVO' : 'ESPERANDO';
+    badge.classList.toggle('badge-on', arrancado);
+    badge.classList.toggle('badge-espera', !arrancado);
+    if(!arrancado) sub.textContent = esTablet ? 'Esperando que lo arranques' : 'Esperando al admin para comenzar';
+    else if(key==='af') sub.textContent='¿Cuánto conocés a los novios?';
+    else sub.textContent='';
+  });
+}
 function goJuego(j){
+  if((j==='tt'||j==='album'||j==='af')&&!esTablet){
+    const arrancado = j==='tt' ? !!(tt&&tt.activa) : j==='album' ? !!paniniEquipos : afSorteado;
+    if(!arrancado){ mostrarToast('Todavía no arrancó — esperá a que lo inicie el admin','⏳'); return; }
+  }
   // Ocultar TODAS las pantallas incluyendo juegos
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
