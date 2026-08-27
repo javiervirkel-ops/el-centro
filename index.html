@@ -502,7 +502,7 @@ body.modo-invitado .btn-attach{display:none}
 .post-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px}
 .post-nm{font-size:14px;font-weight:700;color:var(--txt);line-height:1.2}
 .post-time{font-size:11px;color:var(--gr);margin-top:1px}
-.post-img{width:100%;display:block;background:var(--sf);cursor:pointer;max-height:520px;object-fit:cover}
+.post-img{width:100%;display:block;background:var(--sf);cursor:pointer;max-height:520px;object-fit:contain}
 .post-txt{padding:12px 14px;font-size:14px;line-height:1.55;color:var(--txt);white-space:pre-wrap;word-break:break-word}
 .post-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--bd);cursor:pointer}
 .post-bar:active{background:var(--sf)}
@@ -2508,16 +2508,16 @@ function renderFeed(){
         </div>
       </div>`;
     }
-    return `<div class="post${p.consigna?' post-consigna':''}">
+    return `<div class="post${p.consigna?' post-consigna':''}" style="cursor:pointer" onclick="abrirPost('${p.id}')">
       <div class="post-hdr">
         ${avatarHTML(p.autor,38)}
         <div><div class="post-nm">${ng(p.autor)}${p.consigna?' <span class="cons-badge">🎯 CONSIGNA</span>':''}</div><div class="post-time">${haceCuanto(p.ts||0)}${p.vence?`<span class="post-efi">${ico('hourglass',11)}24 h</span>`:''}</div></div>
-        ${p.autor===miNombre||esTablet?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
+        ${p.autor===miNombre||esTablet?`<button class="post-borrar" onclick="event.stopPropagation();borrarPost('${p.id}')">Borrar</button>`:''}
       </div>
-      ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="abrirImgChat('${p.img}')">`:''}
-      ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata"></video>`:''}
+      ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="event.stopPropagation();abrirImgChat('${p.img}')">`:''}
+      ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata" onclick="event.stopPropagation()"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
-      <div class="post-bar" onclick="abrirPost('${p.id}')">
+      <div class="post-bar">
         <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
       </div>
     </div>`;
