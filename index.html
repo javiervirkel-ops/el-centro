@@ -3180,7 +3180,7 @@ function asignarEq(n,color){
 // Lista completa: los 15 del viaje + cualquiera agregado por admin
 function todosLosJugadores(){
   const set=new Set(JUGADORES);
-  Object.keys(jugadores||{}).forEach(n=>{if(n&&n!=='Admin')set.add(n);});
+  Object.keys(jugadores||{}).forEach(n=>{if(n&&n!=='Admin'&&!invitados[n])set.add(n);});
   return [...set];
 }
 
