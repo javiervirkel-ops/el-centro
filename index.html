@@ -192,6 +192,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 /* SORTEO */
 .sorteo-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+/* La lista de 15 participantes sola ya mide ~300px en un iPhone chico, tapando el
+   resto (Tipo, botón Sortear) sin scrollear toda la pantalla. Se limita su alto y
+   scrollea puertas adentro, para que lo demás quede siempre visible de una. */
+#s-chips,#camas-pool{max-height:140px;overflow-y:auto}
 .s-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .s-chip.on{background:var(--az);color:#fff;border-color:var(--az)}
 .tipo-btns{display:flex;gap:8px;margin-bottom:12px}
