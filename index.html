@@ -1133,7 +1133,7 @@ body.modo-invitado .btn-attach{display:none}
         <div class="regla-item"><div class="regla-n">II</div><div>Al elegir una casilla aparece la misión con el nombre de esa persona. Hay que <strong>lograr que ella lo haga</strong> para ocupar esa posición.</div></div>
         <div class="regla-item"><div class="regla-n">III</div><div>El admin confirma la misión. Sin turnos — gana el que completa más rápido.</div></div>
         <div class="regla-item"><div class="regla-n">IV</div><div>Tenés <strong>7 horas</strong> por misión. Si se cumple el tiempo, la casilla <strong>pasa directo al equipo rival</strong> — no hay segunda oportunidad.</div></div>
-        <div class="regla-item"><div class="regla-n">V</div><div>Los equipos se arman por <strong>sorteo real</strong> — pueden no quedar del mismo tamaño.</div></div>
+        <div class="regla-item"><div class="regla-n">V</div><div>Los equipos se arman por <strong>sorteo real</strong>, siempre 8 y 7.</div></div>
         <div class="regla-item"><div class="regla-n">VI</div><div>Gana el primero en hacer <strong>ta-te-ti</strong> (3 en línea). Equipo ganador +5 puntos.</div></div>
       </div>
     </div>
@@ -3628,22 +3628,20 @@ function renderTT(){
   }
 }
 
-// Sorteo real de equipos, con una condición para que las 18 misiones cierren 9 y 9:
-// Antonio/Pako/Harry tienen 2 misiones cada uno (van a parar al equipo rival del suyo).
-// Si "d" de ellos caen en Izquierda, Izquierda necesita exactamente 9-d integrantes en total
-// (para que Derecha tenga 9 misiones para tirarle) y Derecha necesita 6+d.
-// Quién cae en qué lado sigue siendo 100% al azar — lo único fijo es CUÁNTOS necesita cada lado.
+// Sorteo real de equipos, siempre 8 y 7, con una condición para que las 18 misiones
+// cierren 9 y 9: Antonio/Pako/Harry tienen 2 misiones cada uno (van al rival de su equipo).
+// Para que el equipo de 8 le deje exactamente 9 misiones al rival, tiene que tener
+// exactamente 1 de los 3 "dobles" (8+1=9); el de 7 se queda con los otros 2 (7+2=9).
+// Qué lado (izq/der) es el de 8, cuál de los 3 dobles le toca, y quiénes son los singles
+// de cada lado: todo eso sigue siendo 100% al azar.
 function sortearEquiposTT(){
   const personas=Object.keys(MISIONES_POR_PERSONA); // los 15 del viaje con misión asignada
-  const singles=personas.filter(n=>!MISIONES_DOBLES.includes(n));
+  const singles=shuf(personas.filter(n=>!MISIONES_DOBLES.includes(n)));
   const dobles=shuf([...MISIONES_DOBLES]);
-  const dobIzq=[],dobDer=[];
-  dobles.forEach(n=>(Math.random()<0.5?dobIzq:dobDer).push(n));
-  const d=dobIzq.length;
-  const singlesShuf=shuf(singles);
-  const singlesIzq=singlesShuf.slice(0,9-2*d);
-  const singlesDer=singlesShuf.slice(9-2*d);
-  ttSorteo={a:shuf([...dobIzq,...singlesIzq]),r:shuf([...dobDer,...singlesDer])};
+  const equipoDe8=[dobles[0],...singles.slice(0,7)];
+  const equipoDe7=[dobles[1],dobles[2],...singles.slice(7,12)];
+  if(Math.random()<0.5) ttSorteo={a:shuf(equipoDe8),r:shuf(equipoDe7)};
+  else ttSorteo={a:shuf(equipoDe7),r:shuf(equipoDe8)};
   const prev=document.getElementById('tt-sorteo-preview');if(!prev)return;
   prev.style.display='block';
   prev.innerHTML=`<div class="card" style="margin-bottom:10px">
