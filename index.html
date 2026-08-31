@@ -1034,7 +1034,7 @@ body.modo-invitado .btn-attach{display:none}
       <div id="cs-reg" style="display:none;margin-top:12px">
         <div class="regla-item"><div class="regla-n">I</div><div>Dos equipos: <strong>☭ Izquierda</strong> y <strong>🎩 Derecha</strong>. Cada equipo tiene un <strong>Capitán</strong> que ve los colores en su celu.</div></div>
         <div class="regla-item"><div class="regla-n">II</div><div>El Capitán da una pista de <strong>una sola palabra</strong> y un número. No puede ser el nombre de ninguna carta.</div></div>
-        <div class="regla-item"><div class="regla-n">III</div><div>El equipo elige las cartas y las toca <strong>desde la tablet</strong>.</div></div>
+        <div class="regla-item"><div class="regla-n">III</div><div>El equipo elige las cartas y las toca <strong>desde el Admin</strong>.</div></div>
         <div class="regla-item"><div class="regla-n">IV</div><div>El turno solo termina con <strong>Pasar turno</strong>. Podés tocar tantas cartas como quieras.</div></div>
         <div class="regla-item"><div class="regla-n">V</div><div><strong>💀 Carta negra = Asesino.</strong> Tocás y perdés al instante.</div></div>
         <div class="regla-item"><div class="regla-n">VI</div><div>Gana quien descubre todas sus cartas. ☭ tiene 9, 🎩 tiene 8.</div></div>
@@ -1070,7 +1070,7 @@ body.modo-invitado .btn-attach{display:none}
     <button class="btn btn-az" id="btn-cs" onclick="iniciarCS()" disabled>Iniciar partida</button>
   </div>
   <div id="cs-game" class="cs-game">
-    <div id="cs-tab-banner" class="tab-banner" style="display:none"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tablet — tocá las cartas desde acá</span></div>
+    <div id="cs-tab-banner" class="tab-banner" style="display:none"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Admin — tocá las cartas desde acá</span></div>
     <div id="cs-rol"></div>
     <div class="marcs">
       <div class="marc marc-a"><span class="marc-n" id="sc-a">9</span><div class="marc-lbl">☭ Izquierda</div></div>
@@ -1129,7 +1129,7 @@ body.modo-invitado .btn-attach{display:none}
         <span id="tt-arr" style="font-size:11px;color:var(--gr)">▾ ver</span>
       </div>
       <div id="tt-reg" style="display:none;margin-top:12px">
-        <div class="regla-item"><div class="regla-n">I</div><div>Dos equipos eligen casillas en un tablero 3×3. Cada casilla tiene una <strong>misión secreta dirigida a una persona puntual</strong> del equipo rival.</div></div>
+        <div class="regla-item"><div class="regla-n">I</div><div>Dos equipos eligen casillas en un tablero 3×3. Cada casilla tiene una <strong>misión secreta dirigida a una persona puntual</strong> del equipo rival. Las casillas 🔒 (misión repetida) quedan bloqueadas hasta agotar el resto.</div></div>
         <div class="regla-item"><div class="regla-n">II</div><div>Al elegir una casilla aparece la misión con el nombre de esa persona. Hay que <strong>lograr que ella lo haga</strong> para ocupar esa posición.</div></div>
         <div class="regla-item"><div class="regla-n">III</div><div>El admin confirma la misión. Sin turnos — gana el que completa más rápido.</div></div>
         <div class="regla-item"><div class="regla-n">IV</div><div>Tenés <strong>7 horas</strong> por misión. Si se cumple el tiempo, la casilla <strong>pasa directo al equipo rival</strong> — no hay segunda oportunidad.</div></div>
@@ -1146,7 +1146,7 @@ body.modo-invitado .btn-attach{display:none}
       <button class="btn btn-az" id="btn-tt" onclick="iniciarTT()" disabled style="display:none">Iniciar partida</button>
     </div>
     <div id="tt-espera" style="display:none;text-align:center;padding:30px 0;color:var(--gr);font-size:13px">
-      <div style="margin-bottom:8px;display:flex;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></div>Esperando que la tablet inicie la partida…
+      <div style="margin-bottom:8px;display:flex;justify-content:center"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></div>Esperando que el Admin inicie la partida…
     </div>
   </div>
   <div id="tt-game" style="display:none">
@@ -1352,7 +1352,7 @@ const DIST=[...Array(9).fill('a'),...Array(8).fill('r'),...Array(7).fill('neu'),
 const MISIONES_POR_PERSONA={
   'Antonio':[
     "Lograr que Antonio compita en una competencia de eructos (al menos 3). Puede participar todo el equipo, pero Antonio tiene que largar 3.",
-    "Lograr que Antonio alague un vino de 3 euros o menos."
+    "Lograr que Antonio halague un vino de 3 euros o menos."
   ],
   'Pako':[
     "Conseguir que Pako dé un consejo LARGO sobre un problema inventado por alguien del equipo. Vale que otro del equipo confirme el problema para darle peso.",
@@ -3483,7 +3483,7 @@ function renderAlbumSorteo(){
     return;
   }
   const miEq=paniniEquipoDe(miNombre);
-  el.innerHTML=`<div class="panini-banner">${miEq?`⭐ Tu equipo es el de <strong>${ng(miEq)}</strong>`:'No estás en ningún equipo — hablá con la tablet'}</div>`;
+  el.innerHTML=`<div class="panini-banner">${miEq?`⭐ Tu equipo es el de <strong>${ng(miEq)}</strong>`:'No estás en ningún equipo — hablá con el Admin'}</div>`;
 }
 
 // Sorteo real (no truqueado): cada novio ancla su equipo, el resto se reparte parejo al azar.
@@ -3544,7 +3544,7 @@ function renderAlbumNovio(){
 
 async function abrirUpload(novio,pos,posNm){
   if(paniniEquipos&&paniniEquipoDe(miNombre)!==novio){
-    await alertApp(`🚫 Este álbum es del equipo de ${ng(novio)}. Vos sos del equipo de ${ng(paniniEquipoDe(miNombre))||'nadie — hablá con la tablet'}.`);
+    await alertApp(`🚫 Este álbum es del equipo de ${ng(novio)}. Vos sos del equipo de ${ng(paniniEquipoDe(miNombre))||'nadie — hablá con el Admin'}.`);
     return;
   }
   upNovio=novio;upPos=pos;upURL=null;
@@ -3656,16 +3656,24 @@ function sortearEquiposTT(){
   const btn=document.getElementById('btn-tt');if(btn){btn.style.display='block';btn.disabled=false;}
 }
 
+// Marca con esDoble:true a las entradas cuyo target se repite dentro del mismo pool
+// (o sea, la 2da mision de alguno de los "dobles" — Antonio/Pako/Harry).
+function marcarDobles(arr){
+  const conteo={};
+  arr.forEach(x=>conteo[x.target]=(conteo[x.target]||0)+1);
+  return arr.map(x=>({...x,esDoble:conteo[x.target]>1}));
+}
+
 function iniciarTT(){
   if(!ttSorteo)return;
   // Pool de misiones que Derecha le puede tirar a Izquierda: la/s misión/es de cada
   // integrante de Izquierda. Por construcción del sorteo, esto da exactamente 9.
   const poolParaDer=[];ttSorteo.a.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaDer.push({target:n,texto})));
   const poolParaIzq=[];ttSorteo.r.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaIzq.push({target:n,texto})));
-  const shufDer=shuf(poolParaDer),shufIzq=shuf(poolParaIzq);
+  const shufDer=shuf(marcarDobles(poolParaDer)),shufIzq=shuf(marcarDobles(poolParaIzq));
   const tablero=Array.from({length:9},(_,i)=>({
-    misionIzq:shufIzq[i].texto,targetIzq:shufIzq[i].target,
-    misionDer:shufDer[i].texto,targetDer:shufDer[i].target,
+    misionIzq:shufIzq[i].texto,targetIzq:shufIzq[i].target,dobleIzq:shufIzq[i].esDoble,
+    misionDer:shufDer[i].texto,targetDer:shufDer[i].target,dobleDer:shufDer[i].esDoble,
     estado:'libre',
     equipo:null,
     inicioIzq:null,   // cuándo Izquierda empezó esta casilla
@@ -3702,7 +3710,9 @@ function renderTTGame(){
   ${esTablet&&!tt.ganador?`<button class="btn ${tt.pausadoDesde?'btn-az':'btn-out'}" style="margin-bottom:10px;padding:9px;font-size:12px" onclick="${tt.pausadoDesde?'ttReanudar()':'ttPausar()'}">${tt.pausadoDesde?'▶ Reanudar tiempo':'⏸ Pausar tiempo'}</button>`:''}`;
 
   const tablero=toArr(tt.tablero);
+  const pendientesArr=toArr(tt.pendientes);
   const elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
+  const yaReportada=miEq&&elMia!==null&&pendientesArr.some(p=>p.equipo===miEq&&p.pos===elMia);
   const board=document.getElementById('tt-board');if(!board)return;
   board.innerHTML='';
   tablero.forEach((cell,pos)=>{
@@ -3712,6 +3722,11 @@ function renderTTGame(){
       div.classList.add(cell.equipo==='a'?'ocupada-a':'ocupada-r');
       if(tt.ganador&&esCeldaGanadora(pos,tt.ganador)) div.classList.add('ganadora');
       div.innerHTML=`<div class="tt-sym" style="font-size:38px;font-weight:900;color:#fff;font-family:'Cinzel',serif">${cell.equipo==='a'?'O':'X'}</div><div class="tt-lbl ico-in" style="justify-content:center;width:100%">${cell.equipo==='a'?ico('circle',9)+'Izquierda':ico('x',9)+'Derecha'}</div>`;
+    } else if(elMia===pos&&yaReportada){
+      // Mi equipo ya reportó esta y está esperando que el Admin la apruebe
+      div.classList.add('mision-'+miEq);
+      div.innerHTML=`<div class="tt-sym">⏳</div><div class="tt-lbl">Esperando Admin</div>`;
+      div.style.cursor='default';
     } else if(elMia===pos){
       // Mi equipo la está intentando
       div.classList.add('mision-'+miEq);
@@ -3719,10 +3734,13 @@ function renderTTGame(){
       div.style.cursor='default';
     } else {
       // Libre (aunque el rival la esté intentando — carrera permitida)
-      const puedo=!tt.ganador&&miEq&&elMia===null;
+      const bloqDoble=miEq&&celdaBloqueadaPorDoble(tablero,pos,miEq);
+      const puedo=!tt.ganador&&miEq&&elMia===null&&!bloqDoble;
       if(puedo){div.classList.add('libre');div.onclick=()=>elegirCeldaTT(pos);}
       else div.classList.add('bloq');
-      div.innerHTML=`<div class="tt-sym">❓</div><div class="tt-lbl">Casilla libre</div>`;
+      div.innerHTML=bloqDoble
+        ?`<div class="tt-sym">🔒</div><div class="tt-lbl">Queda para el final</div>`
+        :`<div class="tt-sym">❓</div><div class="tt-lbl">Casilla libre</div>`;
     }
     board.appendChild(div);
   });
@@ -3742,7 +3760,10 @@ function renderTTGame(){
         const pausadoTxt=tt.pausadoDesde?' · ⏸ en pausa':'';
         timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido — esperando que se libere'}${pausadoTxt}</span></div>`;
       }
-      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button></div>`;
+      const accion=yaReportada
+        ?`<div class="ico-in" style="background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:12px;color:var(--gr);justify-content:center;width:100%">${ico('hourglass',13)}Esperando aprobación del Admin…</div>`
+        :`<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>`;
+      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}${accion}</div>`;
     } else mDiv.innerHTML='';
   }
 
@@ -3754,6 +3775,15 @@ function renderTTGame(){
   if(st) st.innerHTML=esTablet?`<button class="btn btn-ro" style="margin-top:14px;padding:11px;font-size:13px" onclick="resetTTTablet()">🔄 Resetear juego (tablet)</button>`:'';
 }
 
+// Una casilla "doble" (2da misión de Antonio/Pako/Harry) queda bloqueada para un equipo
+// hasta que se agoten todas las casillas de misión única de ese mismo equipo — así primero
+// se agota el resto y recién al final tocan las repetidas.
+function celdaBloqueadaPorDoble(tablero,pos,miEq){
+  const dobleKey=miEq==='a'?'dobleIzq':'dobleDer';
+  if(!tablero[pos][dobleKey])return false;
+  return tablero.some(c=>c.estado==='libre'&&!c[dobleKey]);
+}
+
 function elegirCeldaTT(pos){
   if(!tt||tt.ganador)return;
   const miEq=miEqTT();if(!miEq)return;
@@ -3762,6 +3792,7 @@ function elegirCeldaTT(pos){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const tablero=toArr(tt.tablero).map(x=>({...x}));
   if(!tablero[pos]||tablero[pos].estado!=='libre')return;
+  if(celdaBloqueadaPorDoble(tablero,pos,miEq))return;
   // Arrancar el reloj de 7hs para este equipo en esta casilla
   // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
   if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
@@ -3871,15 +3902,15 @@ async function reportarMision(pos){
   const cell=tablero[pos];
   if(!cell||cell.estado!=='libre'){await alertApp('Esa casilla ya fue ocupada.');return;}
   const pendientes=toArr(tt.pendientes);
-  if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){await alertApp('Ya reportaste esta misión. Esperá la aprobación de la tablet.');return;}
+  if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){await alertApp('Ya reportaste esta misión. Esperá la aprobación del Admin.');return;}
   const target=miEq==='a'?cell.targetIzq:cell.targetDer;
   const mision=miEq==='a'?cell.misionIzq:cell.misionDer;
   db.ref('tateti').set({...tt,tablero,
     pendientes:[...pendientes,{equipo:miEq,pos,mision,target,solicitante:miNombre,ts:Date.now()}],
     eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
     ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
-  notificar(miNombre+' dice que cumplió una misión — a confirmar por la tablet','🎯');
-  await alertApp('✅ Misión reportada. La tablet la tiene que aprobar.');
+  notificar(miNombre+' dice que cumplió una misión — a confirmar por el Admin','🎯');
+  await alertApp('✅ Misión reportada. El Admin la tiene que aprobar.');
 }
 
 function renderPendientesTT(){
@@ -3890,13 +3921,9 @@ function renderPendientesTT(){
   const pendientesArr=toArr(tt.pendientes);
   if(!pendientesArr.length){div.innerHTML='';return;}
 
-  // Solo la TABLET aprueba las misiones
-  if(!esTablet){
-    // A los jugadores les mostramos cuántas hay pendientes (info)
-    const mias=pendientesArr.filter(p=>p.solicitante===miNombre);
-    div.innerHTML=mias.length?`<div class="ico-in" style="background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin-top:8px;font-size:12px;color:var(--gr);justify-content:center;width:100%">${ico('hourglass',13)}Tu misión está esperando aprobación de la tablet…</div>`:'';
-    return;
-  }
+  // Solo el Admin aprueba las misiones. El propio jugador ya ve el estado
+  // "Esperando aprobación del Admin" en el panel de su misión, no hace falta repetirlo acá.
+  if(!esTablet){div.innerHTML='';return;}
 
   div.innerHTML=`<div class="ico-in" style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--am);letter-spacing:1px;margin-bottom:10px;justify-content:center;width:100%">${ico('hourglass',13)}MISIONES PENDIENTES DE APROBACIÓN</div>`+
     pendientesArr.map((p,i)=>`<div class="tt-pend">
@@ -4058,7 +4085,7 @@ function renderAF(){
   if(!afSorteado){
     cuerpo.innerHTML=esTablet
       ?`<button class="btn btn-az" onclick="afSortear()">🎲 Sortear equipos</button>`
-      :`<div class="af-espera">Esperando que la tablet sortee los equipos…</div>`;
+      :`<div class="af-espera">Esperando que el Admin sortee los equipos…</div>`;
     return;
   }
   const i=afRespuestas.length;
@@ -4103,7 +4130,7 @@ function renderAF(){
         </div>
         <button class="btn btn-az" onclick="afFinalizar()">🏁 Finalizar partida</button>`;
       } else {
-        cuerpo.innerHTML=`<div class="af-espera">Terminaron las preguntas. Esperando que la tablet finalice la partida…</div>`;
+        cuerpo.innerHTML=`<div class="af-espera">Terminaron las preguntas. Esperando que el Admin finalice la partida…</div>`;
       }
       return;
     }
@@ -4133,7 +4160,7 @@ function renderAF(){
       <div class="af-card-eq">Responde Equipo ${preg.equipo}${miEq===preg.equipo?' (¡tu equipo!)':''}</div>
       <div class="af-card-novio">Sobre: ${preg.novio}</div>
     </div>
-    <div class="af-espera">Esperando que la tablet ponga el puntaje…</div>`;
+    <div class="af-espera">Esperando que el Admin ponga el puntaje…</div>`;
   }
 }
 function afPuntuar(pts){
