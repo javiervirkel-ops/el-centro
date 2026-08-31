@@ -1129,11 +1129,11 @@ body.modo-invitado .btn-attach{display:none}
         <span id="tt-arr" style="font-size:11px;color:var(--gr)">▾ ver</span>
       </div>
       <div id="tt-reg" style="display:none;margin-top:12px">
-        <div class="regla-item"><div class="regla-n">I</div><div>Dos equipos eligen casillas en un tablero 3×3. Cada casilla tiene una <strong>misión secreta</strong>.</div></div>
-        <div class="regla-item"><div class="regla-n">II</div><div>Al elegir una casilla aparece la misión. Hay que <strong>realizarla</strong> para ocupar esa posición.</div></div>
+        <div class="regla-item"><div class="regla-n">I</div><div>Dos equipos eligen casillas en un tablero 3×3. Cada casilla tiene una <strong>misión secreta dirigida a una persona puntual</strong> del equipo rival.</div></div>
+        <div class="regla-item"><div class="regla-n">II</div><div>Al elegir una casilla aparece la misión con el nombre de esa persona. Hay que <strong>lograr que ella lo haga</strong> para ocupar esa posición.</div></div>
         <div class="regla-item"><div class="regla-n">III</div><div>El admin confirma la misión. Sin turnos — gana el que completa más rápido.</div></div>
-        <div class="regla-item"><div class="regla-n">IV</div><div>Tenés <strong>4 horas</strong> por misión. Si se cumple el tiempo, podés <strong>cambiarla</strong> por otra del banco.</div></div>
-        <div class="regla-item"><div class="regla-n">V</div><div>Si el rival te saca <strong>2 casillas de ventaja</strong>, podés pedir cambio de misión sin esperar las 4hs.</div></div>
+        <div class="regla-item"><div class="regla-n">IV</div><div>Tenés <strong>7 horas</strong> por misión. Si se cumple el tiempo, la casilla <strong>pasa directo al equipo rival</strong> — no hay segunda oportunidad.</div></div>
+        <div class="regla-item"><div class="regla-n">V</div><div>Los equipos se arman por <strong>sorteo real</strong> — pueden no quedar del mismo tamaño.</div></div>
         <div class="regla-item"><div class="regla-n">VI</div><div>Gana el primero en hacer <strong>ta-te-ti</strong> (3 en línea). Equipo ganador +5 puntos.</div></div>
       </div>
     </div>
@@ -1347,20 +1347,35 @@ const CARTAS = [
   {n:"Burgueño del Far West",e:"🐎"}
 ];
 const DIST=[...Array(9).fill('a'),...Array(8).fill('r'),...Array(7).fill('neu'),'n'];
-const MISIONES=[
-  "Jugá un ping-pong de eructos con [T] en el que al menos se tiren dos cada uno.",
-  "Convencé a [T] de que te dé un abrazo diciendo que estás triste. Sin explicar por qué.",
-  "Hacé que [T] te diga 'te quiero' o algo equivalente. Vale cualquier método.",
-  "Hacé que [T] te dé de comer algo con la mano. Filmálo.",
-  "Chocale los cinco a [T] al menos 5 veces, inventando una excusa ridícula distinta cada vez.",
-  "Lográ que [T] te invite un trago o un bocado de su comida, pero pidiéndoselo únicamente con la mirada y gestos exagerados.",
-  "Convencé a [T] de que inventaste una palabra nueva y lográ que la use en una frase de forma natural.",
-  "Conseguí que [T] te haga un mimo en el pelo o una caricia en la espalda (podés quejarte de que te duele el cuello o actuar cansado).",
-  "Convencé a [T] de hacer un brindis ridículo en voz alta frente a todos, iniciado por él.",
-  "Conseguí que [T] te confiese detalladamente cuál es su mayor fobia o miedo irracional.",
-  "Hacé que [T] te puntúe del 1 al 10 en algo totalmente absurdo (cómo pestañeás, tu postura al sentarte, cómo sostenés el vaso).",
-  "Convencé a [T] de que se fije si tenés algo en el ojo y lográ que te sople el ojo para sacártelo."
-];
+// Misiones 2.0: cada persona del viaje tiene su/s misión/es propia/s (Antonio, Pako y Harry tienen 2).
+// El equipo rival tiene que lograr que ESA persona puntual haga lo que dice la misión.
+const MISIONES_POR_PERSONA={
+  'Antonio':[
+    "Lograr que Antonio compita en una competencia de eructos (al menos 3). Puede participar todo el equipo, pero Antonio tiene que largar 3.",
+    "Lograr que Antonio alague un vino de 3 euros o menos."
+  ],
+  'Pako':[
+    "Conseguir que Pako dé un consejo LARGO sobre un problema inventado por alguien del equipo. Vale que otro del equipo confirme el problema para darle peso.",
+    "Convencer a Pako de que alguien del equipo tiene algo en el ojo y lograr que se lo sople para sacárselo."
+  ],
+  'Harry':[
+    "Lograr que Harry confirme un recuerdo que nunca existió y agregue un detalle propio.",
+    "Que Harry use el apodo que el equipo le inventó a otra persona, como si fuera el nombre real. Vale que todos lo usen naturalmente hasta que lo adopte."
+  ],
+  'Ray':["Lograr que Ray le haga un mimo en el pelo, una caricia en la espalda o un masaje a alguien del equipo."],
+  'Juan':["Lograr que Juan abrace a alguien del equipo porque esa persona se hace la triste."],
+  'Keke':["Lograr que Keke le dé de comer algo con la mano a alguien del equipo. No importa a quién."],
+  'Litka':["Chocarle los cinco a Litka 4 veces, con una excusa distinta cada vez. Pueden ser 4 personas del equipo, un choque cada una."],
+  'Tomi':["Conseguir que Tomi puntúe del 1 al 10 a alguien del equipo en algo: cómo pestañea, su postura al sentarse, cómo agarra el vaso. Cualquier cosa."],
+  'Naros':["Conseguir que Naros dé un trago o un bocado de su comida, pidiéndoselo solamente con la mirada y gestos. No vale hablar en el pedido."],
+  'Javi IAS':["Conseguir que Javi IAS le diga \"te quiero\" (o algo equivalente) a alguien del equipo. Vale cualquier método."],
+  'Javi Vir':["[PLACEHOLDER — falta que Ale confirme cuál de las opciones propuestas usar]"],
+  'Beker':["Lograr que Beker compita en una batalla de farmear aura."],
+  'Tute':["Entre todos, sacarle a Tute cuál es su mayor fobia o miedo irracional, contado en detalle."],
+  'MP':["Lograr que Marcos (MP) patee una pelota con toda su fuerza."],
+  'Gasti':["Lograr que Gasti tararee o cante una canción de los Beatles (o de antes del 2000)."]
+};
+const MISIONES_DOBLES=['Antonio','Pako','Harry']; // los únicos con 2 misiones en vez de 1
 // ── Íconos Lucide (SVG inline, sin CDN) ──
 const ICONOS={
   bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
@@ -3613,11 +3628,22 @@ function renderTT(){
   }
 }
 
-async function sortearEquiposTT(){
-  const ns=todosLosJugadores();
-  if(ns.length<2){await alertApp('Necesitás al menos 2 jugadores');return;}
-  const bal=sortearBalanceado(ns);
-  ttSorteo={a:bal.a,r:bal.r};
+// Sorteo real de equipos, con una condición para que las 18 misiones cierren 9 y 9:
+// Antonio/Pako/Harry tienen 2 misiones cada uno (van a parar al equipo rival del suyo).
+// Si "d" de ellos caen en Izquierda, Izquierda necesita exactamente 9-d integrantes en total
+// (para que Derecha tenga 9 misiones para tirarle) y Derecha necesita 6+d.
+// Quién cae en qué lado sigue siendo 100% al azar — lo único fijo es CUÁNTOS necesita cada lado.
+function sortearEquiposTT(){
+  const personas=Object.keys(MISIONES_POR_PERSONA); // los 15 del viaje con misión asignada
+  const singles=personas.filter(n=>!MISIONES_DOBLES.includes(n));
+  const dobles=shuf([...MISIONES_DOBLES]);
+  const dobIzq=[],dobDer=[];
+  dobles.forEach(n=>(Math.random()<0.5?dobIzq:dobDer).push(n));
+  const d=dobIzq.length;
+  const singlesShuf=shuf(singles);
+  const singlesIzq=singlesShuf.slice(0,9-2*d);
+  const singlesDer=singlesShuf.slice(9-2*d);
+  ttSorteo={a:shuf([...dobIzq,...singlesIzq]),r:shuf([...dobDer,...singlesDer])};
   const prev=document.getElementById('tt-sorteo-preview');if(!prev)return;
   prev.style.display='block';
   prev.innerHTML=`<div class="card" style="margin-bottom:10px">
@@ -3634,26 +3660,23 @@ async function sortearEquiposTT(){
 
 function iniciarTT(){
   if(!ttSorteo)return;
-  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
-  // Elegir 9 misiones al azar del banco completo
-  const idxBanco=shuf(MISIONES.map((_,i)=>i));
-  const usadas=idxBanco.slice(0,9);
-  const ahora=Date.now();
-  const tablero=usadas.map(mi=>({
-    misionIdx:mi,
-    targetIzq:pick(ttSorteo.r),
-    targetDer:pick(ttSorteo.a),
+  // Pool de misiones que Derecha le puede tirar a Izquierda: la/s misión/es de cada
+  // integrante de Izquierda. Por construcción del sorteo, esto da exactamente 9.
+  const poolParaDer=[];ttSorteo.a.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaDer.push({target:n,texto})));
+  const poolParaIzq=[];ttSorteo.r.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaIzq.push({target:n,texto})));
+  const shufDer=shuf(poolParaDer),shufIzq=shuf(poolParaIzq);
+  const tablero=Array.from({length:9},(_,i)=>({
+    misionIzq:shufIzq[i].texto,targetIzq:shufIzq[i].target,
+    misionDer:shufDer[i].texto,targetDer:shufDer[i].target,
     estado:'libre',
     equipo:null,
     inicioIzq:null,   // cuándo Izquierda empezó esta casilla
     inicioDer:null,
-    vencesIzq:0,      // cuantas veces se le vencieron las 4hs a Izquierda en esta casilla
-    vencesDer:0,
     pausaAlIniciarIzq:0, // foto de pausaAcumulada al momento de arrancar el reloj (para no contar pausas de antes)
     pausaAlIniciarDer:0
   }));
   db.ref('tateti').set({activa:true,equipoIzq:ttSorteo.a,equipoDer:ttSorteo.r,
-    tablero,usadas,pendientes:[],ganador:null,eleccionIzq:null,eleccionDer:null,
+    tablero,pendientes:[],ganador:null,eleccionIzq:null,eleccionDer:null,
     ocupadasIzq:0,ocupadasDer:0,pausadoDesde:null,pausaAcumulada:0});
   ttSorteo=null;
 }
@@ -3711,9 +3734,7 @@ function renderTTGame(){
   if(mDiv){
     if(miEq&&elMia!==null&&tablero[elMia]&&tablero[elMia].estado==='libre'){
       const cell=tablero[elMia];
-      const target=miEq==='a'?cell.targetIzq:cell.targetDer;
-      const mision=MISIONES[cell.misionIdx].replace('[T]',target);
-      const chk=puedeCambiarMision();
+      const mision=miEq==='a'?cell.misionIzq:cell.misionDer;
       let timerHtml='';
       const inicio=miEq==='a'?cell.inicioIzq:cell.inicioDer;
       if(inicio){
@@ -3721,18 +3742,9 @@ function renderTTGame(){
         const hs=Math.floor(rest/3600000), mn=Math.floor((rest%3600000)/60000), sg=Math.floor((rest%60000)/1000);
         const urgente=rest<30*60*1000;
         const pausadoTxt=tt.pausadoDesde?' · ⏸ en pausa':'';
-        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido'}${pausadoTxt}</span></div>`;
+        timerHtml=`<div class="tt-timer ${urgente?'urg':''}" id="tt-timer-live"><span class="ico-in">${ico('hourglass',13)}${rest>0?`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`:'Tiempo cumplido — esperando que se libere'}${pausadoTxt}</span></div>`;
       }
-      let btnCambiar='';
-      if(chk.puede){
-        const vencesActuales=(miEq==='a'?cell.vencesIzq:cell.vencesDer)||0;
-        const esSegundoVencimiento=chk.motivo==='tiempo'&&vencesActuales>=1;
-        const txt=esSegundoVencimiento?ico('triangle-alert',13)+'Se acabó el tiempo de nuevo — perdés el casillero'
-          :chk.motivo==='tiempo'?ico('timer',13)+'Se acabó el tiempo — cambiar misión'
-          :ico('scale',13)+'Vas en desventaja — cambiar misión';
-        btnCambiar=`<button class="btn ${esSegundoVencimiento?'btn-ro':'btn-out'}" style="font-size:12px;padding:10px;margin-top:8px" onclick="cambiarMision()"><span class="ico-in">${txt}</span></button>`;
-      }
-      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>${btnCambiar}</div>`;
+      mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button></div>`;
     } else mDiv.innerHTML='';
   }
 
@@ -3752,7 +3764,7 @@ function elegirCeldaTT(pos){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const tablero=toArr(tt.tablero).map(x=>({...x}));
   if(!tablero[pos]||tablero[pos].estado!=='libre')return;
-  // Arrancar el reloj de 4hs para este equipo en esta casilla
+  // Arrancar el reloj de 7hs para este equipo en esta casilla
   // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
   if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
   else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=tt.pausaAcumulada||0;}
@@ -3761,7 +3773,6 @@ function elegirCeldaTT(pos){
     eleccionDer:(miEq==='r'?pos:(tt.eleccionDer??null)),
     ganador:tt.ganador??null,
     pendientes:toArr(tt.pendientes),
-    usadas:toArr(tt.usadas),
     ocupadasIzq:tt.ocupadasIzq??0,
     ocupadasDer:tt.ocupadasDer??0});
 }
@@ -3788,13 +3799,12 @@ function renderTTControl(){
     const cell=tablero[pos];
     const rest=Math.max(0,TT_LIMITE_MS-ttTranscurrido(cell,lado));
     const hs=Math.floor(rest/3600000),mn=Math.floor((rest%3600000)/60000),sg=Math.floor((rest%60000)/1000);
-    const vences=(lado==='a'?cell.vencesIzq:cell.vencesDer)||0;
-    return {activa:true,pos,txt:`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`,vences};
+    return {activa:true,pos,txt:`${hs}h ${String(mn).padStart(2,'0')}m ${String(sg).padStart(2,'0')}s`};
   };
   const iA=info('a'),iR=info('r');
   const bloque=(nm,ic,i)=>`<div class="tt-control-eq">
     <div class="tt-control-nm ico-in">${ico(ic,11)}${nm}</div>
-    ${i.activa?`<div class="tt-control-cas">Casilla ${i.pos+1}</div><div class="tt-control-timer ico-in">${ico('hourglass',12)}${i.txt}</div><div class="tt-control-venc">${i.vences}/2 vencimientos</div>`:'<div class="tt-control-sin">Sin misión activa</div>'}
+    ${i.activa?`<div class="tt-control-cas">Casilla ${i.pos+1}</div><div class="tt-control-timer ico-in">${ico('hourglass',12)}${i.txt}</div>`:'<div class="tt-control-sin">Sin misión activa</div>'}
   </div>`;
   el.innerHTML=`<div class="tt-control-panel">
     <div class="tt-control-tit">📋 Tablero de control</div>
@@ -3812,93 +3822,48 @@ function ttReanudar(){
   db.ref('tateti').update({pausadoDesde:null,pausaAcumulada:nuevaAcum});
 }
 
-const TT_LIMITE_MS=4*60*60*1000; // 4 horas
+const TT_LIMITE_MS=7*60*60*1000; // 7 horas
 
-function puedeCambiarMision(){
-  if(!tt)return {puede:false,motivo:''};
-  const miEq=miEqTT();if(!miEq)return {puede:false,motivo:''};
-  const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const tablero=toArr(tt.tablero);
-  const pos=miEq==='a'?(tt.eleccionIzq??null):(tt.eleccionDer??null);
-  if(pos===null||!tablero[pos])return {puede:false,motivo:''};
-  const inicio=miEq==='a'?tablero[pos].inicioIzq:tablero[pos].inicioDer;
-  const transcurrido=inicio?ttTranscurrido(tablero[pos],miEq):0;
-  // Motivo 1: pasaron las 4hs
-  if(inicio&&transcurrido>=TT_LIMITE_MS) return {puede:true,motivo:'tiempo',pos};
-  // Motivo 2: el rival va 2 casillas arriba y yo tengo 0 avance en esa diferencia
-  const mias=miEq==='a'?(tt.ocupadasIzq??0):(tt.ocupadasDer??0);
-  const suyas=miEq==='a'?(tt.ocupadasDer??0):(tt.ocupadasIzq??0);
-  if(suyas-mias>=2) return {puede:true,motivo:'desventaja',pos};
-  return {puede:false,motivo:'',pos,restante:inicio?Math.max(0,TT_LIMITE_MS-transcurrido):null};
-}
-
-async function cambiarMision(){
-  const chk=puedeCambiarMision();
-  if(!chk.puede){await alertApp('Todavía no podés cambiar de misión.');return;}
-  const miEq=miEqTT();if(!miEq||!tt)return;
+// Chequeo automático de vencimiento: corre solo en el cliente de la tablet (fuente única
+// de verdad, evita que dos celulares escriban el mismo flip a la vez). Si a un equipo se le
+// vencieron las 7hs en su casilla activa, esa casilla pasa DIRECTO al rival — un solo strike,
+// no hay más "cambiar misión".
+function ttChequearVencimientos(){
+  if(!esTablet||!tt||!tt.activa||tt.ganador||tt.pausadoDesde)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const tablero=toArr(tt.tablero).map(x=>({...x}));
-  const usadas=toArr(tt.usadas);
-  const pos=chk.pos;
-  if(!tablero[pos]||tablero[pos].estado!=='libre')return;
-
-  // Si se acabo el tiempo, es la segunda vez que se le vence a este equipo en esta
-  // casilla: pasa directo y automatico al rival, sin necesidad de que la completen.
-  if(chk.motivo==='tiempo'){
-    const vencesKey=miEq==='a'?'vencesIzq':'vencesDer';
-    tablero[pos][vencesKey]=(tablero[pos][vencesKey]||0)+1;
-    if(tablero[pos][vencesKey]>=2){
-      const rival=miEq==='a'?'r':'a';
-      tablero[pos].estado='ocupada';
-      tablero[pos].equipo=rival;
-
-      let eIzq=tt.eleccionIzq??null, eDer=tt.eleccionDer??null;
-      if(miEq==='a') eIzq=null; else eDer=null;
-      if(rival==='a'&&eIzq===pos) eIzq=null;
-      if(rival==='r'&&eDer===pos) eDer=null;
-
-      const pendientes=toArr(tt.pendientes).filter(p=>p.pos!==pos);
-      const ocupadasIzq=(tt.ocupadasIzq??0)+(rival==='a'?1:0);
-      const ocupadasDer=(tt.ocupadasDer??0)+(rival==='r'?1:0);
-
-      const gano=chequearTT(tablero,rival);
-      let ganador=tt.ganador??null;
-      const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
-      const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
-      notificar(nmMio+' dejó pasar el tiempo 2 veces en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
-      publicarNoticia('Misiones 2.0 - TA TE TI','⏳',
-        `${nmMio} se quedó sin tiempo dos veces en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
-      if(gano){
-        ganador=rival;
-        sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
-        notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
-        publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
-      }
-      db.ref('tateti').set({...tt,tablero,pendientes,usadas,
-        eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
-      return;
+  let eIzq=tt.eleccionIzq??null, eDer=tt.eleccionDer??null;
+  let ocupadasIzq=tt.ocupadasIzq??0, ocupadasDer=tt.ocupadasDer??0;
+  let ganador=tt.ganador??null;
+  const flips=[];
+  const intentar=miEq=>{
+    const pos=miEq==='a'?eIzq:eDer;
+    if(pos===null||!tablero[pos]||tablero[pos].estado!=='libre')return;
+    const inicio=miEq==='a'?tablero[pos].inicioIzq:tablero[pos].inicioDer;
+    if(!inicio||ttTranscurrido(tablero[pos],miEq)<TT_LIMITE_MS)return;
+    const rival=miEq==='a'?'r':'a';
+    tablero[pos]={...tablero[pos],estado:'ocupada',equipo:rival};
+    if(miEq==='a')eIzq=null;else eDer=null;
+    if(rival==='a'&&eIzq===pos)eIzq=null;
+    if(rival==='r'&&eDer===pos)eDer=null;
+    if(rival==='a')ocupadasIzq++;else ocupadasDer++;
+    flips.push(pos);
+    const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
+    const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
+    notificar(nmMio+' se quedó sin tiempo en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
+    publicarNoticia('Misiones 2.0 - TA TE TI','⏳',
+      `${nmMio} se quedó sin tiempo en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
+    if(chequearTT(tablero,rival)){
+      ganador=rival;
+      sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
+      notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
+      publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
     }
-  }
-
-  // Buscar una misión del banco que no esté en juego
-  const disponibles=MISIONES.map((_,i)=>i).filter(i=>!usadas.includes(i));
-  if(!disponibles.length){await alertApp('No quedan misiones nuevas en el banco.');return;}
-  const nueva=disponibles[Math.floor(Math.random()*disponibles.length)];
-
-  // Reemplazar la misión de esa casilla y reiniciar el reloj
-  const vieja=tablero[pos].misionIdx;
-  tablero[pos].misionIdx=nueva;
-  if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
-  else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=tt.pausaAcumulada||0;}
-  const nuevasUsadas=usadas.map(u=>u===vieja?nueva:u);
-
-  // Descartar reportes pendientes propios de esa casilla
-  const pendientes=toArr(tt.pendientes).filter(p=>!(p.equipo===miEq&&p.pos===pos));
-
-  db.ref('tateti').set({...tt,tablero,usadas:nuevasUsadas,pendientes,
-    eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
-    ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
-  notificar((miEq==='a'?'⭕ Izquierda':'❌ Derecha')+' cambió su misión ('+(chk.motivo==='tiempo'?'se acabó el tiempo':'iba en desventaja')+')','🔄');
+  };
+  intentar('a');intentar('r');
+  if(!flips.length)return;
+  const pendientes=toArr(tt.pendientes).filter(p=>!flips.includes(p.pos));
+  db.ref('tateti').set({...tt,tablero,pendientes,eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
 }
 
 async function reportarMision(pos){
@@ -3910,10 +3875,9 @@ async function reportarMision(pos){
   const pendientes=toArr(tt.pendientes);
   if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){await alertApp('Ya reportaste esta misión. Esperá la aprobación de la tablet.');return;}
   const target=miEq==='a'?cell.targetIzq:cell.targetDer;
-  const mision=MISIONES[cell.misionIdx].replace('[T]',target);
+  const mision=miEq==='a'?cell.misionIzq:cell.misionDer;
   db.ref('tateti').set({...tt,tablero,
     pendientes:[...pendientes,{equipo:miEq,pos,mision,target,solicitante:miNombre,ts:Date.now()}],
-    usadas:toArr(tt.usadas),
     eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
     ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
   notificar(miNombre+' dice que cumplió una misión — a confirmar por la tablet','🎯');
@@ -3956,7 +3920,6 @@ function aprobarMision(idx){
   // Si ya la ocuparon, descartar el reporte
   if(tablero[p.pos].estado==='ocupada'){
     db.ref('tateti').set({...tt,tablero,pendientes:pends.filter((_,i)=>i!==idx),
-      usadas:toArr(tt.usadas),
       eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
       ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
     return;
@@ -3986,16 +3949,9 @@ function aprobarMision(idx){
     sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
     notificar('¡Misiones 2.0! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
     publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
-  } else {
-    // Avisar si el que va perdiendo ya puede cambiar de misión
-    const dif=Math.abs(ocupadasIzq-ocupadasDer);
-    if(dif>=2){
-      const atras=ocupadasIzq<ocupadasDer?'⭕ Izquierda':'❌ Derecha';
-      notificar(atras+' va 2 abajo — puede pedir cambio de misión','⚖️');
-    }
   }
 
-  db.ref('tateti').set({...tt,tablero,pendientes,usadas:toArr(tt.usadas),
+  db.ref('tateti').set({...tt,tablero,pendientes,
     eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
 }
 
@@ -4004,7 +3960,6 @@ function rechazarMision(idx){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
   const pends=toArr(tt.pendientes);
   db.ref('tateti').set({...tt,tablero:toArr(tt.tablero),pendientes:pends.filter((_,i)=>i!==idx),
-    usadas:toArr(tt.usadas),
     eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
     ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
 }
@@ -4028,6 +3983,7 @@ function esCeldaGanadora(pos,ganador){
 // Refrescar los timers de Misiones 2.0 - TA TE TI cada segundo
 // (el propio, si tengo una mision activa; o el tablero de control si soy la tablet)
 setInterval(()=>{
+  ttChequearVencimientos(); // corre en segundo plano en la tablet, sin importar qué pantalla esté mirando
   const hayTimerPropio=document.getElementById('tt-timer-live');
   const enPantalla=document.getElementById('scr-tt')&&document.getElementById('scr-tt').classList.contains('on');
   if((hayTimerPropio||esTablet)&&tt&&tt.activa&&!tt.ganador&&enPantalla){
