@@ -192,14 +192,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 /* SORTEO */
 .sorteo-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
-/* La lista de 15 participantes sola ya mide ~300px en un iPhone chico, tapando el
-   resto (Tipo, botón Sortear) sin scrollear toda la pantalla. Se limita su alto y
-   scrollea puertas adentro, para que lo demás quede siempre visible de una. */
-#s-chips,#camas-pool{max-height:140px;overflow-y:auto}
 .s-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .s-chip.on{background:var(--az);color:#fff;border-color:var(--az)}
 .tipo-btns{display:flex;gap:8px;margin-bottom:12px}
 .tipo-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-family:'Inter',sans-serif;transition:all .2s}
+/* La pantalla de Sorteo no entraba entera en un iPhone normal (solo en Pro Max) —
+   se achica todo puertas adentro de #scr-sorteo, sin scroll de ningún tipo. */
+#scr-sorteo .card{padding:10px 12px;margin-bottom:6px}
+#scr-sorteo .lbl{font-size:11px;margin-bottom:4px}
+#scr-sorteo .sorteo-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
+#scr-sorteo .s-chip{padding:4px 2px;font-size:9px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scr-sorteo .tipo-btns{gap:6px;margin-bottom:6px}
+#scr-sorteo .tipo-btn{padding:7px;font-size:12px}
+#scr-sorteo #btn-sortear{margin-bottom:8px}
 .tipo-btn.on{background:var(--az);color:#fff;border-color:var(--az)}
 .dado-wrap{text-align:center;padding:20px 0 10px;display:none}
 .dado-escena{width:130px;height:130px;perspective:600px;margin:0 auto}
