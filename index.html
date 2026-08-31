@@ -3968,7 +3968,10 @@ function aprobarMision(idx){
   notificar(p.solicitante+' completó su misión — '+eqNombre+' ocupa la casilla '+(p.pos+1),'🎯');
   publicarNoticia('Misiones 2.0 - TA TE TI','🎯',
     `${ng(p.solicitante)} cumplió su misión con ${ng(p.target)||'alguien'} y ${eqNombre} se queda con la casilla ${p.pos+1}.\n\n"${p.mision||''}"`);
-  if(rivalPerdio) notificar('El otro equipo llegó primero a la casilla '+(p.pos+1)+' — elegí otra','⚠️');
+  if(rivalPerdio){
+    const nmPerdedor=p.equipo==='a'?'❌ Derecha':'⭕ Izquierda';
+    notificar(nmPerdedor+' perdió la carrera por la casilla '+(p.pos+1)+' contra '+eqNombre+' — elegí otra casilla','⚠️');
+  }
   if(gano){
     ganador=p.equipo;
     sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
