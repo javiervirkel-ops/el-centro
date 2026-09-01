@@ -642,6 +642,7 @@ body.modo-invitado .btn-attach{display:none}
     </div>
     <div id="hdr-sello" style="font-size:26px">🏺</div>
     <div id="hdr-sugerencias" style="display:none;position:relative;margin-right:10px;cursor:pointer;font-size:20px" onclick="abrirSugerencia()">💡</div>
+    <div id="hdr-listas" style="display:none;position:relative;margin-right:10px;cursor:pointer;font-size:20px" onclick="abrirListas()">📋</div>
     <div id="hdr-campanita" style="display:none;position:relative;margin-right:10px;cursor:pointer;color:#fff" onclick="abrirCampanita()">
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
       <span class="chat-badge" id="campanita-badge" style="display:none;position:absolute;top:-6px;right:-8px">0</span>
@@ -683,6 +684,13 @@ body.modo-invitado .btn-attach{display:none}
     <div class="upload-sub">Lo que te involucra a vos</div>
     <div id="campanita-lista" style="overflow-y:auto;flex:1;margin-top:10px"></div>
     <button class="btn btn-out" onclick="cerrarCampanita()" style="margin-top:14px">Cerrar</button>
+  </div>
+</div>
+
+<div class="upload-modal" id="listas-modal">
+  <div class="upload-sheet" style="max-height:75vh;display:flex;flex-direction:column">
+    <div id="listas-body" style="overflow-y:auto;flex:1"></div>
+    <button class="btn btn-out" onclick="cerrarListas()" style="margin-top:14px">Cerrar</button>
   </div>
 </div>
 
@@ -1471,6 +1479,7 @@ function eqCardHTML(titulo,nombres,clase,size){
 // ════════════════════════════════════════
 let miNombre='',esTablet=false,esInvitado=false;
 let jugadores={},partida=null,chatMsgs=[],albumData={},puntos={},puntosLog={},tt=null,equipos={},sugerencias={},calendarioData={},aviso=null,invitados={};
+let listasData={},listaAbierta=null;
 let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
@@ -1630,6 +1639,11 @@ function iniciarApp(){
     renderAdminSugerencias();
   });
 
+  db.ref('listas').on('value',snap=>{
+    listasData=snap.val()||{};
+    if(document.getElementById('listas-modal').classList.contains('open')) renderListas();
+  });
+
   db.ref('chat').on('value',snap=>{
     const raw=snap.val()||{};
     chatMsgs=Object.values(raw).sort((a,b)=>a.ts-b.ts);
@@ -1650,6 +1664,7 @@ function iniciarApp(){
   });
 
   document.getElementById('hdr-sugerencias').style.display=esInvitado?'none':'block';
+  document.getElementById('hdr-listas').style.display=esInvitado?'none':'block';
 
   // Campanita — historial de notificaciones que me involucran a mi
   document.getElementById('hdr-campanita').style.display=esInvitado?'none':'block';
@@ -2391,6 +2406,106 @@ function abrirCampanita(){
 }
 function cerrarCampanita(){
   document.getElementById('campanita-modal').classList.remove('open');
+}
+
+// ════════════════════════════════════════
+// LISTAS — compartidas en tiempo real para los 15 (súper, lo que sea).
+// Cada ítem se escribe por su propio path (no se relee-reescribe la lista entera), así
+// que no hace falta transaction(): dos personas tildando ítems distintos a la vez no
+// pueden pisarse, cada escritura toca solo su propio campo.
+// ════════════════════════════════════════
+function abrirListas(){
+  listaAbierta=null;
+  document.getElementById('listas-modal').classList.add('open');
+  renderListas();
+}
+function cerrarListas(){
+  document.getElementById('listas-modal').classList.remove('open');
+}
+
+function renderListas(){
+  const body=document.getElementById('listas-body');if(!body)return;
+  if(listaAbierta && listasData[listaAbierta]){renderListaDetalle(body);return;}
+  listaAbierta=null;
+  const entradas=Object.entries(listasData);
+  const cards=entradas.length?entradas.map(([id,l])=>{
+    const items=l.items?Object.values(l.items):[];
+    const hechos=items.filter(i=>i.hecho).length;
+    return `<div class="fila-enrol" style="margin-bottom:8px" onclick="abrirListaDetalle('${id}')">
+      <div class="fila-enrol-txt">
+        <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--txt)">${escaparHTML(l.nombre||'Lista')}</div>
+        <div class="fila-enrol-ap">${items.length?`${hechos}/${items.length} tildados`:'Vacía'} · creada por ${ng(l.creador)||l.creador||'?'}</div>
+      </div>
+      <div class="fila-enrol-fl">›</div>
+    </div>`;
+  }).join(''):'<div class="empty"><div class="big">📋</div>Todavía no hay ninguna lista.<br>Creá la primera.</div>';
+  body.innerHTML=`<div class="upload-tit">📋 Listas</div><div class="upload-sub">Compartidas con todo el grupo</div><div style="margin-top:10px">${cards}</div>
+    <div class="add-row" style="margin-top:14px">
+      <input class="inp" id="nueva-lista-nombre" placeholder="Nombre de la lista..." maxlength="40" onkeydown="if(event.key==='Enter')crearLista()">
+      <button class="btn-sm btn-sm-az" onclick="crearLista()">+ Crear</button>
+    </div>`;
+}
+
+function crearLista(){
+  const inp=document.getElementById('nueva-lista-nombre');
+  const nombre=inp.value.trim();
+  if(!nombre)return;
+  db.ref('listas').push().set({nombre,creador:miNombre,ts:Date.now()});
+  inp.value='';
+}
+
+function abrirListaDetalle(id){
+  listaAbierta=id;
+  renderListas();
+}
+function volverAListas(){
+  listaAbierta=null;
+  renderListas();
+}
+
+function renderListaDetalle(body){
+  const l=listasData[listaAbierta];
+  if(!l){listaAbierta=null;renderListas();return;}
+  const items=Object.entries(l.items||{}).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0));
+  const filas=items.length?items.map(([iid,it])=>`
+    <div class="admin-jug">
+      <span style="flex:1;cursor:pointer;${it.hecho?'text-decoration:line-through;color:var(--gr)':''}" onclick="toggleItemLista('${listaAbierta}','${iid}',${!it.hecho})">${it.hecho?'✅':'⬜'}&nbsp; ${escaparHTML(it.texto||'')}</span>
+      <button class="btn-xs btn-xs-r" onclick="eliminarItemLista('${listaAbierta}','${iid}')">✕</button>
+    </div>`).join(''):'<div class="empty" style="padding:16px 0"><div class="big">🛒</div>Todavía no hay ítems.</div>';
+  body.innerHTML=`
+    <span style="cursor:pointer;font-size:13px;color:var(--az);font-weight:700" onclick="volverAListas()">‹ Listas</span>
+    <div class="upload-tit" style="margin-top:8px">${escaparHTML(l.nombre||'Lista')}</div>
+    <div style="margin-top:6px">${filas}</div>
+    <div class="add-row" style="margin-top:14px">
+      <input class="inp" id="nuevo-item-txt" placeholder="Agregar ítem..." maxlength="80" onkeydown="if(event.key==='Enter')agregarItemLista()">
+      <button class="btn-sm btn-sm-az" onclick="agregarItemLista()">+</button>
+    </div>
+    <div style="text-align:center;margin-top:14px">
+      <span style="font-size:11px;color:var(--gr);cursor:pointer" onclick="eliminarListaCompleta('${listaAbierta}')">🗑 Borrar esta lista</span>
+    </div>`;
+}
+
+function agregarItemLista(){
+  if(!listaAbierta)return;
+  const inp=document.getElementById('nuevo-item-txt');
+  const texto=inp.value.trim();
+  if(!texto)return;
+  db.ref('listas/'+listaAbierta+'/items').push().set({texto,hecho:false,autor:miNombre,ts:Date.now()});
+  inp.value='';
+}
+
+function toggleItemLista(listaId,itemId,nuevoValor){
+  db.ref('listas/'+listaId+'/items/'+itemId+'/hecho').set(nuevoValor);
+}
+
+function eliminarItemLista(listaId,itemId){
+  db.ref('listas/'+listaId+'/items/'+itemId).remove();
+}
+
+async function eliminarListaCompleta(id){
+  if(!(await confirmApp('¿Borrar esta lista entera? No se puede deshacer.')))return;
+  db.ref('listas/'+id).remove();
+  listaAbierta=null;
 }
 
 let chatScrollFondo=0;
