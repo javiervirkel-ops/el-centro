@@ -1642,6 +1642,10 @@ function iniciarApp(){
   db.ref('listas').on('value',snap=>{
     listasData=snap.val()||{};
     if(document.getElementById('listas-modal').classList.contains('open')) renderListas();
+    // Si una lista compartida está a la vista (feed o el detalle de su post), refrescar
+    // el progreso mostrado ahí también, no solo dentro del modal de Listas.
+    if(document.getElementById('scr-inicio').classList.contains('on')) renderFeed();
+    if(document.getElementById('scr-post').classList.contains('on')) renderPostDetalle();
   });
 
   db.ref('chat').on('value',snap=>{
@@ -2480,9 +2484,28 @@ function renderListaDetalle(body){
       <input class="inp" id="nuevo-item-txt" placeholder="Agregar ítem..." maxlength="80" onkeydown="if(event.key==='Enter')agregarItemLista()">
       <button class="btn-sm btn-sm-az" onclick="agregarItemLista()">+</button>
     </div>
+    <button class="btn btn-out" style="margin-top:14px" onclick="compartirListaEnFeed('${listaAbierta}')"><span class="ico-in">📰 Compartir en el feed</span></button>
     <div style="text-align:center;margin-top:14px">
       <span style="font-size:11px;color:var(--gr);cursor:pointer" onclick="eliminarListaCompleta('${listaAbierta}')">🗑 Borrar esta lista</span>
     </div>`;
+}
+
+// Comparte la lista como un post en el feed (con push real a todos, mismo mecanismo que
+// cualquier post nuevo) — el post solo guarda el id de la lista, así el feed siempre
+// muestra el progreso ACTUAL (no una foto vieja del momento en que se compartió).
+function compartirListaEnFeed(id){
+  const l=listasData[id];if(!l)return;
+  const nuevoRef=db.ref('posts').push({tipo:'lista',autor:miNombre,listaId:id,ts:Date.now()});
+  notificar(miNombre+' compartió una lista: "'+l.nombre+'" — mirá qué falta','📋',true,null,nuevoRef.key);
+  mostrarToast('¡Compartida en el feed!','📰');
+}
+
+// Desde el feed, abre directo la lista compartida en el modal de Listas.
+function irALista(id){
+  if(!listasData[id]){mostrarToast('Esa lista ya no existe','🗑');return;}
+  listaAbierta=id;
+  document.getElementById('listas-modal').classList.add('open');
+  renderListas();
 }
 
 function agregarItemLista(){
@@ -2647,6 +2670,26 @@ function renderFeed(){
           ${esTablet?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
         </div>
         <div class="not-txt" style="cursor:pointer" onclick="irANoticia('${p.etiqueta||''}')">${escaparHTML(p.texto||'')}</div>
+        <div class="post-bar" onclick="abrirPost('${p.id}')">
+          <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
+        </div>
+      </div>`;
+    }
+    if(p.tipo==='lista'){
+      const l=listasData[p.listaId];
+      const items=l?Object.values(l.items||{}):[];
+      const hechos=items.filter(i=>i.hecho).length;
+      const estadoTxt=!l?'Esta lista ya no existe':(items.length?`${hechos}/${items.length} tildados`:'Vacía todavía');
+      return `<div class="post">
+        <div class="post-hdr">
+          ${avatarHTML(p.autor,38)}
+          <div><div class="post-nm">${ng(p.autor)}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
+          ${p.autor===miNombre||esTablet?`<button class="post-borrar" onclick="event.stopPropagation();borrarPost('${p.id}')">Borrar</button>`:''}
+        </div>
+        <div class="not-hdr" style="cursor:pointer" onclick="irALista('${p.listaId}')">
+          <div class="not-icono">${iconoDe('📋',20)}</div>
+          <div><div class="not-etiqueta">${escaparHTML(l?l.nombre:'Lista borrada')}</div><div class="post-time">${estadoTxt}</div></div>
+        </div>
         <div class="post-bar" onclick="abrirPost('${p.id}')">
           <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
         </div>
@@ -2857,6 +2900,23 @@ function renderPostDetalle(){
           <div><div class="not-etiqueta">${p.etiqueta||'Novedad'}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
         </div>
         <div class="not-txt">${escaparHTML(p.texto||'')}</div>
+      </div>`+comentariosHTML(p);
+    return;
+  }
+  if(p.tipo==='lista'){
+    const l=listasData[p.listaId];
+    const items=l?Object.values(l.items||{}):[];
+    const hechos=items.filter(i=>i.hecho).length;
+    const estadoTxt=!l?'Esta lista ya no existe':(items.length?`${hechos}/${items.length} tildados`:'Vacía todavía');
+    cont.innerHTML=`<div class="post" style="margin-bottom:10px">
+        <div class="post-hdr">
+          ${avatarHTML(p.autor,38)}
+          <div><div class="post-nm">${ng(p.autor)}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
+        </div>
+        <div class="not-hdr" style="cursor:pointer" onclick="irALista('${p.listaId}')">
+          <div class="not-icono">${iconoDe('📋',20)}</div>
+          <div><div class="not-etiqueta">${escaparHTML(l?l.nombre:'Lista borrada')}</div><div class="post-time">${estadoTxt}</div></div>
+        </div>
       </div>`+comentariosHTML(p);
     return;
   }
