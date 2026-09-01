@@ -705,11 +705,15 @@ body.modo-invitado .btn-attach{display:none}
   <div class="enrol-sub">¿Quién sos?</div>
   <div class="lista-enrol" id="chips"></div>
   <div class="div"></div>
+  <!-- Modo invitado deshabilitado (1 sep 2026, a pedido de Javi) — oculto, no borrado.
+       Para reactivarlo: sacar este comentario. La lógica (entrarInvitado, esInvitado,
+       panel de admin de invitados) sigue intacta en el resto del archivo.
   <div style="font-size:11px;color:var(--gr);text-align:center;margin-bottom:8px">¿No sos de los 15? Entrá como invitado — solo podés ver y comentar</div>
   <div class="add-row" style="margin-top:0;margin-bottom:16px">
     <input class="inp" id="invitado-nombre" placeholder="Tu nombre..." maxlength="20" onkeydown="if(event.key==='Enter')entrarInvitado()">
     <button class="btn-sm btn-sm-az" onclick="entrarInvitado()" style="white-space:nowrap">Entrar</button>
   </div>
+  -->
   <button class="btn btn-out" onclick="entrarTablet()" style="margin-bottom:16px"><span class="ico-in"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Soy el Admin</span></button>
 </div>
 
