@@ -3797,23 +3797,30 @@ function celdaBloqueadaPorDoble(tablero,pos,miEq){
 function elegirCeldaTT(pos){
   if(!tt||tt.ganador)return;
   const miEq=miEqTT();if(!miEq)return;
-  if(miEq==='a'&&tt.eleccionIzq!=null)return;
-  if(miEq==='r'&&tt.eleccionDer!=null)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const tablero=toArr(tt.tablero).map(x=>({...x}));
-  if(!tablero[pos]||tablero[pos].estado!=='libre')return;
-  if(celdaBloqueadaPorDoble(tablero,pos,miEq))return;
-  // Arrancar el reloj de 7hs para este equipo en esta casilla
-  // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
-  if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=tt.pausaAcumulada||0;}
-  else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=tt.pausaAcumulada||0;}
-  db.ref('tateti').set({...tt,tablero,
-    eleccionIzq:(miEq==='a'?pos:(tt.eleccionIzq??null)),
-    eleccionDer:(miEq==='r'?pos:(tt.eleccionDer??null)),
-    ganador:tt.ganador??null,
-    pendientes:toArr(tt.pendientes),
-    ocupadasIzq:tt.ocupadasIzq??0,
-    ocupadasDer:tt.ocupadasDer??0});
+  // Transaction en vez de set(): si dos jugadores de equipos distintos eligen casillas
+  // distintas casi al mismo tiempo, cada uno leía un snapshot local viejo y el que ganaba
+  // la carrera de red pisaba al otro (su elección desaparecía en silencio). La transaction
+  // relee el valor real del servidor antes de escribir y reintenta sola si hubo conflicto.
+  db.ref('tateti').transaction(current=>{
+    if(!current||current.ganador)return;
+    if(miEq==='a'&&current.eleccionIzq!=null)return;
+    if(miEq==='r'&&current.eleccionDer!=null)return;
+    const tablero=toArr(current.tablero).map(x=>({...x}));
+    if(!tablero[pos]||tablero[pos].estado!=='libre')return;
+    if(celdaBloqueadaPorDoble(tablero,pos,miEq))return;
+    // Arrancar el reloj de 7hs para este equipo en esta casilla
+    // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
+    if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=current.pausaAcumulada||0;}
+    else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=current.pausaAcumulada||0;}
+    return {...current,tablero,
+      eleccionIzq:(miEq==='a'?pos:(current.eleccionIzq??null)),
+      eleccionDer:(miEq==='r'?pos:(current.eleccionDer??null)),
+      ganador:current.ganador??null,
+      pendientes:toArr(current.pendientes),
+      ocupadasIzq:current.ocupadasIzq??0,
+      ocupadasDer:current.ocupadasDer??0};
+  });
 }
 
 // Cuanto tiempo real paso desde que empezo el reloj de esta casilla, descontando pausas.
@@ -3870,55 +3877,90 @@ const TT_LIMITE_MS=7*60*60*1000; // 7 horas
 function ttChequearVencimientos(){
   if(!esTablet||!tt||!tt.activa||tt.ganador||tt.pausadoDesde)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const tablero=toArr(tt.tablero).map(x=>({...x}));
-  let eIzq=tt.eleccionIzq??null, eDer=tt.eleccionDer??null;
-  let ocupadasIzq=tt.ocupadasIzq??0, ocupadasDer=tt.ocupadasDer??0;
-  let ganador=tt.ganador??null;
-  const flips=[];
-  const intentar=miEq=>{
-    const pos=miEq==='a'?eIzq:eDer;
-    if(pos===null||!tablero[pos]||tablero[pos].estado!=='libre')return;
-    const inicio=miEq==='a'?tablero[pos].inicioIzq:tablero[pos].inicioDer;
-    if(!inicio||ttTranscurrido(tablero[pos],miEq)<TT_LIMITE_MS)return;
-    const rival=miEq==='a'?'r':'a';
-    tablero[pos]={...tablero[pos],estado:'ocupada',equipo:rival};
-    if(miEq==='a')eIzq=null;else eDer=null;
-    if(rival==='a'&&eIzq===pos)eIzq=null;
-    if(rival==='r'&&eDer===pos)eDer=null;
-    if(rival==='a')ocupadasIzq++;else ocupadasDer++;
-    flips.push(pos);
-    const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
-    const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
-    notificar(nmMio+' se quedó sin tiempo en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
-    publicarNoticia('Misiones 2.0 - TA TE TI','⏳',
-      `${nmMio} se quedó sin tiempo en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
-    if(chequearTT(tablero,rival)){
-      ganador=rival;
-      sumarPtosLista(toArr(rival==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
+  // Igual que elegirCeldaTT: se usa transaction() para no pisar, con un .set() basado en un
+  // tt local desactualizado, la elección de un jugador que justo llegó por otro lado. Los
+  // efectos (notificar/publicarNoticia/sumarPtosLista) se disparan DESPUÉS de que la
+  // transaction confirma, no adentro — así no se duplican si Firebase reintenta la función.
+  let flips=[],ganadorFinal=null,eqGanadorLista=null;
+  db.ref('tateti').transaction(current=>{
+    flips=[];ganadorFinal=null;eqGanadorLista=null;
+    if(!current||!current.activa||current.ganador||current.pausadoDesde)return;
+    const tablero=toArr(current.tablero).map(x=>({...x}));
+    let eIzq=current.eleccionIzq??null, eDer=current.eleccionDer??null;
+    let ocupadasIzq=current.ocupadasIzq??0, ocupadasDer=current.ocupadasDer??0;
+    let ganador=current.ganador??null;
+    const transcurridoLocal=(cell,lado)=>{
+      const inicio=lado==='a'?cell.inicioIzq:cell.inicioDer;
+      if(!inicio)return 0;
+      const snap=(lado==='a'?cell.pausaAlIniciarIzq:cell.pausaAlIniciarDer)||0;
+      const pausaDuranteEsteIntervalo=(current.pausaAcumulada||0)-snap;
+      const ahora=current.pausadoDesde||Date.now();
+      return Math.max(0,ahora-inicio-pausaDuranteEsteIntervalo);
+    };
+    const intentar=miEq=>{
+      const pos=miEq==='a'?eIzq:eDer;
+      if(pos===null||!tablero[pos]||tablero[pos].estado!=='libre')return;
+      const inicio=miEq==='a'?tablero[pos].inicioIzq:tablero[pos].inicioDer;
+      if(!inicio||transcurridoLocal(tablero[pos],miEq)<TT_LIMITE_MS)return;
+      const rival=miEq==='a'?'r':'a';
+      tablero[pos]={...tablero[pos],estado:'ocupada',equipo:rival};
+      if(miEq==='a')eIzq=null;else eDer=null;
+      if(rival==='a'&&eIzq===pos)eIzq=null;
+      if(rival==='r'&&eDer===pos)eDer=null;
+      if(rival==='a')ocupadasIzq++;else ocupadasDer++;
+      flips.push({pos,rival,miEq});
+      if(chequearTT(tablero,rival)){
+        ganador=rival;
+        ganadorFinal=rival;
+        eqGanadorLista=toArr(rival==='a'?current.equipoIzq:current.equipoDer);
+      }
+    };
+    intentar('a');intentar('r');
+    if(!flips.length)return;
+    const pendientes=toArr(current.pendientes).filter(p=>!flips.some(f=>f.pos===p.pos));
+    return {...current,tablero,pendientes,eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer};
+  }).then(result=>{
+    if(!result.committed||!flips.length)return;
+    flips.forEach(({pos,rival,miEq})=>{
+      const nmRival=rival==='a'?'⭕ Izquierda':'❌ Derecha';
+      const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
+      notificar(nmMio+' se quedó sin tiempo en la casilla '+(pos+1)+' — pasa directo a '+nmRival,'⏳');
+      publicarNoticia('Misiones 2.0 - TA TE TI','⏳',
+        `${nmMio} se quedó sin tiempo en la casilla ${pos+1}, así que pasa directo para ${nmRival}.`);
+    });
+    if(ganadorFinal){
+      const nmRival=ganadorFinal==='a'?'⭕ Izquierda':'❌ Derecha';
+      sumarPtosLista(eqGanadorLista,5,'Misiones 2.0 - TA TE TI');
       notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
       publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
     }
-  };
-  intentar('a');intentar('r');
-  if(!flips.length)return;
-  const pendientes=toArr(tt.pendientes).filter(p=>!flips.includes(p.pos));
-  db.ref('tateti').set({...tt,tablero,pendientes,eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
+  });
 }
 
 async function reportarMision(pos){
   if(!tt)return;const miEq=miEqTT();if(!miEq)return;
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const tablero=toArr(tt.tablero);
-  const cell=tablero[pos];
-  if(!cell||cell.estado!=='libre'){await alertApp('Esa casilla ya fue ocupada.');return;}
-  const pendientes=toArr(tt.pendientes);
-  if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){await alertApp('Ya reportaste esta misión. Esperá la aprobación del Admin.');return;}
-  const target=miEq==='a'?cell.targetIzq:cell.targetDer;
-  const mision=miEq==='a'?cell.misionIzq:cell.misionDer;
-  db.ref('tateti').set({...tt,tablero,
-    pendientes:[...pendientes,{equipo:miEq,pos,mision,target,solicitante:miNombre,ts:Date.now()}],
-    eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
-    ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
+  let abortReason=null;
+  const result=await db.ref('tateti').transaction(current=>{
+    abortReason=null;
+    if(!current)return;
+    const tablero=toArr(current.tablero);
+    const cell=tablero[pos];
+    if(!cell||cell.estado!=='libre'){abortReason='ocupada';return;}
+    const pendientes=toArr(current.pendientes);
+    if(pendientes.find(p=>p.equipo===miEq&&p.pos===pos)){abortReason='repetida';return;}
+    const target=miEq==='a'?cell.targetIzq:cell.targetDer;
+    const mision=miEq==='a'?cell.misionIzq:cell.misionDer;
+    return {...current,tablero,
+      pendientes:[...pendientes,{equipo:miEq,pos,mision,target,solicitante:miNombre,ts:Date.now()}],
+      eleccionIzq:current.eleccionIzq??null,eleccionDer:current.eleccionDer??null,ganador:current.ganador??null,
+      ocupadasIzq:current.ocupadasIzq??0,ocupadasDer:current.ocupadasDer??0};
+  });
+  if(!result.committed){
+    if(abortReason==='repetida')await alertApp('Ya reportaste esta misión. Esperá la aprobación del Admin.');
+    else await alertApp('Esa casilla ya fue ocupada.');
+    return;
+  }
   notificar(miNombre+' dice que cumplió una misión — a confirmar por el Admin','🎯');
   await alertApp('✅ Misión reportada. El Admin la tiene que aprobar.');
 }
@@ -3936,70 +3978,88 @@ function renderPendientesTT(){
   if(!esTablet){div.innerHTML='';return;}
 
   div.innerHTML=`<div class="ico-in" style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--am);letter-spacing:1px;margin-bottom:10px;justify-content:center;width:100%">${ico('hourglass',13)}MISIONES PENDIENTES DE APROBACIÓN</div>`+
-    pendientesArr.map((p,i)=>`<div class="tt-pend">
+    pendientesArr.map(p=>`<div class="tt-pend">
       <div class="tt-pend-tit ico-in">${p.equipo==='a'?ico('circle',11)+'Izquierda':ico('x',11)+'Derecha'} · Casilla ${p.pos+1} · ${ng(p.solicitante)}</div>
       <div class="tt-pend-txt">${p.mision}</div>
       <div class="tt-pend-btns">
-        <button class="btn btn-ro" style="flex:1;padding:10px;font-size:12px" onclick="rechazarMision(${i})"><span class="ico-in">${ico('x',13)}Rechazar</span></button>
-        <button class="btn btn-az" style="flex:1;padding:10px;font-size:12px" onclick="aprobarMision(${i})"><span class="ico-in">${ico('check',13)}Aprobar</span></button>
+        <button class="btn btn-ro" style="flex:1;padding:10px;font-size:12px" onclick="rechazarMision(${p.pos},'${p.equipo}')"><span class="ico-in">${ico('x',13)}Rechazar</span></button>
+        <button class="btn btn-az" style="flex:1;padding:10px;font-size:12px" onclick="aprobarMision(${p.pos},'${p.equipo}')"><span class="ico-in">${ico('check',13)}Aprobar</span></button>
       </div></div>`).join('');
 }
 
-function aprobarMision(idx){
-  if(!tt)return;
+// pos+equipo identifica la misión pendiente en vez de un índice de array: el índice se podía
+// desincronizar si llegaba un reporte nuevo justo cuando el Admin ya iba a tocar el botón.
+function aprobarMision(pos,equipo){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const pends=toArr(tt.pendientes);
-  const p=pends[idx];if(!p)return;
-  const tablero=toArr(tt.tablero).map(x=>({...x}));
+  let outcome=null,pFinal=null,ganadorFinal=null,eqGanadorLista=null,rivalPerdioFinal=false;
+  db.ref('tateti').transaction(current=>{
+    outcome=null;pFinal=null;ganadorFinal=null;eqGanadorLista=null;rivalPerdioFinal=false;
+    if(!current)return;
+    const pends=toArr(current.pendientes);
+    const p=pends.find(x=>x.pos===pos&&x.equipo===equipo);
+    if(!p)return;
+    pFinal=p;
+    const tablero=toArr(current.tablero).map(x=>({...x}));
+    if(!tablero[p.pos])return;
 
-  // Si ya la ocuparon, descartar el reporte
-  if(tablero[p.pos].estado==='ocupada'){
-    db.ref('tateti').set({...tt,tablero,pendientes:pends.filter((_,i)=>i!==idx),
-      eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
-      ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
-    return;
-  }
+    // Si ya la ocuparon, descartar el reporte
+    if(tablero[p.pos].estado==='ocupada'){
+      outcome='ocupada';
+      return {...current,tablero,pendientes:pends.filter(x=>!(x.pos===pos&&x.equipo===equipo)),
+        eleccionIzq:current.eleccionIzq??null,eleccionDer:current.eleccionDer??null,ganador:current.ganador??null,
+        ocupadasIzq:current.ocupadasIzq??0,ocupadasDer:current.ocupadasDer??0};
+    }
 
-  tablero[p.pos]={...tablero[p.pos],estado:'ocupada',equipo:p.equipo};
+    tablero[p.pos]={...tablero[p.pos],estado:'ocupada',equipo:p.equipo};
 
-  let eIzq=tt.eleccionIzq??null, eDer=tt.eleccionDer??null;
-  if(p.equipo==='a')eIzq=null;else eDer=null;
-  let rivalPerdio=false;
-  if(p.equipo==='a'&&eDer===p.pos){eDer=null;rivalPerdio=true;}
-  if(p.equipo==='r'&&eIzq===p.pos){eIzq=null;rivalPerdio=true;}
+    let eIzq=current.eleccionIzq??null, eDer=current.eleccionDer??null;
+    if(p.equipo==='a')eIzq=null;else eDer=null;
+    let rivalPerdio=false;
+    if(p.equipo==='a'&&eDer===p.pos){eDer=null;rivalPerdio=true;}
+    if(p.equipo==='r'&&eIzq===p.pos){eIzq=null;rivalPerdio=true;}
 
-  const pendientes=pends.filter((x,i)=>i!==idx&&x.pos!==p.pos);
-  const ocupadasIzq=(tt.ocupadasIzq??0)+(p.equipo==='a'?1:0);
-  const ocupadasDer=(tt.ocupadasDer??0)+(p.equipo==='r'?1:0);
+    const pendientes=pends.filter(x=>x.pos!==p.pos);
+    const ocupadasIzq=(current.ocupadasIzq??0)+(p.equipo==='a'?1:0);
+    const ocupadasDer=(current.ocupadasDer??0)+(p.equipo==='r'?1:0);
 
-  const gano=chequearTT(tablero,p.equipo);
-  let ganador=tt.ganador??null;
-  const eqNombre=p.equipo==='a'?'⭕ Izquierda':'❌ Derecha';
-  notificar(p.solicitante+' completó su misión — '+eqNombre+' ocupa la casilla '+(p.pos+1),'🎯');
-  publicarNoticia('Misiones 2.0 - TA TE TI','🎯',
-    `${ng(p.solicitante)} cumplió su misión con ${ng(p.target)||'alguien'} y ${eqNombre} se queda con la casilla ${p.pos+1}.\n\n"${p.mision||''}"`);
-  if(rivalPerdio){
-    const nmPerdedor=p.equipo==='a'?'❌ Derecha':'⭕ Izquierda';
-    notificar(nmPerdedor+' perdió la carrera por la casilla '+(p.pos+1)+' contra '+eqNombre+' — elegí otra casilla','⚠️');
-  }
-  if(gano){
-    ganador=p.equipo;
-    sumarPtosLista(toArr(p.equipo==='a'?tt.equipoIzq:tt.equipoDer),5,'Misiones 2.0 - TA TE TI');
-    notificar('¡Misiones 2.0! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
-    publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
-  }
-
-  db.ref('tateti').set({...tt,tablero,pendientes,
-    eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer});
+    const gano=chequearTT(tablero,p.equipo);
+    let ganador=current.ganador??null;
+    if(gano){
+      ganador=p.equipo;
+      ganadorFinal=p.equipo;
+      eqGanadorLista=toArr(p.equipo==='a'?current.equipoIzq:current.equipoDer);
+    }
+    outcome='ok';
+    rivalPerdioFinal=rivalPerdio;
+    return {...current,tablero,pendientes,eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer};
+  }).then(result=>{
+    if(!result.committed||!pFinal||outcome==='ocupada')return;
+    const p=pFinal;
+    const eqNombre=p.equipo==='a'?'⭕ Izquierda':'❌ Derecha';
+    notificar(p.solicitante+' completó su misión — '+eqNombre+' ocupa la casilla '+(p.pos+1),'🎯');
+    publicarNoticia('Misiones 2.0 - TA TE TI','🎯',
+      `${ng(p.solicitante)} cumplió su misión con ${ng(p.target)||'alguien'} y ${eqNombre} se queda con la casilla ${p.pos+1}.\n\n"${p.mision||''}"`);
+    if(rivalPerdioFinal){
+      const nmPerdedor=p.equipo==='a'?'❌ Derecha':'⭕ Izquierda';
+      notificar(nmPerdedor+' perdió la carrera por la casilla '+(p.pos+1)+' contra '+eqNombre+' — elegí otra casilla','⚠️');
+    }
+    if(ganadorFinal){
+      notificar('¡Misiones 2.0! Gana '+eqNombre+' — +5 puntos para el equipo','🏆');
+      publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${eqNombre}. Tres en línea. +5 pts para todo el equipo.`);
+      sumarPtosLista(eqGanadorLista,5,'Misiones 2.0 - TA TE TI');
+    }
+  });
 }
 
-function rechazarMision(idx){
-  if(!tt)return;
+function rechazarMision(pos,equipo){
   const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
-  const pends=toArr(tt.pendientes);
-  db.ref('tateti').set({...tt,tablero:toArr(tt.tablero),pendientes:pends.filter((_,i)=>i!==idx),
-    eleccionIzq:tt.eleccionIzq??null,eleccionDer:tt.eleccionDer??null,ganador:tt.ganador??null,
-    ocupadasIzq:tt.ocupadasIzq??0,ocupadasDer:tt.ocupadasDer??0});
+  db.ref('tateti').transaction(current=>{
+    if(!current)return;
+    const pends=toArr(current.pendientes);
+    return {...current,tablero:toArr(current.tablero),pendientes:pends.filter(x=>!(x.pos===pos&&x.equipo===equipo)),
+      eleccionIzq:current.eleccionIzq??null,eleccionDer:current.eleccionDer??null,ganador:current.ganador??null,
+      ocupadasIzq:current.ocupadasIzq??0,ocupadasDer:current.ocupadasDer??0};
+  });
 }
 
 function chequearTT(tablero,eq){
