@@ -2443,11 +2443,16 @@ function renderListas(){
       <div class="fila-enrol-fl">›</div>
     </div>`;
   }).join(''):'<div class="empty"><div class="big">📋</div>Todavía no hay ninguna lista.<br>Creá la primera.</div>';
+  // Cada escritura a Firebase (ej. crear una lista) dispara este render de nuevo por el
+  // listener en tiempo real. Si no se restaura el foco del input, el teclado del celular
+  // se cierra solo al perder el elemento enfocado y la pantalla "salta" hacia abajo.
+  const teniaFoco=document.activeElement&&document.activeElement.id==='nueva-lista-nombre';
   body.innerHTML=`<div class="upload-tit">📋 Listas</div><div class="upload-sub">Compartidas con todo el grupo</div><div style="margin-top:10px">${cards}</div>
     <div class="add-row" style="margin-top:14px">
       <input class="inp" id="nueva-lista-nombre" placeholder="Nombre de la lista..." maxlength="40" onkeydown="if(event.key==='Enter')crearLista()">
       <button class="btn-sm btn-sm-az" onclick="crearLista()">+ Crear</button>
     </div>`;
+  if(teniaFoco) document.getElementById('nueva-lista-nombre').focus();
 }
 
 function crearLista(){
@@ -2456,6 +2461,7 @@ function crearLista(){
   if(!nombre)return;
   db.ref('listas').push().set({nombre,creador:miNombre,ts:Date.now()});
   inp.value='';
+  inp.focus();
 }
 
 function abrirListaDetalle(id){
@@ -2476,6 +2482,9 @@ function renderListaDetalle(body){
       <span style="flex:1;cursor:pointer;${it.hecho?'text-decoration:line-through;color:var(--gr)':''}" onclick="toggleItemLista('${listaAbierta}','${iid}',${!it.hecho})">${it.hecho?'✅':'⬜'}&nbsp; ${escaparHTML(it.texto||'')}</span>
       <button class="btn-xs btn-xs-r" onclick="eliminarItemLista('${listaAbierta}','${iid}')">✕</button>
     </div>`).join(''):'<div class="empty" style="padding:16px 0"><div class="big">🛒</div>Todavía no hay ítems.</div>';
+  // Mismo motivo que en renderListas(): restaurar el foco después de reconstruir el HTML,
+  // para que agregar un ítem no cierre el teclado ni haga "saltar" la pantalla.
+  const teniaFoco=document.activeElement&&document.activeElement.id==='nuevo-item-txt';
   body.innerHTML=`
     <span style="cursor:pointer;font-size:13px;color:var(--az);font-weight:700" onclick="volverAListas()">‹ Listas</span>
     <div class="upload-tit" style="margin-top:8px">${escaparHTML(l.nombre||'Lista')}</div>
@@ -2488,6 +2497,7 @@ function renderListaDetalle(body){
     <div style="text-align:center;margin-top:14px">
       <span style="font-size:11px;color:var(--gr);cursor:pointer" onclick="eliminarListaCompleta('${listaAbierta}')">🗑 Borrar esta lista</span>
     </div>`;
+  if(teniaFoco) document.getElementById('nuevo-item-txt').focus();
 }
 
 // Comparte la lista como un post en el feed (con push real a todos, mismo mecanismo que
@@ -2515,6 +2525,7 @@ function agregarItemLista(){
   if(!texto)return;
   db.ref('listas/'+listaAbierta+'/items').push().set({texto,hecho:false,autor:miNombre,ts:Date.now()});
   inp.value='';
+  inp.focus();
 }
 
 function toggleItemLista(listaId,itemId,nuevoValor){
