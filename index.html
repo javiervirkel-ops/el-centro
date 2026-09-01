@@ -637,7 +637,7 @@ body.modo-invitado .btn-attach{display:none}
       <span class="hdr-icon">🏛️</span>
       <div>
         <div class="hdr-tit">EL CENTRO</div>
-        <div class="hdr-sub">Partido del Pueblo del Medio</div>
+        <div class="hdr-sub">Ni de Izquierda ni de Derecha</div>
       </div>
     </div>
     <div id="hdr-sello" style="font-size:26px">🏺</div>
@@ -737,7 +737,7 @@ body.modo-invitado .btn-attach{display:none}
 
   <div class="composer" onclick="abrirComposer()">
     <div id="comp-av"></div>
-    <div class="composer-ph">¿Qué estás pensando?</div>
+    <div class="composer-ph">Un pensamiento filosófico, una foto, video o lo que sea</div>
     <div class="composer-cam">📷</div>
   </div>
 
@@ -757,10 +757,10 @@ body.modo-invitado .btn-attach{display:none}
 <!-- JUEGOS -->
 <div id="scr-juegos" class="scr">
   <span class="lbl" style="margin-top:0">Los Juegos</span>
-  <div class="juego-card" onclick="goJuego('cs')">
+  <div class="juego-card" id="juego-card-cs" onclick="goJuego('cs')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
-    <div class="juego-info"><h3>Código Secreto</h3><p>Versión Pibes</p></div>
-    <div class="badge badge-on">ACTIVO</div>
+    <div class="juego-info"><h3>Código Secreto</h3><p id="juego-sub-cs">Versión Pibes</p></div>
+    <div class="badge badge-on" id="juego-badge-cs">ACTIVO</div>
   </div>
   <div class="juego-card" id="juego-card-album" onclick="goJuego('album')">
     <div class="juego-emo"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></div>
@@ -911,7 +911,7 @@ body.modo-invitado .btn-attach{display:none}
   <div class="comp-sheet">
     <div class="comp-tit">Nuevo post</div>
     <div class="comp-hint">💡 ¿Tenés una idea para que haga todo el grupo? Tirala como consigna en vez de un post común.</div>
-    <textarea class="comp-txt" id="comp-inp" placeholder="Un pensamiento, una foto, lo que sea..." maxlength="600"></textarea>
+    <textarea class="comp-txt" id="comp-inp" placeholder="Un pensamiento filosófico, una foto, video o lo que sea..." maxlength="600"</textarea>
     <div class="comp-zona" id="comp-zona" onclick="document.getElementById('post-file').click()">
       <div>📷🎥 Agregar una foto o video (opcional)</div>
     </div>
@@ -966,6 +966,7 @@ body.modo-invitado .btn-attach{display:none}
 
   <!-- ═══ SORTEO CAMAS ═══ -->
   <div id="sub-camas" style="display:none">
+    <button class="btn btn-out" style="margin-bottom:12px" onclick="mostrarToast('Disponible en El Centro PRO','🛍️')"><span class="ico-in" style="justify-content:center;width:100%">🛍️ Ir al Marketplace <span style="background:var(--am);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:6px;margin-left:2px">PRO</span></span></button>
     <div class="card" style="margin-bottom:12px">
       <div style="font-size:13px;color:var(--gr);line-height:1.6">Se sortea <strong>una persona por vez</strong>. El que sale queda adjudicado a esa cama y se retira del bolillero.</div>
     </div>
@@ -1709,6 +1710,7 @@ function iniciarApp(){
     partida=snap.val();
     const en=document.getElementById('scr-cs').classList.contains('on');
     if(en)renderCS();
+    renderJuegosLista();
   });
 
   db.ref('album').on('value',snap=>{
@@ -1993,6 +1995,7 @@ function volverDeJuego(){
 // hasta que el admin los arranca de verdad — así nadie sabe de qué van de antemano.
 function renderJuegosLista(){
   const config=[
+    {key:'cs', arrancado: !!(partida&&partida.activa)},
     {key:'tt', arrancado: !!(tt&&tt.activa)},
     {key:'album', arrancado: !!paniniEquipos},
     {key:'af', arrancado: afSorteado}
@@ -2009,12 +2012,13 @@ function renderJuegosLista(){
     badge.classList.toggle('badge-espera', !arrancado);
     if(!arrancado) sub.textContent = esTablet ? 'Esperando que lo arranques' : 'Esperando al admin para comenzar';
     else if(key==='af') sub.textContent='¿Cuánto conocés a los novios?';
+    else if(key==='cs') sub.textContent='Versión Pibes';
     else sub.textContent='';
   });
 }
 function goJuego(j){
-  if((j==='tt'||j==='album'||j==='af')&&!esTablet){
-    const arrancado = j==='tt' ? !!(tt&&tt.activa) : j==='album' ? !!paniniEquipos : afSorteado;
+  if((j==='tt'||j==='album'||j==='af'||j==='cs')&&!esTablet){
+    const arrancado = j==='tt' ? !!(tt&&tt.activa) : j==='album' ? !!paniniEquipos : j==='cs' ? !!(partida&&partida.activa) : afSorteado;
     if(!arrancado){ mostrarToast('Todavía no arrancó — esperá a que lo inicie el admin','⏳'); return; }
   }
   // Ocultar TODAS las pantallas incluyendo juegos
