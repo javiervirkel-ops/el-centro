@@ -2176,7 +2176,7 @@ function renderAdminJuegosTab(el){
     <button class="btn btn-ro btn-sm-full" onclick="adminResetCS()">Resetear partida</button>
     <div class="div"></div>
     <div class="admin-tit">📸 Novios Panini</div>
-    <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Borrar todas las fotos</button>
+    <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Resetear partida</button>
     <div class="div"></div>
     <div class="admin-tit">🎯 Misiones 2.0 - TA TE TI</div>
     <button class="btn btn-ro btn-sm-full" onclick="adminResetTT()">Resetear partida</button>
@@ -2191,7 +2191,7 @@ function renderAdminJuegosTab(el){
     <button class="btn btn-ro btn-sm-full" onclick="adminResetFeed()">Vaciar el feed</button>`;
 }
 async function adminResetCS(){if(!(await confirmApp('¿Resetear CS?')))return;db.ref('partida').set({activa:false});db.ref('equipos').remove();}
-async function adminResetAlbum(){if(!(await confirmApp('¿Borrar fotos?')))return;db.ref('album').remove();db.ref('album_orden').remove();db.ref('panini_equipos').remove();}
+async function adminResetAlbum(){if(!(await confirmApp('¿Resetear Novios Panini?')))return;db.ref('album').remove();db.ref('album_orden').remove();db.ref('panini_equipos').remove();}
 async function adminResetTT(){if(!(await confirmApp('¿Resetear Misiones 2.0 - TA TE TI?')))return;db.ref('tateti').set({activa:false});}
 async function adminResetTruco(){if(!(await confirmApp('¿Resetear Truco?')))return;db.ref('truco').set({activa:false});}
 async function adminResetFeed(){
