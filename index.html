@@ -616,8 +616,8 @@ body.modo-invitado .btn-attach{display:none}
 .modal-emo{font-size:48px;margin-bottom:10px;text-align:center}
 .modal-tit{font-family:'Cinzel',serif;font-size:22px;letter-spacing:2px;margin-bottom:8px;color:var(--az);text-align:center}
 .modal-sub{font-size:13px;color:var(--gr);margin-bottom:20px;line-height:1.5;text-align:center}
-.reacc-grid{display:flex;justify-content:space-between;gap:2px}
-.reacc-opt{font-size:26px;cursor:pointer;padding:8px;border-radius:50%;line-height:1}
+.reacc-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+.reacc-opt{font-size:26px;cursor:pointer;padding:7px;border-radius:50%;line-height:1}
 .reacc-opt.sel{background:var(--sf)}
 .reacc-ver-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--bd)}
 .reacc-ver-row:last-child{border-bottom:none}
@@ -1517,7 +1517,7 @@ let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
 let posts={},postAbierto=null,postFotoURL=null,postVideoURL=null,postEfimero=false,postConsigna=false,comFotoURL=null;
-const REACC_EMOJIS=['❤️','😂','😮','😢','🙏','🔥'];
+const REACC_EMOJIS=['👍','❤️','😂','😮','😢','🙏','🔥'];
 let reaccPickerPost=null,reaccPickerCom=null;
 let ttSorteo=null;
 
