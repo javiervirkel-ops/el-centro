@@ -520,7 +520,6 @@ body.modo-invitado .btn-attach{display:none}
 .reac-pill{display:inline-flex;align-items:center;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--txt);cursor:pointer}
 .reac-pill.mine{border-color:var(--az);background:#E4EEFF}
 .reac-add{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:50%;background:var(--sf);border:1px solid var(--bd);cursor:pointer;font-size:14px;padding:0 4px}
-.reac-add.mine{border-color:var(--az);background:#E4EEFF}
 .msg-bw .post-reacs{padding:2px 0 0}
 .post-borrar{margin-left:auto;font-size:11px;color:var(--gr);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif}
 .post.noticia{border-color:var(--az);background:linear-gradient(135deg,#F4F8FF,#EBF2FF)}
@@ -2940,7 +2939,7 @@ function reaccionesHTML(reacciones,postId,comId){
     .join('');
   if(esInvitado)return pills?`<div class="post-reacs">${pills}</div>`:'';
   const pickArg=comId?`'${postId}','${comId}'`:`'${postId}',null`;
-  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg},event)">👍</span></div>`;
+  return `<div class="post-reacs">${pills}<span class="reac-add" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg},event)">👍</span></div>`;
 }
 // Bandeja flotante estilo WhatsApp: aparece pegada al boton tocado (arriba si entra, si no abajo),
 // en vez de un modal centrado con fondo oscuro.
