@@ -516,6 +516,12 @@ body.modo-invitado .btn-attach{display:none}
 .post-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--bd);cursor:pointer}
 .post-bar:active{background:var(--sf)}
 .post-coms{font-size:13px;font-weight:600;color:var(--az)}
+.post-reacs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 14px 2px}
+.reac-pill{display:inline-flex;align-items:center;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--txt);cursor:pointer}
+.reac-pill.mine{border-color:var(--az);background:#E4EEFF}
+.reac-add{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:50%;background:var(--sf);border:1px solid var(--bd);cursor:pointer;font-size:14px;padding:0 4px}
+.reac-add.mine{border-color:var(--az);background:#E4EEFF}
+.msg-bw .post-reacs{padding:2px 0 0}
 .post-borrar{margin-left:auto;font-size:11px;color:var(--gr);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif}
 .post.noticia{border-color:var(--az);background:linear-gradient(135deg,#F4F8FF,#EBF2FF)}
 .not-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px 8px}
@@ -610,6 +616,12 @@ body.modo-invitado .btn-attach{display:none}
 .modal-emo{font-size:48px;margin-bottom:10px;text-align:center}
 .modal-tit{font-family:'Cinzel',serif;font-size:22px;letter-spacing:2px;margin-bottom:8px;color:var(--az);text-align:center}
 .modal-sub{font-size:13px;color:var(--gr);margin-bottom:20px;line-height:1.5;text-align:center}
+.reacc-grid{display:flex;justify-content:space-between;gap:2px}
+.reacc-opt{font-size:26px;cursor:pointer;padding:8px;border-radius:50%;line-height:1}
+.reacc-opt.sel{background:var(--sf)}
+.reacc-ver-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--bd)}
+.reacc-ver-row:last-child{border-bottom:none}
+.reacc-ver-emoji{font-size:18px;flex-shrink:0}
 #modal-dialogo .modal-emo{width:60px;height:60px;border-radius:50%;background:var(--sf);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1px}
 #modal-dialogo .modal-emo svg{color:var(--az)}
 #modal-dialogo .modal-emo.dlg-warn{background:#FFFBEB}
@@ -1214,6 +1226,24 @@ body.modo-invitado .btn-attach{display:none}
     </div>
   </div>
 </div>
+<!-- REACCIONES: elegir emoji -->
+<div class="modal-bg" id="modal-reacc-picker">
+  <div class="modal" style="max-width:300px">
+    <div class="modal-top"></div>
+    <div class="modal-tit" style="margin-bottom:16px;font-size:16px">Reaccionar</div>
+    <div class="reacc-grid" id="reacc-grid"></div>
+    <button class="btn btn-out" style="margin-top:18px" onclick="cerrarPickerReaccion()">Cerrar</button>
+  </div>
+</div>
+<!-- REACCIONES: ver quien reacciono -->
+<div class="modal-bg" id="modal-reacc-ver">
+  <div class="modal" style="max-width:300px">
+    <div class="modal-top"></div>
+    <div class="modal-tit" style="margin-bottom:12px;font-size:16px">Reacciones</div>
+    <div id="reacc-ver-lista" style="text-align:left;max-height:320px;overflow-y:auto"></div>
+    <button class="btn btn-out" style="margin-top:16px" onclick="document.getElementById('modal-reacc-ver').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
 
 <!-- PANEL DE ADMIN (pantalla completa, solo accesible en modo Admin) -->
 <div id="scr-admin" class="scr">
@@ -1487,6 +1517,8 @@ let capIzq=null,capDer=null,tiempoEleg=90,timerInt=null,timerSeg=0;
 let albumNovio=NOVIOS[0],upNovio=null,upPos=null,upURL=null;
 let sorteoSel=new Set(),sorteoTipo='uno';
 let posts={},postAbierto=null,postFotoURL=null,postVideoURL=null,postEfimero=false,postConsigna=false,comFotoURL=null;
+const REACC_EMOJIS=['❤️','😂','😮','😢','🙏','🔥'];
+let reaccPickerPost=null,reaccPickerCom=null;
 let ttSorteo=null;
 
 // ════════════════════════════════════════
@@ -2687,6 +2719,7 @@ function renderFeed(){
           ${esTablet?`<button class="post-borrar" onclick="borrarPost('${p.id}')">Borrar</button>`:''}
         </div>
         <div class="not-txt" style="cursor:pointer" onclick="irANoticia('${p.etiqueta||''}')">${escaparHTML(p.texto||'')}</div>
+        ${reaccionesHTML(p.reacciones,p.id,null)}
         <div class="post-bar" onclick="abrirPost('${p.id}')">
           <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
         </div>
@@ -2707,6 +2740,7 @@ function renderFeed(){
           <div class="not-icono">${iconoDe('📋',20)}</div>
           <div><div class="not-etiqueta">${escaparHTML(l?l.nombre:'Lista borrada')}</div><div class="post-time">${estadoTxt}</div></div>
         </div>
+        ${reaccionesHTML(p.reacciones,p.id,null)}
         <div class="post-bar" onclick="abrirPost('${p.id}')">
           <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
         </div>
@@ -2721,6 +2755,7 @@ function renderFeed(){
       ${p.img?`<img class="post-img" src="${p.img}" loading="lazy" onclick="event.stopPropagation();abrirImgChat('${p.img}')">`:''}
       ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata" onclick="event.stopPropagation()"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
+      ${reaccionesHTML(p.reacciones,p.id,null)}
       <div class="post-bar">
         <span style="font-size:15px">💬</span><span class="post-coms">${txtComs}</span>
       </div>
@@ -2882,13 +2917,68 @@ function abrirPostDesdeNotificacion(id){
   if(s) s.scrollTop=s.scrollHeight;
 }
 
+// ── Reacciones (likes/emojis) en posts y comentarios ──
+// Un solo emoji por persona por post/comentario: posts/{id}/reacciones/{emoji}/{nombre}=true
+// (o posts/{id}/coms/{cid}/reacciones/{emoji}/{nombre}=true para un comentario puntual).
+function miReaccion(reacciones){
+  if(!reacciones)return null;
+  for(const emoji in reacciones){
+    if(reacciones[emoji]&&reacciones[emoji][miNombre])return emoji;
+  }
+  return null;
+}
+function getReaccionesDe(postId,comId){
+  const p=posts[postId];if(!p)return null;
+  if(!comId)return p.reacciones||null;
+  const c=p.coms&&p.coms[comId];
+  return c?(c.reacciones||null):null;
+}
+function reaccionesHTML(reacciones,postId,comId){
+  const mia=miReaccion(reacciones);
+  const verArg=comId?`'${postId}','${comId}'`:`'${postId}',null`;
+  const pills=REACC_EMOJIS.filter(e=>reacciones&&reacciones[e]&&Object.keys(reacciones[e]).length)
+    .map(e=>`<span class="reac-pill${e===mia?' mine':''}" onclick="event.stopPropagation();verReacciones(${verArg})">${e} ${Object.keys(reacciones[e]).length}</span>`)
+    .join('');
+  if(esInvitado)return pills?`<div class="post-reacs">${pills}</div>`:'';
+  const pickArg=comId?`'${postId}','${comId}'`:`'${postId}',null`;
+  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg})">${mia||'😊'}</span></div>`;
+}
+function abrirPickerReaccion(postId,comId){
+  if(esInvitado)return;
+  reaccPickerPost=postId;reaccPickerCom=comId||null;
+  const mia=miReaccion(getReaccionesDe(postId,comId));
+  document.getElementById('reacc-grid').innerHTML=REACC_EMOJIS.map(e=>
+    `<span class="reacc-opt${e===mia?' sel':''}" onclick="elegirReaccion('${e}')">${e}</span>`
+  ).join('');
+  document.getElementById('modal-reacc-picker').classList.add('open');
+}
+function cerrarPickerReaccion(){document.getElementById('modal-reacc-picker').classList.remove('open');}
+function elegirReaccion(emoji){
+  const postId=reaccPickerPost,comId=reaccPickerCom;
+  if(!postId)return;
+  const base=comId?`posts/${postId}/coms/${comId}/reacciones`:`posts/${postId}/reacciones`;
+  const mia=miReaccion(getReaccionesDe(postId,comId));
+  if(mia)db.ref(base+'/'+mia+'/'+miNombre).remove();
+  if(mia!==emoji)db.ref(base+'/'+emoji+'/'+miNombre).set(true);
+  cerrarPickerReaccion();
+}
+function verReacciones(postId,comId){
+  const reacciones=getReaccionesDe(postId,comId);
+  const filas=!reacciones?'':REACC_EMOJIS.filter(e=>reacciones[e]&&Object.keys(reacciones[e]).length).map(e=>
+    `<div class="reacc-ver-row"><span class="reacc-ver-emoji">${e}</span><span>${Object.keys(reacciones[e]).map(ng).join(', ')}</span></div>`
+  ).join('');
+  document.getElementById('reacc-ver-lista').innerHTML=filas||'<div style="color:var(--gr);font-size:13px">Sin reacciones todavía.</div>';
+  document.getElementById('modal-reacc-ver').classList.add('open');
+}
+
 function comentariosHTML(p){
   const cm=p.coms;
-  const coms=!cm?[]:(Array.isArray(cm)?cm.filter(Boolean):Object.values(cm)).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const toArr=v=>!v?[]:(Array.isArray(v)?v.map((x,i)=>[String(i),x]).filter(([,x])=>x):Object.entries(v));
+  const coms=toArr(cm).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0));
   const sigo=!!(p.seguidores&&p.seguidores[miNombre]);
   return `${esInvitado?'':`<div class="pd-seguir${sigo?' on':''}" onclick="toggleSeguirPost()">${ico(sigo?'bell':'bell-off',14)}${sigo?'Recibiendo notificaciones de este hilo':'Recibir notificaciones de este hilo'}</div>`}
     <span class="lbl">${coms.length?'Comentarios':'Sin comentarios todavía'}</span>
-    <div class="pd-coms">${coms.map(m=>{
+    <div class="pd-coms">${coms.map(([cid,m])=>{
       const yo=m.nombre===miNombre;
       const col=colorFor(m.nombre||'?');
       const cuerpo=m.img
@@ -2900,6 +2990,7 @@ function comentariosHTML(p){
           ${!yo?`<div class="msg-nm" style="color:${col}">${ng(m.nombre)}</div>`:''}
           <div class="msg-b ${yo?'yo':'otro'}${m.img?' con-img':''}">${cuerpo}</div>
           <div class="msg-hora">${m.hora||''}</div>
+          ${reaccionesHTML(m.reacciones,postAbierto,cid)}
         </div>
         ${yo?avatarHTML(miNombre,30,'margin-bottom:2px'):''}
       </div>`;
@@ -2917,6 +3008,7 @@ function renderPostDetalle(){
           <div><div class="not-etiqueta">${p.etiqueta||'Novedad'}</div><div class="post-time">${haceCuanto(p.ts||0)}</div></div>
         </div>
         <div class="not-txt">${escaparHTML(p.texto||'')}</div>
+        ${reaccionesHTML(p.reacciones,postAbierto,null)}
       </div>`+comentariosHTML(p);
     return;
   }
@@ -2934,6 +3026,7 @@ function renderPostDetalle(){
           <div class="not-icono">${iconoDe('📋',20)}</div>
           <div><div class="not-etiqueta">${escaparHTML(l?l.nombre:'Lista borrada')}</div><div class="post-time">${estadoTxt}</div></div>
         </div>
+        ${reaccionesHTML(p.reacciones,postAbierto,null)}
       </div>`+comentariosHTML(p);
     return;
   }
@@ -2945,6 +3038,7 @@ function renderPostDetalle(){
       ${p.img?`<img class="post-img" src="${p.img}" onclick="abrirImgChat('${p.img}')">`:''}
       ${p.video?`<video class="post-img" src="${p.video}" poster="${posterDeVideo(p.video)}" controls preload="metadata"></video>`:''}
       ${p.texto?`<div class="post-txt">${escaparHTML(p.texto)}</div>`:''}
+      ${reaccionesHTML(p.reacciones,postAbierto,null)}
     </div>`+comentariosHTML(p);
 }
 
