@@ -194,6 +194,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .sorteo-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
 .s-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .s-chip.on{background:var(--az);color:#fff;border-color:var(--az)}
+.s-chip.ellos{background:var(--ro);color:#fff;border-color:var(--ro)}
+.s-chip .lado-tag{opacity:.85;font-size:9px;font-weight:800;margin-left:4px}
 .tipo-btns{display:flex;gap:8px;margin-bottom:12px}
 .tipo-btn{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--bd);background:#fff;color:var(--gr);font-family:'Inter',sans-serif;transition:all .2s}
 /* La pantalla de Sorteo no entraba entera en un iPhone normal (solo en Pro Max) —
@@ -815,7 +817,10 @@ body.modo-invitado .btn-attach{display:none}
       <div style="font-size:13px;color:var(--gr);margin-bottom:10px">Tocá para elegir. <strong id="truco-count" style="color:var(--az)">0/6</strong></div>
       <div class="sorteo-chips" id="truco-chips"></div>
     </div>
-    <button class="btn btn-az" id="btn-truco-sortear" onclick="sortearEquiposTruco()" disabled>🎲 Sortear equipos</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-az" id="btn-truco-sortear" style="flex:1" onclick="sortearEquiposTruco()" disabled>🎲 Sortear</button>
+      <button class="btn btn-out" id="btn-truco-elegir" style="flex:1" onclick="elegirEquiposTruco()" disabled>✋ Elegir equipos</button>
+    </div>
     <div id="truco-preview" style="display:none;margin-top:12px"></div>
   </div>
 
@@ -834,7 +839,7 @@ body.modo-invitado .btn-attach{display:none}
           <div class="truco-fosforos" id="tr-malas-a"></div>
         </div>
         <div class="truco-total" id="tr-tot-a">0</div>
-        <div class="truco-btns">
+        <div class="truco-btns" id="truco-btns-a">
           <button class="truco-btn menos" onclick="puntoTruco('a',-1)">−</button>
           <button class="truco-btn mas" onclick="puntoTruco('a',1)">+</button>
         </div>
@@ -852,7 +857,7 @@ body.modo-invitado .btn-attach{display:none}
           <div class="truco-fosforos" id="tr-malas-r"></div>
         </div>
         <div class="truco-total" id="tr-tot-r">0</div>
-        <div class="truco-btns">
+        <div class="truco-btns" id="truco-btns-r">
           <button class="truco-btn menos" onclick="puntoTruco('r',-1)">−</button>
           <button class="truco-btn mas" onclick="puntoTruco('r',1)">+</button>
         </div>
@@ -4602,6 +4607,8 @@ function renderTrucoChips(){
   if(cnt) cnt.textContent=trucoSel.size+'/6';
   const btn=document.getElementById('btn-truco-sortear');
   if(btn) btn.disabled=trucoSel.size!==6;
+  const btn2=document.getElementById('btn-truco-elegir');
+  if(btn2) btn2.disabled=trucoSel.size!==6;
 }
 
 async function toggleTrucoChip(n){
@@ -4628,14 +4635,44 @@ async function sortearEquiposTruco(){
   <button class="btn btn-az" onclick="iniciarTruco(${JSON.stringify(a).replace(/"/g,'&quot;')},${JSON.stringify(r).replace(/"/g,'&quot;')})">Empezar partida ✓</button>`;
 }
 
+// Armado manual: arranca 3 y 3 en el orden en que se eligieron, tocando un nombre lo pasa al otro lado.
+let trucoManual=null;
+function elegirEquiposTruco(){
+  if(trucoSel.size!==6)return;
+  const arr=[...trucoSel];
+  trucoManual={a:new Set(arr.slice(0,3)),r:new Set(arr.slice(3))};
+  renderTrucoManual();
+}
+function toggleLadoManual(n){
+  if(trucoManual.a.has(n)){trucoManual.a.delete(n);trucoManual.r.add(n);}
+  else{trucoManual.r.delete(n);trucoManual.a.add(n);}
+  renderTrucoManual();
+}
+function renderTrucoManual(){
+  const prev=document.getElementById('truco-preview');
+  prev.style.display='block';
+  const chip=n=>{
+    const lado=trucoManual.a.has(n)?'a':'r';
+    return `<button class="s-chip ${lado==='a'?'on':'ellos'}" onclick="toggleLadoManual('${n}')">${n}<span class="lado-tag">${lado==='a'?'NOSOTROS':'ELLOS'}</span></button>`;
+  };
+  const listo=trucoManual.a.size===3&&trucoManual.r.size===3;
+  const a=[...trucoManual.a],r=[...trucoManual.r];
+  prev.innerHTML=`<div style="font-size:12px;color:var(--gr);margin-bottom:10px">Tocá un nombre para cambiarlo de lado (tiene que quedar 3 y 3)</div>
+    <div class="sorteo-chips" style="margin-bottom:14px">${[...trucoSel].map(chip).join('')}</div>
+    <button class="btn btn-az" ${listo?'':'disabled'} onclick="iniciarTruco(${JSON.stringify(a).replace(/"/g,'&quot;')},${JSON.stringify(r).replace(/"/g,'&quot;')})">Empezar partida ✓</button>`;
+}
+
 function iniciarTruco(a,r){
-  truco={activa:true,equipoA:a,equipoR:r,ptsA:0,ptsR:0,ganador:null};
+  let equipoA=a,equipoR=r;
+  if(!equipoA.includes(miNombre)&&equipoR.includes(miNombre)){equipoA=r;equipoR=a;}
+  truco={activa:true,equipoA,equipoR,ptsA:0,ptsR:0,ganador:null,iniciadoPor:miNombre};
   db.ref('truco').set(truco);
   renderTruco();
 }
 
 function puntoTruco(eq,delta){
   if(!truco||!truco.activa||truco.ganador)return;
+  if(truco.iniciadoPor&&truco.iniciadoPor!==miNombre&&!esTablet)return;
   const key=eq==='a'?'ptsA':'ptsR';
   let v=(truco[key]||0)+delta;
   if(v<0)v=0;
@@ -4698,8 +4735,16 @@ function renderTrucoGame(){
   document.getElementById('tr-tot-a').textContent=pa;
   document.getElementById('tr-tot-r').textContent=pr;
 
+  // Solo puede tocar +/- quien inició la partida (o el admin). Partidas viejas sin
+  // "iniciadoPor" guardado (de antes de este cambio) siguen abiertas para cualquiera.
+  const puedoAnotar=!truco.iniciadoPor||truco.iniciadoPor===miNombre||esTablet;
+  const btnsA=document.getElementById('truco-btns-a'), btnsR=document.getElementById('truco-btns-r');
+  if(btnsA) btnsA.style.display=puedoAnotar?'flex':'none';
+  if(btnsR) btnsR.style.display=puedoAnotar?'flex':'none';
+
   const info=document.getElementById('truco-equipos-info');
-  info.innerHTML=`<div class="truco-eq-card"><b>NOSOTROS:</b> ${eqA.join(', ')}<br><b>ELLOS:</b> ${eqR.join(', ')}</div>`
+  info.innerHTML=(truco.iniciadoPor&&!puedoAnotar?`<div style="text-align:center;font-size:12px;color:var(--gr);margin-bottom:8px">Anotando: <b>${ng(truco.iniciadoPor)}</b></div>`:'')
+    +`<div class="truco-eq-card"><b>NOSOTROS:</b> ${eqA.join(', ')}<br><b>ELLOS:</b> ${eqR.join(', ')}</div>`
     +(truco.ganador?`<div style="text-align:center;margin-top:12px;font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--az)">🏆 Gana ${truco.ganador==='a'?'NOSOTROS':'ELLOS'} — +3 pts</div>`:'');
 }
 
