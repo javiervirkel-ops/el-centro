@@ -616,9 +616,14 @@ body.modo-invitado .btn-attach{display:none}
 .modal-emo{font-size:48px;margin-bottom:10px;text-align:center}
 .modal-tit{font-family:'Cinzel',serif;font-size:22px;letter-spacing:2px;margin-bottom:8px;color:var(--az);text-align:center}
 .modal-sub{font-size:13px;color:var(--gr);margin-bottom:20px;line-height:1.5;text-align:center}
-.reacc-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
-.reacc-opt{font-size:26px;cursor:pointer;padding:7px;border-radius:50%;line-height:1}
-.reacc-opt.sel{background:var(--sf)}
+.reacc-float-backdrop{display:none;position:fixed;inset:0;z-index:499}
+.reacc-float-backdrop.open{display:block}
+.reacc-float{position:fixed;display:none;align-items:center;gap:2px;background:#fff;border-radius:30px;padding:6px 8px;box-shadow:0 10px 30px rgba(13,43,94,.28);border:1px solid var(--bd);z-index:500;max-width:calc(100vw - 16px);flex-wrap:wrap;justify-content:center}
+.reacc-float.open{display:flex;animation:reaccPop .12s ease-out}
+@keyframes reaccPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.reacc-float-opt{font-size:23px;cursor:pointer;padding:5px;border-radius:50%;line-height:1}
+.reacc-float-opt.sel{background:var(--sf)}
+.reacc-float-opt:active{transform:scale(1.2)}
 .reacc-ver-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--bd)}
 .reacc-ver-row:last-child{border-bottom:none}
 .reacc-ver-emoji{font-size:18px;flex-shrink:0}
@@ -1226,15 +1231,9 @@ body.modo-invitado .btn-attach{display:none}
     </div>
   </div>
 </div>
-<!-- REACCIONES: elegir emoji -->
-<div class="modal-bg" id="modal-reacc-picker">
-  <div class="modal" style="max-width:300px">
-    <div class="modal-top"></div>
-    <div class="modal-tit" style="margin-bottom:16px;font-size:16px">Reaccionar</div>
-    <div class="reacc-grid" id="reacc-grid"></div>
-    <button class="btn btn-out" style="margin-top:18px" onclick="cerrarPickerReaccion()">Cerrar</button>
-  </div>
-</div>
+<!-- REACCIONES: bandeja flotante de emojis, arriba del boton tocado (estilo WhatsApp) -->
+<div class="reacc-float-backdrop" id="reacc-float-backdrop" onclick="cerrarPickerReaccion()"></div>
+<div class="reacc-float" id="reacc-float"></div>
 <!-- REACCIONES: ver quien reacciono -->
 <div class="modal-bg" id="modal-reacc-ver">
   <div class="modal" style="max-width:300px">
@@ -2941,18 +2940,36 @@ function reaccionesHTML(reacciones,postId,comId){
     .join('');
   if(esInvitado)return pills?`<div class="post-reacs">${pills}</div>`:'';
   const pickArg=comId?`'${postId}','${comId}'`:`'${postId}',null`;
-  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg})">${mia||'😊'}</span></div>`;
+  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg},event)">${mia||'😊'}</span></div>`;
 }
-function abrirPickerReaccion(postId,comId){
+// Bandeja flotante estilo WhatsApp: aparece pegada al boton tocado (arriba si entra, si no abajo),
+// en vez de un modal centrado con fondo oscuro.
+function abrirPickerReaccion(postId,comId,ev){
   if(esInvitado)return;
   reaccPickerPost=postId;reaccPickerCom=comId||null;
   const mia=miReaccion(getReaccionesDe(postId,comId));
-  document.getElementById('reacc-grid').innerHTML=REACC_EMOJIS.map(e=>
-    `<span class="reacc-opt${e===mia?' sel':''}" onclick="elegirReaccion('${e}')">${e}</span>`
+  const cont=document.getElementById('reacc-float');
+  cont.innerHTML=REACC_EMOJIS.map(e=>
+    `<span class="reacc-float-opt${e===mia?' sel':''}" onclick="elegirReaccion('${e}')">${e}</span>`
   ).join('');
-  document.getElementById('modal-reacc-picker').classList.add('open');
+  const btn=ev&&(ev.currentTarget||ev.target);
+  cont.classList.add('open');
+  document.getElementById('reacc-float-backdrop').classList.add('open');
+  if(btn){
+    const r=btn.getBoundingClientRect();
+    const cw=cont.offsetWidth,ch=cont.offsetHeight;
+    let left=r.left+r.width/2-cw/2;
+    left=Math.max(8,Math.min(left,window.innerWidth-cw-8));
+    let top=r.top-ch-10;
+    if(top<8)top=r.bottom+10;
+    cont.style.left=left+'px';
+    cont.style.top=top+'px';
+  }
 }
-function cerrarPickerReaccion(){document.getElementById('modal-reacc-picker').classList.remove('open');}
+function cerrarPickerReaccion(){
+  document.getElementById('reacc-float').classList.remove('open');
+  document.getElementById('reacc-float-backdrop').classList.remove('open');
+}
 function elegirReaccion(emoji){
   const postId=reaccPickerPost,comId=reaccPickerCom;
   if(!postId)return;
