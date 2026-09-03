@@ -2940,7 +2940,7 @@ function reaccionesHTML(reacciones,postId,comId){
     .join('');
   if(esInvitado)return pills?`<div class="post-reacs">${pills}</div>`:'';
   const pickArg=comId?`'${postId}','${comId}'`:`'${postId}',null`;
-  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg},event)">${mia||'😊'}</span></div>`;
+  return `<div class="post-reacs">${pills}<span class="reac-add${mia?' mine':''}" onclick="event.stopPropagation();abrirPickerReaccion(${pickArg},event)">👍</span></div>`;
 }
 // Bandeja flotante estilo WhatsApp: aparece pegada al boton tocado (arriba si entra, si no abajo),
 // en vez de un modal centrado con fondo oscuro.
