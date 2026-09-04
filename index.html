@@ -1434,6 +1434,7 @@ const MISIONES_POR_PERSONA={
   'Gasti':["Lograr que Gasti tararee o cante una canción de los Beatles (o de antes del 2000)."]
 };
 const MISIONES_DOBLES=['Antonio','Pako','Harry']; // los únicos con 2 misiones en vez de 1
+const MARCOS_KEY='MP'; // Marcos llega 2 días después que el resto — ver iniciarTT() y marcosLlego()
 // ── Íconos Lucide (SVG inline, sin CDN) ──
 const ICONOS={
   bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
@@ -2214,6 +2215,7 @@ function renderAdminJuegosTab(el){
     <button class="btn btn-ro btn-sm-full" onclick="adminResetAlbum()">Resetear partida</button>
     <div class="div"></div>
     <div class="admin-tit">🎯 Misiones 2.0 - TA TE TI</div>
+    <button class="btn btn-az btn-sm-full" onclick="marcosLlego()" style="margin-bottom:8px">🎉 Marcos llegó</button>
     <button class="btn btn-ro btn-sm-full" onclick="adminResetTT()">Resetear partida</button>
     <div class="div"></div>
     <div class="admin-tit">🃏 Truco</div>
@@ -3991,10 +3993,30 @@ function iniciarTT(){
   // integrante de Izquierda. Por construcción del sorteo, esto da exactamente 9.
   const poolParaDer=[];ttSorteo.a.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaDer.push({target:n,texto})));
   const poolParaIzq=[];ttSorteo.r.forEach(n=>MISIONES_POR_PERSONA[n].forEach(texto=>poolParaIzq.push({target:n,texto})));
-  const shufDer=shuf(marcarDobles(poolParaDer)),shufIzq=shuf(marcarDobles(poolParaIzq));
+
+  // Marcos (MP) llega 2 días después que el resto del grupo. Se lo deja en el sorteo de
+  // equipos como a cualquiera (sigue siendo "15 personas"), pero su misión se saca del
+  // pool del equipo rival: ese equipo arranca con 8 misiones en vez de 9. No se le asigna
+  // una casilla fija del tablero — se van entregando de a una, en el orden en que ese
+  // equipo vaya eligiendo casillas (colaCorta/usadasCorta, ver elegirCeldaTT). Si llegan a
+  // necesitar una 9na antes de que el Admin avise que Marcos llegó (marcosLlego()), se
+  // quedan esperando esa última — no hay forma de saber de antemano cuál va a ser.
+  let ladoCorto=null,colaCorta=null;
+  if(poolParaDer.some(x=>x.target===MARCOS_KEY)) ladoCorto='r';
+  else if(poolParaIzq.some(x=>x.target===MARCOS_KEY)) ladoCorto='a';
+  if(ladoCorto){
+    const poolCorto=ladoCorto==='r'?poolParaDer:poolParaIzq;
+    const conDobles=marcarDobles(shuf(poolCorto.filter(x=>x.target!==MARCOS_KEY)));
+    // Las misiones "dobles" quedan siempre al final de la cola — mismo criterio que
+    // celdaBloqueadaPorDoble usa para el lado normal, pero acá alcanza con el orden.
+    colaCorta=[...conDobles.filter(x=>!x.esDoble),...conDobles.filter(x=>x.esDoble)];
+  }
+
+  const shufDer=ladoCorto==='r'?[]:shuf(marcarDobles(poolParaDer));
+  const shufIzq=ladoCorto==='a'?[]:shuf(marcarDobles(poolParaIzq));
   const tablero=Array.from({length:9},(_,i)=>({
-    misionIzq:shufIzq[i].texto,targetIzq:shufIzq[i].target,dobleIzq:shufIzq[i].esDoble,
-    misionDer:shufDer[i].texto,targetDer:shufDer[i].target,dobleDer:shufDer[i].esDoble,
+    misionIzq:ladoCorto==='a'?null:shufIzq[i].texto,targetIzq:ladoCorto==='a'?null:shufIzq[i].target,dobleIzq:ladoCorto==='a'?false:shufIzq[i].esDoble,
+    misionDer:ladoCorto==='r'?null:shufDer[i].texto,targetDer:ladoCorto==='r'?null:shufDer[i].target,dobleDer:ladoCorto==='r'?false:shufDer[i].esDoble,
     estado:'libre',
     equipo:null,
     inicioIzq:null,   // cuándo Izquierda empezó esta casilla
@@ -4004,7 +4026,8 @@ function iniciarTT(){
   }));
   db.ref('tateti').set({activa:true,equipoIzq:ttSorteo.a,equipoDer:ttSorteo.r,
     tablero,pendientes:[],ganador:null,eleccionIzq:null,eleccionDer:null,
-    ocupadasIzq:0,ocupadasDer:0,pausadoDesde:null,pausaAcumulada:0});
+    ocupadasIzq:0,ocupadasDer:0,pausadoDesde:null,pausaAcumulada:0,
+    ladoCorto:ladoCorto||null,colaCorta:colaCorta||null,usadasCorta:0,marcosLlego:false});
   ttSorteo=null;
 }
 
@@ -4113,24 +4136,43 @@ function elegirCeldaTT(pos){
   // distintas casi al mismo tiempo, cada uno leía un snapshot local viejo y el que ganaba
   // la carrera de red pisaba al otro (su elección desaparecía en silencio). La transaction
   // relee el valor real del servidor antes de escribir y reintenta sola si hubo conflicto.
+  let abortReason=null;
   db.ref('tateti').transaction(current=>{
+    abortReason=null;
     if(!current||current.ganador)return;
     if(miEq==='a'&&current.eleccionIzq!=null)return;
     if(miEq==='r'&&current.eleccionDer!=null)return;
     const tablero=toArr(current.tablero).map(x=>({...x}));
     if(!tablero[pos]||tablero[pos].estado!=='libre')return;
-    if(celdaBloqueadaPorDoble(tablero,pos,miEq))return;
-    // Arrancar el reloj de 7hs para este equipo en esta casilla
+
+    const esLadoCorto=current.ladoCorto===miEq;
+    let usadasCorta=current.usadasCorta||0;
+    if(esLadoCorto){
+      // Este equipo todavía no tiene la misión de Marcos en su cola: le va tocando la
+      // próxima de colaCorta en el orden en que elige casillas, no una posición fija.
+      const cola=toArr(current.colaCorta);
+      if(usadasCorta>=cola.length){abortReason='sin-mision';return;}
+      const item=cola[usadasCorta];usadasCorta++;
+      if(miEq==='a'){tablero[pos].misionIzq=item.texto;tablero[pos].targetIzq=item.target;tablero[pos].dobleIzq=!!item.esDoble;}
+      else{tablero[pos].misionDer=item.texto;tablero[pos].targetDer=item.target;tablero[pos].dobleDer=!!item.esDoble;}
+    } else if(celdaBloqueadaPorDoble(tablero,pos,miEq)) return;
+
+    // Arrancar el reloj para este equipo en esta casilla
     // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
     if(miEq==='a'){tablero[pos].inicioIzq=Date.now();tablero[pos].pausaAlIniciarIzq=current.pausaAcumulada||0;}
     else{tablero[pos].inicioDer=Date.now();tablero[pos].pausaAlIniciarDer=current.pausaAcumulada||0;}
     return {...current,tablero,
       eleccionIzq:(miEq==='a'?pos:(current.eleccionIzq??null)),
       eleccionDer:(miEq==='r'?pos:(current.eleccionDer??null)),
+      usadasCorta,
       ganador:current.ganador??null,
       pendientes:toArr(current.pendientes),
       ocupadasIzq:current.ocupadasIzq??0,
       ocupadasDer:current.ocupadasDer??0};
+  }).then(result=>{
+    if(!result.committed&&abortReason==='sin-mision'){
+      alertApp('Todavía no hay más misiones para tu equipo — esperá a que se sume la que falta.');
+    }
   });
 }
 
@@ -4179,7 +4221,43 @@ function ttReanudar(){
   db.ref('tateti').update({pausadoDesde:null,pausaAcumulada:nuevaAcum});
 }
 
-const TT_LIMITE_MS=7*60*60*1000; // 7 horas
+const TT_LIMITE_MS=24*60*60*1000; // 24 horas (antes 7, se alargó para darle más margen al juego)
+
+// Admin marca que Marcos llegó al viaje: suma su misión al final de la cola del equipo
+// corto. Si ese equipo ya la venía necesitando (se había quedado sin más para elegir),
+// la próxima casilla libre que toquen se la va a dar. Si el TA TE TI ya terminó o nunca
+// hubo lado corto, no hay dónde meterla en el tablero — se anuncia aparte como bonus.
+async function marcosLlego(){
+  if(!tt){await alertApp('Todavía no arrancó Misiones 2.0 - TA TE TI.');return;}
+  if(tt.marcosLlego){await alertApp('Ya se avisó que Marcos llegó.');return;}
+  if(!(await confirmApp('¿Confirmar que Marcos llegó y sumar su misión al TA TE TI?')))return;
+
+  const misionMarcos=MISIONES_POR_PERSONA[MARCOS_KEY][0];
+  const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
+  let sePudoAgregar=false,ladoCortoFinal=null;
+  const result=await db.ref('tateti').transaction(current=>{
+    sePudoAgregar=false;ladoCortoFinal=null;
+    if(!current)return;
+    if(!current.activa||current.ganador||!current.ladoCorto)return {...current,marcosLlego:true};
+    ladoCortoFinal=current.ladoCorto;
+    sePudoAgregar=true;
+    const cola=[...toArr(current.colaCorta),{target:MARCOS_KEY,texto:misionMarcos,esDoble:false}];
+    return {...current,colaCorta:cola,marcosLlego:true};
+  });
+  if(!result.committed)return;
+
+  if(sePudoAgregar){
+    const nmEq=ladoCortoFinal==='a'?'⭕ Izquierda':'❌ Derecha';
+    notificar('🎉 ¡Marcos llegó! Ya está disponible su misión en Misiones 2.0 para '+nmEq,'🎯');
+    publicarNoticia('Misiones 2.0 - TA TE TI','🎉',`¡Marcos llegó al viaje! Su misión ya está disponible para que ${nmEq} la juegue.`);
+    await alertApp('Listo — la misión de Marcos ya está sumada al TA TE TI.');
+  } else {
+    notificar('🎉 ¡Marcos llegó! Su misión (bonus, fuera del tablero): "'+misionMarcos+'"','🎯');
+    publicarNoticia('Misiones 2.0 - TA TE TI','🎉',
+      `¡Marcos llegó al viaje! El TA TE TI ya no tenía lugar para su misión, así que queda como desafío bonus:\n\n"${misionMarcos}"`);
+    await alertApp('El TA TE TI ya no tenía lugar para esa misión — se anunció aparte como bonus. Si alguien la cumple, sumale los puntos a mano desde Puntos.');
+  }
+}
 
 // Chequeo automático de vencimiento: corre solo en el cliente de la tablet (fuente única
 // de verdad, evita que dos celulares escriban el mismo flip a la vez). Si a un equipo se le
