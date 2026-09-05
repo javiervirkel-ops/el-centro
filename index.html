@@ -4077,14 +4077,14 @@ function renderTTGame(){
       div.innerHTML=`<div class="tt-sym">🎯</div><div class="tt-lbl">En misión</div>`;
       div.style.cursor='default';
     } else {
-      // Libre (aunque el rival la esté intentando — carrera permitida)
-      const bloqDoble=miEq&&celdaBloqueadaPorDoble(tablero,pos,miEq);
-      const puedo=!tt.ganador&&miEq&&elMia===null&&!bloqDoble;
+      // Libre (aunque el rival la esté intentando — carrera permitida). Cualquier
+      // casilla libre se puede elegir, como en cualquier TA TE TI — las misiones
+      // repetidas (Antonio/Pako/Harry) se reparten atrás de escena, nunca restringiendo
+      // qué casillas se pueden tocar.
+      const puedo=!tt.ganador&&miEq&&elMia===null;
       if(puedo){div.classList.add('libre');div.onclick=()=>elegirCeldaTT(pos);}
       else div.classList.add('bloq');
-      div.innerHTML=bloqDoble
-        ?`<div class="tt-sym">🔒</div><div class="tt-lbl">Queda para el final</div>`
-        :`<div class="tt-sym">❓</div><div class="tt-lbl">Casilla libre</div>`;
+      div.innerHTML=`<div class="tt-sym">❓</div><div class="tt-lbl">Casilla libre</div>`;
     }
     board.appendChild(div);
   });
@@ -4119,15 +4119,6 @@ function renderTTGame(){
   if(st) st.innerHTML=esTablet?`<button class="btn btn-ro" style="margin-top:14px;padding:11px;font-size:13px" onclick="resetTTTablet()">🔄 Resetear juego (tablet)</button>`:'';
 }
 
-// Una casilla "doble" (2da misión de Antonio/Pako/Harry) queda bloqueada para un equipo
-// hasta que se agoten todas las casillas de misión única de ese mismo equipo — así primero
-// se agota el resto y recién al final tocan las repetidas.
-function celdaBloqueadaPorDoble(tablero,pos,miEq){
-  const dobleKey=miEq==='a'?'dobleIzq':'dobleDer';
-  if(!tablero[pos][dobleKey])return false;
-  return tablero.some(c=>c.estado==='libre'&&!c[dobleKey]);
-}
-
 function elegirCeldaTT(pos){
   if(!tt||tt.ganador)return;
   const miEq=miEqTT();if(!miEq)return;
@@ -4155,7 +4146,10 @@ function elegirCeldaTT(pos){
       const item=cola[usadasCorta];usadasCorta++;
       if(miEq==='a'){tablero[pos].misionIzq=item.texto;tablero[pos].targetIzq=item.target;tablero[pos].dobleIzq=!!item.esDoble;}
       else{tablero[pos].misionDer=item.texto;tablero[pos].targetDer=item.target;tablero[pos].dobleDer=!!item.esDoble;}
-    } else if(celdaBloqueadaPorDoble(tablero,pos,miEq)) return;
+    }
+    // El lado normal ya no restringe casillas por "doble" — cualquier casilla libre
+    // se puede elegir, las misiones repetidas de Antonio/Pako/Harry se reparten igual
+    // (quedaron ya asignadas al azar entre las 9 desde que arrancó la partida).
 
     // Arrancar el reloj para este equipo en esta casilla
     // (guardamos la pausa acumulada de este momento para no descontar pausas de antes)
