@@ -4106,7 +4106,8 @@ function renderTTGame(){
       }
       const accion=yaReportada
         ?`<div class="ico-in" style="background:var(--sf);border:1.5px solid var(--bd);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:12px;color:var(--gr);justify-content:center;width:100%">${ico('hourglass',13)}Esperando aprobación del Admin…</div>`
-        :`<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>`;
+        :`<button class="btn btn-az" style="font-size:13px;padding:11px;margin-top:10px" onclick="reportarMision(${elMia})"><span class="ico-in">${ico('hand',14)}Misión cumplida — pedir aprobación</span></button>
+           <button class="btn btn-out" style="font-size:12px;padding:9px;margin-top:8px" onclick="cederCeldaTT()">🏳️ Me descubrieron — ceder casilla</button>`;
       mDiv.innerHTML=`<div class="tt-mision"><div class="tt-mision-tit ico-in">${ico('target',12)}TU MISIÓN — Casilla ${elMia+1}</div><div class="tt-mision-txt">${mision}</div>${timerHtml}${accion}</div>`;
     } else mDiv.innerHTML='';
   }
@@ -4346,6 +4347,49 @@ async function reportarMision(pos){
   }
   notificar(miNombre+' dice que cumplió una misión — a confirmar por el Admin','🎯');
   await alertApp('✅ Misión reportada. El Admin la tiene que aprobar.');
+}
+
+// Ceder la casilla propia al rival a propósito (ej: "me descubrieron"), sin esperar
+// a que se venzan las 24hs. Mismo efecto final que un vencimiento por tiempo, pero
+// disparado a pedido del equipo en vez de automático.
+async function cederCeldaTT(){
+  if(!tt||tt.ganador)return;
+  const miEq=miEqTT();if(!miEq)return;
+  const toArr=v=>v?Array.isArray(v)?v:Object.values(v):[];
+  const elMiaActual=miEq==='a'?tt.eleccionIzq:tt.eleccionDer;
+  if(elMiaActual==null)return;
+  if(!(await confirmApp('¿Estás seguro que querés cederle la posición al equipo contrario para no perder tiempo e intentar ocupar otra posición?')))return;
+
+  let flip=null,ganadorFinal=null,eqGanadorLista=null;
+  const result=await db.ref('tateti').transaction(current=>{
+    flip=null;ganadorFinal=null;eqGanadorLista=null;
+    if(!current||!current.activa||current.ganador)return;
+    const pos=miEq==='a'?current.eleccionIzq:current.eleccionDer;
+    if(pos==null)return;
+    const tablero=toArr(current.tablero).map(x=>({...x}));
+    if(!tablero[pos]||tablero[pos].estado!=='libre')return;
+    const rival=miEq==='a'?'r':'a';
+    tablero[pos]={...tablero[pos],estado:'ocupada',equipo:rival};
+    let eIzq=current.eleccionIzq??null, eDer=current.eleccionDer??null;
+    if(miEq==='a')eIzq=null;else eDer=null;
+    let ocupadasIzq=current.ocupadasIzq??0, ocupadasDer=current.ocupadasDer??0;
+    if(rival==='a')ocupadasIzq++;else ocupadasDer++;
+    const pendientes=toArr(current.pendientes).filter(p=>!(p.equipo===miEq&&p.pos===pos));
+    let ganador=current.ganador??null;
+    if(chequearTT(tablero,rival)){ganador=rival;ganadorFinal=rival;eqGanadorLista=toArr(rival==='a'?current.equipoIzq:current.equipoDer);}
+    flip={pos,rival};
+    return {...current,tablero,pendientes,eleccionIzq:eIzq,eleccionDer:eDer,ganador,ocupadasIzq,ocupadasDer};
+  });
+  if(!result.committed||!flip)return;
+  const nmRival=flip.rival==='a'?'⭕ Izquierda':'❌ Derecha';
+  const nmMio=miEq==='a'?'⭕ Izquierda':'❌ Derecha';
+  notificar(nmMio+' se descubrió y le cedió la casilla '+(flip.pos+1)+' a '+nmRival,'🏳️');
+  publicarNoticia('Misiones 2.0 - TA TE TI','🏳️',`${nmMio} se descubrió en la casilla ${flip.pos+1} y se la cedió a ${nmRival} para intentar otra.`);
+  if(ganadorFinal){
+    notificar('¡Misiones 2.0! Gana '+nmRival+' — +5 puntos para el equipo','🏆');
+    publicarNoticia('Misiones 2.0 - TA TE TI','🏆',`¡Misiones 2.0! Gana ${nmRival}. Tres en línea. +5 pts para todo el equipo.`);
+    sumarPtosLista(eqGanadorLista,5,'Misiones 2.0 - TA TE TI');
+  }
 }
 
 function renderPendientesTT(){
