@@ -4055,7 +4055,16 @@ function renderTTGame(){
 
   const tablero=toArr(tt.tablero);
   const pendientesArr=toArr(tt.pendientes);
-  const elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
+  let elMia=miEq==='a'?(tt.eleccionIzq??null):miEq==='r'?(tt.eleccionDer??null):null;
+  // Auto-reparación: si mi "estoy jugando la casilla X" quedó apuntando a una casilla
+  // que ya está resuelta (esto pasaba si el rival ganaba esa misma casilla por el otro
+  // lado mientras yo también la tenía activa — bug ya arreglado en cederCeldaTT, pero
+  // esto limpia solo cualquier caso que haya quedado pegado de antes del fix), se limpia
+  // sola la próxima vez que se renderiza, sin que nadie tenga que hacer nada a mano.
+  if(miEq&&elMia!==null&&tablero[elMia]&&tablero[elMia].estado==='ocupada'){
+    db.ref('tateti/'+(miEq==='a'?'eleccionIzq':'eleccionDer')).set(null);
+    elMia=null;
+  }
   const yaReportada=miEq&&elMia!==null&&pendientesArr.some(p=>p.equipo===miEq&&p.pos===elMia);
   const board=document.getElementById('tt-board');if(!board)return;
   board.innerHTML='';
@@ -4372,6 +4381,11 @@ async function cederCeldaTT(){
     tablero[pos]={...tablero[pos],estado:'ocupada',equipo:rival};
     let eIzq=current.eleccionIzq??null, eDer=current.eleccionDer??null;
     if(miEq==='a')eIzq=null;else eDer=null;
+    // Si el rival justo estaba corriendo esta misma casilla en paralelo (carrera
+    // permitida), la casilla ya quedó resuelta a su favor — hay que limpiarle también
+    // su elección, si no le queda "trabado" pensando que sigue jugando ahí.
+    if(rival==='a'&&eIzq===pos)eIzq=null;
+    if(rival==='r'&&eDer===pos)eDer=null;
     let ocupadasIzq=current.ocupadasIzq??0, ocupadasDer=current.ocupadasDer??0;
     if(rival==='a')ocupadasIzq++;else ocupadasDer++;
     const pendientes=toArr(current.pendientes).filter(p=>!(p.equipo===miEq&&p.pos===pos));
